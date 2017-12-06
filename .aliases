@@ -1,0 +1,24 @@
+# https://github.com/byrongibson/dotfiles/blob/master/.aliases
+
+alias time='/usr/bin/time'
+alias top="htop"
+alias o='gnome-open'
+alias ipython='ipython --colors LightBG'
+
+alias du='ncdu'
+#alias df='df -h'
+alias df='pydf -a -h -B'
+alias grep='grep --color=always'
+alias mkdir='mkdir -p'
+
+alias ll='ls -lFh --group-directories-first'
+alias lt='ll -tr'
+alias la='ll -A'
+alias l='ls -CF'
+alias lla='ls -alF --group-directories-first --color=always'
+alias lll='ls -alF --group-directories-first --color=always|more'
+alias llt='lt -alF --group-directories-first --color=always|more'
+
+alias h='history'
+
+alias nodei='node --inspect --debug-brk'
