@@ -1,4 +1,5 @@
 set vertical-split = true
+set split-view-width = 75%
 
 # Add keybinding to quickly jump to the next diff chunk in the stage view
 bind stage <Enter> :/^@@
@@ -8,7 +9,8 @@ bind stage <Ctrl-j> :/^@@
 
 bind diff <Ctrl-j> :/^@@
 
-bind status  X  !npm run commit
+bind status  X  !./commit
+bind status  Z  !npm run commit
 bind status  P  !git push
 
 bind main ! !git revert %(commit)
