@@ -1,24 +1,55 @@
 # https://github.com/byrongibson/dotfiles/blob/master/.aliases
 
-alias time='/usr/bin/time'
+bindkey -s '^A' 'term-cheat --filter^M'
+#alias time='/usr/bin/time'
+alias c="br"
+alias lsd="lsd -l --group-dirs=first"
+alias cat="batcat"
 alias top="htop"
-alias o='gnome-open'
+alias o='xdg-open'
 alias ipython='ipython --colors LightBG'
-
-alias du='ncdu'
-#alias df='df -h'
-alias df='pydf -a -h -B'
+alias ifc='hostname -I | awk '\''{print $1}'\'
+alias mc='mc --nocolor'
+alias glances='glances --theme-white'
+alias cx='chmod +x'
+alias du='du'
+alias d='ncdu'
+# alias df='df -h'
+alias df='pydf -h -B'
 alias grep='grep --color=always'
 alias mkdir='mkdir -p'
 
-alias ll='ls -lFh --group-directories-first'
-alias lt='ll -tr'
-alias la='ll -A'
-alias l='ls -CF'
-alias lla='ls -alF --group-directories-first --color=always'
+alias lla='ls -lFh --group-directories-first'
+lx() {
+  /home/select/bin/exa-linux-x86_64 --group-directories-first --git --color-scale $@;
+  numFiles=`ls -l | wc -l`;
+  numFiles=`expr $numFiles - 1`
+  echo $numFiles" files"
+}
+
+lo() {
+  find $@ -type f -printf '%T+ %p\n' | sort | head -n 1
+}
+
+alias ll='lx --long'
+alias llt='ll --tree'
+alias lt='ll --sort=mod $@'
+alias lz='ll --sort=size $@'
+alias la='/home/select/bin/exa-linux-x86_64 --group-directories-first --git --header -all $@; numFiles=`ls -laFh | wc -l`; numFiles=`expr $numFiles - 1`; echo $numFiles" files"'
+alias l='/home/select/bin/exa-linux-x86_64'
+# alias lla='ls -alF --group-directories-first --color=always'
 alias lll='ls -alF --group-directories-first --color=always|more'
-alias llt='lt -alF --group-directories-first --color=always|more'
 
-alias h='history'
+alias nodei='node --inspect --inspect-brk'
 
-alias nodei='node --inspect --debug-brk'
+export NNN_TMPFILE="/tmp/nnn"
+
+nn()
+{
+  nnn "$@"
+
+  if [ -f $NNN_TMPFILE ]; then
+    . $NNN_TMPFILE
+    rm $NNN_TMPFILE
+  fi
+}
