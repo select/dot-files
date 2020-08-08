@@ -18,6 +18,10 @@ alias d='ncdu'
 alias df='pydf -h -B'
 alias grep='grep --color=always'
 alias mkdir='mkdir -p'
+alias j='z'
+alias fd='fdfind'
+alias ki='khal interactive'
+alias npml='npm run lint'
 
 alias lla='ls -lFh --group-directories-first'
 lx() {
