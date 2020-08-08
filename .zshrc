@@ -19,6 +19,7 @@ export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
 export ZSH=/home/select/.oh-my-zsh
+export EDITOR='subl'
 
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-zsh is loaded.
@@ -72,10 +73,13 @@ export FZF_BASE='/usr/bin/fzf'
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 
-plugins=(hacker-quotes colored-man-pages emoji-clock git npm sudo docker command-not-found extract copydir cp autojump history fzf zsh-autosuggestions zsh-syntax-highlighting z zsh-autocomplete)
+plugins=(dotbare colored-man-pages emoji-clock git npm sudo docker command-not-found extract copydir cp history vi-mode fzf zsh-autosuggestions z)
+# zsh-autocomplete # nice but was a bit too much noise
 
 zstyle ':completion:*' menu select
-
+# zstyle ':autocomplete:list-choices:*' min-input 4
+# zstyle ':autocomplete:*' frecent-dirs off
+export BAT_THEME="Monokai Extended Light"
 source $ZSH/oh-my-zsh.sh
 export TERM="xterm-256color"
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=250"
@@ -83,11 +87,15 @@ bindkey '^ ' autosuggest-execute
 
 # https://github.com/pawamoy/shell-history
 # only load it for interactive shells
-if [[ $- == *i* ]] && command -v /home/select/.local/lib/python3.8/site-packages/shellhistory/shellhistory.sh &>/dev/null; then
-    . $(shellhistory-location)
+if [[ $- == *i* ]]; then
+    . /home/select/.local/lib/python3.8/site-packages/shellhistory/shellhistory.sh
     shellhistory enable
 fi
 
+
+if type ag &> /dev/null; then
+    export FZF_DEFAULT_COMMAND='ag -p ~/.gitignore -g ""'
+fi
 # User configuration
 
 # export MANPATH="/usr/local/man:$MANPATH"
@@ -150,3 +158,4 @@ _fzf_compgen_path() {
 _fzf_compgen_dir() {
   fd --type d --hidden --follow --exclude ".git" . "$1"
 }
+source /home/select/.config/broot/launcher/bash/br
