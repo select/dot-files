@@ -1,0 +1,103 @@
+# https://github.com/byrongibson/dotfiles/blob/master/.aliases
+alias opencode='BUN_TMPDIR=~/.opencode/tmp opencode'
+alias btca='BUN_TMPDIR=~/.btca/tmp btca'
+alias zed='__NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia zed'
+bindkey -s '^A' 'term-cheat --filter^M'
+#alias time='/usr/bin/time'
+# alias codastart=". /home/falkokrause/bin/miniconda3/etc/profile.d/conda.sh"
+alias c="br"
+alias ls="eza"
+alias llt="ll -T"
+alias lat="la -T"
+alias lt="ll -s modified"
+alias ip="ip -c -h a"
+# alias lsd="lsd -l --group-dirs=first"
+# alias cat="batcat"
+alias top="htop"
+alias btop="bpytop"
+alias o='xdg-open'
+# alias ipython='ipython --colors LightBG'
+alias ifc='hostname -I | awk '\''{print $1}'\'
+alias mc='mc --nocolor'
+alias cx='chmod +x'
+alias du='du'
+# alias df='df -h'
+alias df='pydf -h -B'
+alias grep='grep --color=always'
+alias mkdir='mkdir -p'
+# alias j='z'
+# alias fd='fdfind'
+alias ki='khal interactive'
+alias npml='npm run lint'
+alias ns='npm start'
+alias s='./start'
+alias na='nautilus `pwd`'
+# alias ji='jiracli'
+# alias k='kubectl'
+# alias koi='kubectl config use-context arn:aws:eks:eu-central-1:917323733352:cluster/node-orchestrator; aws-vault exec integration-orchestrator-1-dev-admin -- kubectl -n apheris'
+alias 'gcn!'='git commit -v --no-edit --amend "-S"'
+alias p="pnpm"
+alias t="task"
+alias grm="git rebase main"
+alias grmp="git fetch origin main;git rebase main;gpf"
+alias ghpc="gh pr create"
+alias ghps="gh pr status"
+
+function v() {
+  if [[ -z "$VIRTUAL_ENV" ]] ; then
+    ## If env folder is found then activate the vitualenv
+      if [[ -d ./.env ]] ; then
+        source ./.env/bin/activate
+      fi
+      if [[ -d ./.venv ]] ; then
+        source ./.venv/bin/activate
+      fi
+  else
+    ## check the current folder belong to earlier VIRTUAL_ENV folder
+    # if yes then do nothing
+    # else deactivate
+      parentdir="$(dirname "$VIRTUAL_ENV")"
+      if [[ "$PWD"/ != "$parentdir"/* ]] ; then
+        deactivate
+      fi
+  fi
+}
+
+## inital call to v to load the inital vitual env if necessary
+v
+
+## alias z to j and try to set up and tear down venv after each jump
+function j() {
+  z "$@"
+  v
+}
+
+## add venv setup and tear down to ever cd command
+function cd() {
+  builtin cd "$@"
+  v
+}
+
+
+# alias lla='ls -lFh --group-directories-first'
+# lx() {
+#   /home/falkokrause/bin/exa --group-directories-first --git --color-scale $@;
+#   numFiles=`ls -l | wc -l`;
+#   numFiles=`expr $numFiles - 1`
+#   echo $numFiles" files"
+# }
+
+# lo() {
+#   find $@ -type f -printf '%T+ %p\n' | sort | head -n 1
+# }
+
+# alias ll='lx --long'
+# alias llt='ll --tree'
+# alias lt='ll --sort=mod $@'
+# alias lz='ll --sort=size $@'
+# alias la='/home/falkokrause/bin/exa --group-directories-first --git --header -all $@; numFiles=`ls -laFh | wc -l`; numFiles=`expr $numFiles - 1`; echo $numFiles" files"'
+# alias l='/home/falkokrause/bin/exa'
+# # alias lla='ls -alF --group-directories-first --color=always'
+# alias lll='ls -alF --group-directories-first --color=always|more'
+
+alias nodei='node --inspect --inspect-brk'
