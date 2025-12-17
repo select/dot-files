@@ -1,0 +1,47 @@
+// Zed keymap
+//
+// For information on binding keys, see the Zed
+// documentation: https://zed.dev/docs/key-bindings
+//
+// To see the default key bindings run `zed: open default keymap`
+// from the command palette.
+[
+	{
+		"context": "AgentPanel",
+		"bindings": {
+			"ctrl-alt-b": "workspace::ToggleRightDock",
+			"ctrl-shift-e": "project_panel::ToggleFocus"
+		}
+	},
+	{
+		"context": "Editor",
+		"bindings": {
+			"ctrl-shift-b": "task::Spawn",
+			"ctrl-j": "workspace::ToggleBottomDock",
+			"ctrl-w": ["pane::CloseActiveItem", { "close_pinned": false }],
+			"ctrl-v": "editor::Paste",
+			"ctrl-c": "editor::Copy",
+			"ctrl-x": "editor::Cut",
+			"ctrl-f": "buffer_search::Deploy",
+			"ctrl-s": "workspace::Save",
+			// "ctrl-k": "pane::ActivateNextItem",
+			// "ctrl-j": "pane::ActivatePreviousItem",
+			"ctrl-d": ["editor::SelectNext", { "replace_newest": false }], // editor.action.addSelectionToNextFindMatch  / find_under_expand
+			"ctrl-a": "editor::SelectAll"
+			// "j k": ["workspace::SendKeystrokes", "escape"]
+		}
+	},
+	{
+		"context": "vim_mode == insert && !(showing_code_actions || showing_completions)",
+		"bindings": {
+			"ctrl-p": "file_finder::Toggle",
+			"ctrl-n": "project_panel::NewFile"
+		}
+	},
+	{
+		"context": "vim_mode == insert",
+		"bindings": {
+			"ctrl-o": "workspace::Open"
+		}
+	}
+]

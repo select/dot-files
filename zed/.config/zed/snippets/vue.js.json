@@ -1,0 +1,17 @@
+{
+	"Vue Base File": {
+		"prefix": "template",
+		"body": [
+			"<template>",
+			"  <div>",
+			"    <!-- Your template here -->",
+			"  </div>",
+			"</template>",
+			"",
+			"<script setup lang='ts'>",
+			"// Your script setup here",
+			"</script>"
+		],
+		"description": "Base Vue file template for Nuxt"
+	}
+}
