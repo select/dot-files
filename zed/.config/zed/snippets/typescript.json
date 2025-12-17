@@ -1,0 +1,7 @@
+{
+	"Log to console": {
+		"prefix": "log",
+		"description": "Writes a console.log for the selected text",
+		"body": ["console.log('$1', $2);", "$0"]
+	}
+}

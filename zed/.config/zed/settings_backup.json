@@ -1,0 +1,227 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+	"colorize_brackets": true,
+	"edit_predictions": {
+		"mode": "subtle",
+		"copilot": {
+			"proxy": null,
+			"proxy_no_verify": null,
+			"enterprise_uri": null,
+		},
+		"enabled_in_text_threads": false,
+	},
+	"features": {
+		"edit_prediction_provider": "copilot",
+	},
+	"soft_wrap": "editor_width",
+	"context_servers": {
+		"apheris": {
+			"enabled": false,
+			"command": "node",
+			"args": ["/home/linux-falko/Dev/ai_agent_poc/mcp/dist/index.js"],
+		},
+
+		"jira": {
+			"command": "docker",
+			"args": [
+				"run",
+				"-i",
+				"--rm",
+				"-e",
+				"CONFLUENCE_URL",
+				"-e",
+				"CONFLUENCE_USERNAME",
+				"-e",
+				"CONFLUENCE_API_TOKEN",
+				"-e",
+				"JIRA_URL",
+				"-e",
+				"JIRA_USERNAME",
+				"-e",
+				"JIRA_API_TOKEN",
+				"ghcr.io/sooperset/mcp-atlassian:latest",
+			],
+		},
+		"convert": {
+			"command": "node",
+			"args": ["/home/linux-falko/Dev/mcp-converter/mcp-server.js"],
+		},
+		"fetch": {
+			"command": "uvx",
+			"args": ["mcp-server-fetch"],
+		},
+		"c7": {
+			"command": "npx",
+			"args": ["-y", "@upstash/context7-mcp"],
+		},
+
+		"time": {
+			"command": "uvx",
+			"args": ["mcp-server-time", "--local-timezone=Europe/Berlin"],
+		},
+		"obsidian": {
+			"enabled": true,
+			"command": "uvx",
+			"args": ["mcp-obsidian"],
+			"env": {
+				"OBSIDIAN_HOST": "https://127.0.0.1",
+				"OBSIDIAN_PORT": "27124",
+			},
+		},
+	},
+	"languages": {
+		"JSON": {
+			"prettier": {
+				"allowed": true,
+				"parser": "json",
+			},
+		},
+	},
+
+	"minimap": {
+		"show": "auto",
+	},
+
+	"dev": {
+		"file_scan_exclusions": [
+			"**/.git",
+			"**/.svn",
+			"**/.hg",
+			"**/.jj",
+			"**/CVS",
+			"**/.DS_Store",
+			"**/Thumbs.db",
+			"**/.classpath",
+			"**/.obsidian",
+			"**/.settings",
+		],
+		// "lsp_document_colors": "inlay"
+	},
+	"agent": {
+		"play_sound_when_agent_done": true,
+		"notify_when_agent_waiting": "all_screens",
+		"profiles": {
+			"minimal": {
+				"name": "Minimal",
+				"tools": {},
+				"enable_all_context_servers": false,
+				"context_servers": {
+					"time": {
+						"tools": {
+							"get_current_time": true,
+							"convert_time": true,
+						},
+					},
+				},
+			},
+			"ask": {
+				"name": "Ask",
+				"tools": {
+					"contents": true,
+					"diagnostics": true,
+					"fetch": true,
+					"list_directory": true,
+					"now": true,
+					"find_path": true,
+					"read_file": true,
+					"open": true,
+					"grep": true,
+					"thinking": true,
+					"web_search": true,
+				},
+				"enable_all_context_servers": false,
+				"context_servers": {
+					"fetch": {
+						"tools": {
+							"fetch": true,
+						},
+					},
+					"c7": {
+						"tools": {
+							"resolve-library-id": true,
+							"get-library-docs": true,
+						},
+					},
+					"time": {
+						"tools": {
+							"get_current_time": true,
+							"convert_time": true,
+						},
+					},
+				},
+			},
+			"test": {
+				"name": "test",
+				"tools": {
+					"move_path": true,
+					"grep": true,
+					"find_path": true,
+					"fetch": true,
+					"edit_file": true,
+					"diagnostics": true,
+					"delete_path": true,
+					"create_directory": true,
+					"copy_path": true,
+					"terminal": true,
+					"thinking": true,
+					"read_file": true,
+					"list_directory": true,
+					"now": true,
+					"open": true,
+				},
+				"enable_all_context_servers": false,
+				"context_servers": {
+					"time": {
+						"tools": {
+							"convert_time": true,
+							"get_current_time": true,
+						},
+					},
+				},
+			},
+		},
+		"always_allow_tool_actions": true,
+		"inline_assistant_model": {
+			"provider": "amazon-bedrock",
+			"model": "claude-sonnet-4",
+		},
+		"default_profile": "write",
+		"model_parameters": [],
+		"default_model": {
+			"provider": "amazon-bedrock",
+			"model": "claude-sonnet-4",
+		},
+	},
+	"language_models": {
+		"bedrock": {
+			"authentication_method": "named_profile",
+			"region": "eu-central-1",
+			"profile": "test-sso",
+		},
+	},
+	"base_keymap": "SublimeText",
+	"telemetry": {
+		"diagnostics": false,
+		"metrics": false,
+	},
+	"hard_tabs": true,
+	"tab_size": 2,
+	"vim_mode": true,
+	"ui_font_size": 16,
+	"buffer_font_size": 16.0,
+	"theme": {
+		"mode": "system",
+		"light": "One Dark",
+		"dark": "One Dark",
+	},
+	"file_types": {
+		"HTML": ["svg"],
+	},
+}
