@@ -1,0 +1,29 @@
+set vertical-split = true
+set split-view-width = 75%
+bind generic <Ctrl-H> :toggle split-view-width +5%
+bind generic <Ctrl-L> :toggle split-view-width -5%
+
+# Add keybinding to quickly jump to the next diff chunk in the stage view
+bind stage <Enter> :/^@@
+#bind stage <Ctrl-s> j
+
+bind stage <Ctrl-j> :/^@@
+
+bind diff <Ctrl-j> :/^@@
+
+bind status  X  !./commit
+bind status  V  !git-cz
+bind status  Z  !npm run commit
+bind status  P  !git push
+
+bind main ! !git revert %(commit)
+# git tag
+bind main T !git tag %(prompt) %(commit)
+
+# Apply the selected stash:
+bind stash A !?git stash apply %(stash)
+# Drop the selected stash:
+bind stash D !?git stash drop %(stash)
+
+# Delete a file:
+bind status D !@?rm %(file)
