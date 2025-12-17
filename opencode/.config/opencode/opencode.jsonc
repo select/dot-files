@@ -1,0 +1,141 @@
+{
+	"$schema": "https://opencode.ai/config.json",
+	"keybinds": {
+		"leader": "ctrl+m",
+	},
+	// === Models ===
+	"model": "amazon-bedrock/anthropic.claude-sonnet-4-5-20250929-v1:0",
+	"provider": {
+		"amazon-bedrock": {
+			"models": {
+				"anthropic.claude-sonnet-4-5-20250929-v1:0": {
+					"limit": {
+						"context": 150000,
+						"output": 64000,
+					},
+				},
+			},
+		},
+	},
+	// === Formatters ===
+	// Runs after file writes - uses project's formatter config
+	"formatter": {
+		"prettier": {
+			"command": ["npx", "prettier", "--write", "$FILE"],
+			"extensions": [
+				".js",
+				".jsx",
+				".ts",
+				".tsx",
+				".json",
+				".md",
+				".yaml",
+				".yml",
+				".css",
+				".scss",
+			],
+		},
+	},
+	// === MCP Servers ===
+	"mcp": {
+		"chrome-devtools": {
+			"type": "local",
+			"command": ["npx", "-y", "chrome-devtools-mcp@latest"],
+		},
+		"jira": {
+			"type": "local",
+			"command": [
+				"docker",
+				"run",
+				"-i",
+				"--rm",
+				"-e",
+				"CONFLUENCE_URL",
+				"-e",
+				"CONFLUENCE_USERNAME",
+				"-e",
+				"CONFLUENCE_API_TOKEN",
+				"-e",
+				"JIRA_URL",
+				"-e",
+				"JIRA_USERNAME",
+				"-e",
+				"JIRA_API_TOKEN",
+				"ghcr.io/sooperset/mcp-atlassian:latest",
+			],
+			"enabled": true,
+		},
+		"c7": {
+			"type": "local",
+			"command": ["npx", "-y", "@upstash/context7-mcp"],
+			"enabled": true,
+		},
+		"time": {
+			"type": "local",
+			"command": ["uvx", "mcp-server-time", "--local-timezone=Europe/Berlin"],
+			"enabled": true,
+		},
+		"obsidian": {
+			"type": "local",
+			"command": ["uvx", "mcp-obsidian"],
+			"enabled": true,
+			"environment": {
+				"OBSIDIAN_HOST": "https://127.0.0.1",
+				"OBSIDIAN_PORT": "27124",
+			},
+		},
+	},
+	// === Plugins ===
+	"plugin": ["opencode-beads"],
+	// === Agent Overrides ===
+	"agent": {
+		// Build agent - full capability with slight creativity
+		"build": {
+			"temperature": 0.3,
+		},
+		// Plan agent - read-only analysis, no file writes
+		"plan": {
+			"model": "amazon-bedrock/anthropic.claude-sonnet-4-5-20250929-v1:0", // Sonnet for planning (cheaper)
+			"temperature": 0.1,
+			"tools": {
+				"write": false,
+				"edit": false,
+				"patch": false,
+			},
+			"permission": {
+				"bash": {
+					"git status": "allow",
+					"git diff*": "allow",
+					"git log*": "allow",
+					"git show*": "allow",
+					"bd *": "allow",
+					"rg *": "allow",
+					"tree *": "allow",
+					"wc *": "allow",
+					"head *": "allow",
+					"tail *": "allow",
+					"pnpm exec tsc*": "allow",
+					"pnpm run lint*": "allow",
+					"pnpm test*": "allow",
+					"*": "deny",
+				},
+			},
+		},
+
+		// Test writer agent - generates comprehensive test suites
+		// "test-writer": {
+		// 	"model": "amazon-bedrock/anthropic.claude-sonnet-4-5-20250929-v1:0",
+		// 	"temperature": 0.2, // Slight creativity for test case generation
+		// 	"permission": {
+		// 		"write": {
+		// 			"**/*.test.ts": "allow",
+		// 			"**/*.spec.ts": "allow",
+		// 			"**/*.test.tsx": "allow",
+		// 			"**/*.spec.tsx": "allow",
+		// 			"*": "deny",
+		// 		},
+		// 	},
+		// 	"description": "Test specialist - generates comprehensive unit, integration, and e2e tests. Can only write to test files.",
+		// },
+	},
+}
