@@ -22,9 +22,6 @@ export CLAUDE_CODE_AWS_PROFILE=test-sso
 export CLAUDE_CODE_USE_BEDROCK=1
 export OPENAI_API_KEY=your-openai-key
 
-source $HOME/.aliases
-source $HOME/.env-private
-
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 
 #-*-shell-script-*-
@@ -75,6 +72,8 @@ if type ag &> /dev/null; then
 fi
 # User configuration
 
+source $HOME/.aliases
+source $HOME/.env-private
 
 
 export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
@@ -161,3 +160,7 @@ ASYNCAPI_AC_ZSH_SETUP_PATH=$HOME/.cache/@asyncapi/cli/autocomplete/zsh_setup && 
 
 # bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+
+# AsyncAPI CLI Autocomplete
+
+ASYNCAPI_AC_ZSH_SETUP_PATH=/home/linux-falko/.cache/@asyncapi/cli/autocomplete/zsh_setup && test -f $ASYNCAPI_AC_ZSH_SETUP_PATH && source $ASYNCAPI_AC_ZSH_SETUP_PATH; # asyncapi autocomplete setup
