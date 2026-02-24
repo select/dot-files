@@ -7,6 +7,7 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+	"icon_theme": "Catppuccin Frappé",
 	"colorize_brackets": true,
 	"edit_predictions": {
 		"mode": "subtle",
@@ -22,6 +23,14 @@
 	},
 	"soft_wrap": "editor_width",
 	"context_servers": {
+		"chrome-devtools": {
+   /// The command which runs the MCP server
+			"command": "npx",
+			/// The arguments to pass to the MCP server
+			"args": ["-y", "chrome-devtools-mcp@latest"],
+			/// The environment variables to set
+			"env": {},
+		},
 		"apheris": {
    "enabled": false,
 			"command": "node",
@@ -29,7 +38,8 @@
 		},
 
 		"jira": {
-   "command": "docker",
+   "enabled": false,
+			"command": "docker",
 			"args": [
 				"run",
 				"-i",
@@ -50,11 +60,13 @@
 			],
 		},
 		"convert": {
-   "command": "node",
+   "enabled": false,
+			"command": "node",
 			"args": ["/home/linux-falko/Dev/mcp-converter/mcp-server.js"],
 		},
 		"fetch": {
-   "command": "uvx",
+   "enabled": false,
+			"command": "uvx",
 			"args": ["mcp-server-fetch"],
 		},
 		"c7": {
@@ -63,11 +75,12 @@
 		},
 
 		"time": {
-   "command": "uvx",
+   "enabled": false,
+			"command": "uvx",
 			"args": ["mcp-server-time", "--local-timezone=Europe/Berlin"],
 		},
 		"obsidian": {
-   "enabled": true,
+   "enabled": false,
 			"command": "uvx",
 			"args": ["mcp-obsidian"],
 			"env": {
@@ -196,7 +209,7 @@
 		"model_parameters": [],
 		"default_model": {
 			"provider": "amazon-bedrock",
-			"model": "claude-sonnet-4",
+			"model": "claude-sonnet-4-5",
 		},
 	},
 	"language_models": {
