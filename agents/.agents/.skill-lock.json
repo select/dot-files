@@ -1,0 +1,29 @@
+{
+  "version": 3,
+  "skills": {
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/vercel-labs/skills.git",
+      "skillPath": "skills/find-skills/SKILL.md",
+      "skillFolderHash": "c2f31172b6f256272305a5e6e7228b258446899f",
+      "installedAt": "2026-01-29T01:38:31.977Z",
+      "updatedAt": "2026-01-29T01:38:31.977Z"
+    },
+    "typescript": {
+      "source": "pproenca/dot-skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/pproenca/dot-skills.git",
+      "skillPath": "skills/.curated/typescript/SKILL.md",
+      "skillFolderHash": "0cf469325fc508c8812394ee9e8356917c36ed5b",
+      "installedAt": "2026-01-29T01:45:04.369Z",
+      "updatedAt": "2026-01-29T01:45:04.369Z"
+    }
+  },
+  "dismissed": {
+    "findSkillsPrompt": true
+  },
+  "lastSelectedAgents": [
+    "opencode"
+  ]
+}

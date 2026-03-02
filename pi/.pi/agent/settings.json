@@ -1,0 +1,5 @@
+{
+  "lastChangelogVersion": "0.55.3",
+  "defaultProvider": "amazon-bedrock",
+  "defaultModel": "eu.anthropic.claude-sonnet-4-20250514-v1:0"
+}

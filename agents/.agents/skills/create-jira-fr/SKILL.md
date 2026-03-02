@@ -1,6 +1,6 @@
 ---
 name: create-jira-fr
-description: Create Jira Feature Requests (FR board) interactively. Use this skill when: "create FR", "new feature request", "submit FR", "jira feature request", "FR ticket"
+description: "Create Jira Feature Requests (FR board) interactively. Use this skill when: create FR, new feature request, submit FR, jira feature request, FR ticket"
 ---
 
 # Purpose

@@ -1,6 +1,6 @@
 ---
 name: fetch-github-pr
-description: Fetch GitHub pull request (PR) comments and save to markdown. Use this skill when: "fetch PR", "PR comments", "review comments", "github PR", "get PR feedback" 
+description: "Fetch GitHub pull request (PR) comments and save to markdown. Use this skill when: fetch PR, PR comments, review comments, github PR, get PR feedback"
 ---
 
 # Purpose

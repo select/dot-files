@@ -1,6 +1,6 @@
 ---
 name: create-jira-issue
-description: Create Jira issues for EN (Engineering) or AW (Apheris Web) boards interactively. Use this skill when: "create issue", "new EN ticket", "new AW ticket", "jira issue", "engineering ticket", "create task"
+description: "Create Jira issues for EN (Engineering) or AW (Apheris Web) boards interactively. Use this skill when: create issue, new EN ticket, new AW ticket, jira issue, engineering ticket, create task"
 ---
 
 # Purpose

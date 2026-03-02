@@ -1,0 +1,47 @@
+{
+	"$schema": "https://opencode.ai/config.json",
+	"keybinds": {
+		"leader": "ctrl+k",
+	},
+	// === Models ===
+	"model": "amazon-bedrock/anthropic.claude-sonnet-4-5-20250929-v1:0",
+	"provider": {
+		"amazon-bedrock": {
+			"models": {
+				"anthropic.claude-sonnet-4-5-20250929-v1:0": {
+					"limit": {
+						"context": 150000,
+						"output": 64000,
+					},
+				},
+			},
+		},
+	},
+	// === MCP Servers ===
+	"mcp": {
+		"chrome-devtools": {
+			"type": "local",
+			"command": ["npx", "-y", "chrome-devtools-mcp@latest"],
+			"enabled": false,
+		},
+		"c7": {
+			"type": "local",
+			"command": ["npx", "-y", "@upstash/context7-mcp"],
+			"enabled": true,
+		},
+
+		"obsidian": {
+			"type": "local",
+			"command": ["uvx", "mcp-obsidian"],
+			"enabled": false,
+			"environment": {
+				"OBSIDIAN_HOST": "https://127.0.0.1",
+				"OBSIDIAN_PORT": "27124",
+			},
+		},
+	},
+	// === Plugins ===
+	"plugin": ["opencode-gemini-auth@latest"],
+	// === Agent Overrides ===
+	"agent": {},
+}

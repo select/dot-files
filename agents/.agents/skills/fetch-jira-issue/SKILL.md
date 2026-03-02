@@ -1,6 +1,6 @@
 ---
 name: fetch-jira-issue
-description: Fetch Jira issue with attachments and save to markdown. Use this skill when: "fetch jira", "jira issue", "get ticket", "jira ticket", "download jira" "EN-1234", "AW-1234", "FR-1234", "https://apheris.atlassian.net/browse/EN-4526"
+description: "Fetch Jira issue with attachments and save to markdown. Use this skill when: fetch jira, jira issue, get ticket, jira ticket, download jira, EN-1234, AW-1234, FR-1234"
 ---
 
 # Purpose
