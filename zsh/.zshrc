@@ -164,3 +164,24 @@ ASYNCAPI_AC_ZSH_SETUP_PATH=$HOME/.cache/@asyncapi/cli/autocomplete/zsh_setup && 
 # AsyncAPI CLI Autocomplete
 
 ASYNCAPI_AC_ZSH_SETUP_PATH=/home/linux-falko/.cache/@asyncapi/cli/autocomplete/zsh_setup && test -f $ASYNCAPI_AC_ZSH_SETUP_PATH && source $ASYNCAPI_AC_ZSH_SETUP_PATH; # asyncapi autocomplete setup
+
+# Import pywal colors
+if [ -f ~/.cache/wal/sequences ]; then
+  cat ~/.cache/wal/sequences
+fi
+
+# Alias to refresh pywal colors in current shell
+alias walrefresh='cat ~/.cache/wal/sequences'
+
+# Function to run wal and refresh all tmux panes
+walset() {
+  wal -s "$@" && cat ~/.cache/wal/sequences
+  # Reload tmux config and colors
+  tmux source-file ~/.cache/wal/colors-tmux.conf 2>/dev/null
+  tmux source-file ~/.config/tmux/tmux.conf 2>/dev/null
+  if [ -n "$TMUX" ]; then
+    # Refresh all tmux panes
+    tmux list-panes -s -F '#{session_name}:#{window_index}.#{pane_index}' | \
+    xargs -I PANE tmux send-keys -t PANE 'walrefresh' Enter
+  fi
+}
