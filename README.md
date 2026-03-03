@@ -12,6 +12,7 @@ Each directory is a stow package that mirrors the home directory structure:
 | `git/`      | Git configuration                    | `~/.gitconfig`   |
 | `tmux/`     | Tmux terminal multiplexer            | `~/.tmux/`       |
 | `mpv/`      | MPV media player                     | `~/.config/mpv/` |
+| `kitty/`    | Kitty terminal emulator              | `~/.config/kitty/` |
 | `zed/`      | Zed editor                           | `~/.config/zed/` |
 | `opencode/` | OpenCode AI tool                     | `~/.config/opencode/` |
 | `awesome/`  | AwesomeWM window manager             | `~/.config/awesome/` |
@@ -25,7 +26,7 @@ Each directory is a stow package that mirrors the home directory structure:
 
 ```bash
 cd ~/Dev/dot-files
-stow -v -t ~ zsh git tmux mpv zed opencode awesome wal agents
+stow -v -t ~ zsh git tmux mpv kitty zed opencode awesome wal agents
 stow --no-folding -v -t ~ pi  # pi needs --no-folding to avoid overwriting sessions/auth
 ```
 
