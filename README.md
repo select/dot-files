@@ -15,6 +15,7 @@ Each directory is a stow package that mirrors the home directory structure:
 | `zed/`      | Zed editor                           | `~/.config/zed/` |
 | `opencode/` | OpenCode AI tool                     | `~/.config/opencode/` |
 | `awesome/`  | AwesomeWM window manager             | `~/.config/awesome/` |
+| `wal/`      | Pywal color scheme generator         | `~/.config/wal/` |
 | `pi/`       | Pi coding agent config               | `~/.pi/`         |
 | `agents/`   | Shared agent skills                  | `~/.agents/`     |
 
@@ -24,7 +25,7 @@ Each directory is a stow package that mirrors the home directory structure:
 
 ```bash
 cd ~/Dev/dot-files
-stow -v -t ~ zsh git tmux mpv zed opencode awesome agents
+stow -v -t ~ zsh git tmux mpv zed opencode awesome wal agents
 stow --no-folding -v -t ~ pi  # pi needs --no-folding to avoid overwriting sessions/auth
 ```
 
