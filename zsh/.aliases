@@ -3,6 +3,13 @@ alias -s json="jless"
 alias -s yaml="jless"
 alias -s yml="jless"
 alias -s git="clone"
+alias -s png="kitty +kitten icat"
+alias -s jpg="kitty +kitten icat"
+alias -s jpeg="kitty +kitten icat"
+alias -s gif="kitty +kitten icat"
+alias -s webp="kitty +kitten icat"
+alias -s bmp="kitty +kitten icat"
+alias -s svg="kitty +kitten icat"
 
 # https://github.com/byrongibson/dotfiles/blob/master/.aliases
 alias opencode='BUN_TMPDIR=~/.opencode/tmp opencode'
@@ -10,6 +17,7 @@ alias btca='BUN_TMPDIR=~/.btca/tmp btca'
 alias zed='__NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia zed'
 # bindkey -s '^A' 'term-cheat --filter^M'
 alias c="br"
+alias icat="kitty +kitten icat"
 
 alias ip="ip -c -h a"
 alias ipl='hostname -I | awk '\''{print $1}'\'
