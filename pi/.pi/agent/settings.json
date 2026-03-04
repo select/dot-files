@@ -1,5 +1,18 @@
 {
-  "lastChangelogVersion": "0.55.3",
+  "lastChangelogVersion": "0.55.4",
+  "quietStartup": true,
   "defaultProvider": "amazon-bedrock",
-  "defaultModel": "eu.anthropic.claude-sonnet-4-20250514-v1:0"
+  "defaultModel": "eu.anthropic.claude-opus-4-6-v1",
+  "enabledModels": [
+    "eu.anthropic.claude-sonnet-4-6",
+    "eu.anthropic.claude-opus-4-6-v1",
+    "moonshotai/kimi-k2.5",
+    "minimax/minimax-m1"
+  ],
+  "packages": [
+    "npm:pi-powerline-footer",
+    "npm:pi-skill-palette",
+    "npm:@aliou/pi-guardrails",
+    "npm:lsp-pi"
+  ]
 }

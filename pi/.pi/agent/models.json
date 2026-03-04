@@ -3,17 +3,7 @@
 		"openrouter": {
 			"baseUrl": "https://openrouter.ai/api/v1",
 			"apiKey": "OPENROUTER_API_KEY",
-			"api": "openai-completions",
-			"models": [
-				{
-					"id": "moonshotai/kimi-k2.5",
-					"name": "Kimi K2.5",
-					"reasoning": true,
-					"input": ["text", "image"],
-					"contextWindow": 262144,
-					"maxTokens": 262144
-				}
-			]
+			"api": "openai-completions"
 		}
 	}
 }
