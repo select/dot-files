@@ -1,0 +1,62 @@
+{
+  "enabled": true,
+  "features": {
+    "policies": true,
+    "permissionGate": true
+  },
+  "policies": {
+    "rules": [
+      {
+        "id": "secret-files",
+        "description": "Files containing secrets",
+        "patterns": [
+          { "pattern": ".env" },
+          { "pattern": ".env.local" },
+          { "pattern": ".env.production" },
+          { "pattern": ".env.prod" },
+          { "pattern": ".dev.vars" }
+        ],
+        "allowedPatterns": [
+          { "pattern": ".env.example" },
+          { "pattern": ".env.sample" },
+          { "pattern": ".env.test" },
+          { "pattern": "*.example.env" },
+          { "pattern": "*.sample.env" },
+          { "pattern": "*.test.env" }
+        ],
+        "protection": "noAccess",
+        "onlyIfExists": true
+      },
+      {
+        "id": "eslint-config",
+        "description": "ESLint configuration files",
+        "patterns": [
+          { "pattern": "eslint.config.*" }
+        ],
+        "protection": "readOnly",
+        "onlyIfExists": true,
+        "blockMessage": "Editing {file} requires user approval. Explain what change you want to make and why, then ask the user to confirm before proceeding."
+      }
+    ]
+  },
+  "permissionGate": {
+    "patterns": [
+      { "pattern": "git reset --hard", "description": "discards all uncommitted changes" },
+      { "pattern": "git reset --(mixed|soft)", "regex": true, "description": "rewrites local commit history" },
+      { "pattern": "git push -(-force|-f)\\b", "regex": true, "description": "force-pushes, can overwrite remote history" },
+      { "pattern": "git push --force-with-lease", "description": "force-pushes with lease check" },
+      { "pattern": "git clean -[a-z]*f", "regex": true, "description": "deletes untracked files permanently" },
+      { "pattern": "git branch -D", "description": "force-deletes a branch without merge check" },
+      { "pattern": "git rebase\\b", "regex": true, "description": "rewrites commit history" },
+      { "pattern": "git stash (drop|clear)", "regex": true, "description": "permanently deletes stash entries" },
+      { "pattern": "git tag -d", "description": "deletes a tag locally" },
+      { "pattern": "git remote remove", "description": "removes a configured remote" }
+    ],
+    "requireConfirmation": true,
+    "allowedPatterns": [],
+    "autoDenyPatterns": [],
+    "explainCommands": false,
+    "explainModel": null,
+    "explainTimeout": 5000
+  }
+}
