@@ -26,20 +26,20 @@ Each directory is a stow package that mirrors the home directory structure:
 
 ```bash
 cd ~/Dev/dot-files
-stow -v -t $HOME zsh git tmux mpv kitty zed opencode awesome wal agents
-stow --no-folding -v -t $HOME pi  # pi needs --no-folding to avoid overwriting sessions/auth
+stow -v -t ~ zsh git tmux mpv kitty zed opencode awesome wal agents
+stow --no-folding -v -t ~ pi  # pi needs --no-folding to avoid overwriting sessions/auth
 ```
 
 ### Install a single package
 
 ```bash
-stow -v -t $HOME zsh
+stow -v -t ~ zsh
 ```
 
 ### Uninstall a package
 
 ```bash
-stow -D -v -t $HOME zsh
+stow -D -v -t ~ zsh
 ```
 
 ### Re-stow (uninstall + install)
@@ -47,12 +47,11 @@ stow -D -v -t $HOME zsh
 Useful after modifying package structure:
 
 ```bash
-stow -R -v -t $HOME zsh
+stow -R -v -t ~ zsh
 ```
 
 ## Notes
 
-- **Use `$HOME` instead of `~`** when specifying the target directory, e.g. `stow -v -t $HOME zsh`. Some shells or contexts don't expand `~` correctly, and `$HOME` is more reliable in scripts and automation.
 - **pi package**: Uses `--no-folding` because `~/.pi/agent/` contains local-only data (sessions, auth, binaries) that shouldn't be symlinked
 - **agents package**: Skills are shared across coding agents (pi, claude-code, etc.) via symlinks from `~/.pi/agent/skills/` → `~/.agents/skills/`
 - **First-time setup**: Back up existing configs before stowing, or use `stow --adopt` to move existing files into the package (dangerous!)
