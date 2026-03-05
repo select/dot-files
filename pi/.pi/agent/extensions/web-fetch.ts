@@ -11,7 +11,16 @@
  */
 
 import { spawn } from "node:child_process"
-import type { ExtensionAPI, ExtensionContext, SessionStartEvent, SessionShutdownEvent } from "@mariozechner/pi-coding-agent"
+import type {
+	AgentToolResult,
+	AgentToolUpdateCallback,
+	ExtensionAPI,
+	ExtensionContext,
+	SessionShutdownEvent,
+	SessionStartEvent,
+	Theme,
+	ToolRenderResultOptions,
+} from "@mariozechner/pi-coding-agent"
 import {
 	truncateHead,
 	DEFAULT_MAX_BYTES,
@@ -19,8 +28,8 @@ import {
 	formatSize,
 	getMarkdownTheme,
 } from "@mariozechner/pi-coding-agent"
-import { Text, Markdown } from "@mariozechner/pi-tui"
-import { Type } from "@sinclair/typebox"
+import { type Component, Text, Markdown } from "@mariozechner/pi-tui"
+import { type Static, Type } from "@sinclair/typebox"
 
 // ---------------------------------------------------------------------------
 // Cache
@@ -205,6 +214,16 @@ function stripHtml(html: string): string {
 }
 
 // ---------------------------------------------------------------------------
+// Tool parameter schema
+// ---------------------------------------------------------------------------
+
+const WebFetchParams = Type.Object({
+	url: Type.String({
+		description: "Fully-formed URL to fetch, e.g. https://example.com/page",
+	}),
+})
+
+// ---------------------------------------------------------------------------
 // Extension entry point
 // ---------------------------------------------------------------------------
 
@@ -247,13 +266,9 @@ export default function (pi: ExtensionAPI) {
 			"URL must include the scheme (https://). Plain http:// is auto-upgraded.",
 			"Use the gh CLI (via bash) for GitHub URLs — it is faster and more reliable.",
 		].join("\n"),
-		parameters: Type.Object({
-			url: Type.String({
-				description: "Fully-formed URL to fetch, e.g. https://example.com/page",
-			}),
-		}),
+		parameters: WebFetchParams,
 
-		async execute(_id, params, signal, onUpdate, _ctx) {
+		async execute(_id: string, params: Static<typeof WebFetchParams>, signal: AbortSignal | undefined, onUpdate: AgentToolUpdateCallback | undefined, _ctx: ExtensionContext): Promise<AgentToolResult> {
 			// 1. Validate URL
 			const urlResult = normalizeUrl(params.url)
 			if ("error" in urlResult) {
@@ -297,7 +312,7 @@ export default function (pi: ExtensionAPI) {
 			return buildResult(markdown)
 		},
 
-		renderCall(args, theme) {
+		renderCall(args: Static<typeof WebFetchParams>, theme: Theme): Component | undefined {
 			const url = args.url ?? "…"
 			const short = url.length > 72 ? url.slice(0, 72) + "…" : url
 			return new Text(
@@ -307,7 +322,7 @@ export default function (pi: ExtensionAPI) {
 			)
 		},
 
-		renderResult(result, { expanded }, theme) {
+		renderResult(result: AgentToolResult, { expanded }: ToolRenderResultOptions, theme: Theme): Component | undefined {
 			if (result.isError) {
 				const msg = result.content[0]?.type === "text" ? result.content[0].text : "(error)"
 				return new Text("\n" + theme.fg("error", "✗ ") + theme.fg("error", msg), 0, 0)
