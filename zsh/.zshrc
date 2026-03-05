@@ -176,6 +176,8 @@ alias walrefresh='cat ~/.cache/wal/sequences'
 # Function to run wal and refresh all tmux panes
 walset() {
   wal -s "$@" && cat ~/.cache/wal/sequences
+  # Generate pi-theme.json from pywal colors
+  python3 ~/.config/wal/postrun/pi-theme.py 2>/dev/null
   # Reload tmux config and colors
   tmux source-file ~/.cache/wal/colors-tmux.conf 2>/dev/null
   tmux source-file ~/.config/tmux/tmux.conf 2>/dev/null
