@@ -11,7 +11,7 @@
  */
 
 import { spawn } from "node:child_process"
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent"
+import type { ExtensionAPI, ExtensionContext, SessionStartEvent, SessionShutdownEvent } from "@mariozechner/pi-coding-agent"
 import {
 	truncateHead,
 	DEFAULT_MAX_BYTES,
@@ -211,7 +211,7 @@ function stripHtml(html: string): string {
 export default function (pi: ExtensionAPI) {
 	let cleanupTimer: ReturnType<typeof setInterval> | null = null
 
-	pi.on("session_start", async (_event, ctx) => {
+	pi.on("session_start", async (_event: SessionStartEvent, ctx: ExtensionContext) => {
 		const runner = await detectRunner(pi.exec.bind(pi))
 		if (!runner) {
 			ctx.ui.notify(
@@ -228,7 +228,7 @@ export default function (pi: ExtensionAPI) {
 		}, 5 * 60 * 1000)
 	})
 
-	pi.on("session_shutdown", async () => {
+	pi.on("session_shutdown", async (_event: SessionShutdownEvent) => {
 		if (cleanupTimer) clearInterval(cleanupTimer)
 		cache.clear()
 	})
