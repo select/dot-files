@@ -174,6 +174,7 @@ fi
 walrefresh() {
   cat ~/.cache/wal/sequences
   bash ~/.config/wal/postrun/wal-gnome.sh 2>/dev/null
+  bash ~/.config/wal/postrun/pywalfox-update.sh 2>/dev/null
 }
 
 # Function to run wal and refresh all tmux panes
@@ -183,6 +184,8 @@ walset() {
   python3 ~/.config/wal/postrun/pi-theme.py 2>/dev/null
   # Apply wal colors to GNOME Shell top bar
   bash ~/.config/wal/postrun/wal-gnome.sh 2>/dev/null
+  # Send updated colors to Firefox via pywalfox
+  bash ~/.config/wal/postrun/pywalfox-update.sh 2>/dev/null
   # Reload tmux config and colors
   tmux source-file ~/.cache/wal/colors-tmux.conf 2>/dev/null
   tmux source-file ~/.config/tmux/tmux.conf 2>/dev/null
