@@ -171,13 +171,18 @@ if [ -f ~/.cache/wal/sequences ]; then
 fi
 
 # Alias to refresh pywal colors in current shell
-alias walrefresh='cat ~/.cache/wal/sequences'
+walrefresh() {
+  cat ~/.cache/wal/sequences
+  bash ~/.config/wal/postrun/wal-gnome.sh 2>/dev/null
+}
 
 # Function to run wal and refresh all tmux panes
 walset() {
   wal -s "$@" && cat ~/.cache/wal/sequences
   # Generate pi-theme.json from pywal colors
   python3 ~/.config/wal/postrun/pi-theme.py 2>/dev/null
+  # Apply wal colors to GNOME Shell top bar
+  bash ~/.config/wal/postrun/wal-gnome.sh 2>/dev/null
   # Reload tmux config and colors
   tmux source-file ~/.cache/wal/colors-tmux.conf 2>/dev/null
   tmux source-file ~/.config/tmux/tmux.conf 2>/dev/null
