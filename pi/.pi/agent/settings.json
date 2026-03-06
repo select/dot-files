@@ -1,19 +1,22 @@
 {
-  "lastChangelogVersion": "0.55.4",
+  "lastChangelogVersion": "0.56.2",
   "quietStartup": true,
   "theme": "pywal",
   "defaultProvider": "amazon-bedrock",
-  "defaultModel": "eu.anthropic.claude-opus-4-6-v1",
+  "defaultModel": "eu.anthropic.claude-sonnet-4-6",
+  "workingVibe": "star trek",
   "enabledModels": [
     "eu.anthropic.claude-sonnet-4-6",
-    "eu.anthropic.claude-opus-4-6-v1",
-    "moonshotai/kimi-k2.5",
-    "minimax/minimax-m1"
+    "eu.anthropic.claude-opus-4-6"
+  ],
+  "skills": [
+    "~/.agents/skills"
   ],
   "packages": [
     "npm:pi-powerline-footer",
     "npm:pi-skill-palette",
     "npm:@aliou/pi-guardrails",
-    "npm:lsp-pi"
+    "npm:lsp-pi",
+    "npm:token-rate-pi"
   ]
 }
