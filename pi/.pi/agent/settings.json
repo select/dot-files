@@ -1,6 +1,6 @@
 {
   "lastChangelogVersion": "0.56.2",
-  "quietStartup": true,
+  "quietStartup": false,
   "theme": "pywal",
   "defaultProvider": "amazon-bedrock",
   "defaultModel": "eu.anthropic.claude-sonnet-4-6",
@@ -8,9 +8,6 @@
   "enabledModels": [
     "eu.anthropic.claude-sonnet-4-6",
     "eu.anthropic.claude-opus-4-6"
-  ],
-  "skills": [
-    "~/.agents/skills"
   ],
   "packages": [
     "npm:pi-powerline-footer",
