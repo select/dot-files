@@ -1,6 +1,6 @@
 {
   "lastChangelogVersion": "0.56.2",
-  "quietStartup": false,
+  "quietStartup": true,
   "theme": "pywal",
   "defaultProvider": "amazon-bedrock",
   "defaultModel": "eu.anthropic.claude-sonnet-4-6",
