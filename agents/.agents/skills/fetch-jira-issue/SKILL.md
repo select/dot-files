@@ -48,7 +48,7 @@ When fetching a Jira issue, you need:
    - Run the bundled script to fetch issue data:
 
    ```bash
-   bun /path/to/.opencode/skills/fetch-jira-issue/scripts/fetch-issue.ts \
+   bun {baseDir}/scripts/fetch-issue.ts \
      --issue "EN-4526"
    ```
 

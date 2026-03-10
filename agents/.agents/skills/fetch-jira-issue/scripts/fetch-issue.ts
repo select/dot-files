@@ -1,7 +1,7 @@
-#!/usr/bin/env npx ts-node
+#!/usr/bin/env bun
 /**
  * Fetch Jira issue with attachments and save to markdown
- * Usage: npx ts-node fetch-issue.ts --issue "EN-4526"
+ * Usage: bun fetch-issue.ts --issue "EN-4526"
  */
 
 import { writeFile, mkdir } from 'fs/promises';
@@ -350,7 +350,7 @@ async function main() {
 
 	if (values.help || !values.issue) {
 		console.log(`
-Usage: npx ts-node fetch-issue.ts --issue <issue-identifier>
+Usage: bun fetch-issue.ts --issue <issue-identifier>
 
 Arguments:
   --issue, -i      Jira issue ID or URL (required)
@@ -364,8 +364,8 @@ Environment Variables:
   JIRA_DEBUG       Set to "true" to save raw JSON responses
 
 Examples:
-  npx ts-node fetch-issue.ts --issue "EN-4526"
-  npx ts-node fetch-issue.ts --issue "https://apheris.atlassian.net/browse/EN-4526"
+  bun fetch-issue.ts --issue "EN-4526"
+  bun fetch-issue.ts --issue "https://apheris.atlassian.net/browse/EN-4526"
 `);
 		process.exit(values.help ? 0 : 1);
 	}

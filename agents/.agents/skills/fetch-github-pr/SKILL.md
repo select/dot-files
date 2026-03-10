@@ -53,7 +53,7 @@ PR identifier or Jira Issue ID
    - Run the bundled script using `bun` to fetch and organize comments:
 
    ```bash
-   bun /path/to/.opencode/skills/fetch-github-pr/scripts/fetch-pr-comments.ts \
+   bun {baseDir}/scripts/fetch-pr-comments.ts \
      --pr "owner/repo#123" \
      --jiraIssueId "EN-1234"  # optional, use the Jira ID if available
    ```
@@ -69,16 +69,16 @@ The `scripts/fetch-pr-comments.ts` script accepts:
 **Command line arguments:**
 
 ```bash
-bun /path/to/.opencode/skills/fetch-github-pr/scripts/fetch-pr-comments.ts \
+bun {baseDir}/scripts/fetch-pr-comments.ts \
   --pr "https://github.com/owner/repo/pull/123"
 
 # Or with explicit Jira issue ID:
-bun /path/to/.opencode/skills/fetch-github-pr/scripts/fetch-pr-comments.ts \
+bun {baseDir}/scripts/fetch-pr-comments.ts \
   --pr "owner/repo#123" \
   --jiraIssueId "EN-4526"
 
 # Or just PR number (uses current repo):
-bun /path/to/.opencode/skills/fetch-github-pr/scripts/fetch-pr-comments.ts --pr "123"
+bun {baseDir}/scripts/fetch-pr-comments.ts --pr "123"
 ```
 
 **Output:** Saves markdown to `issues/[issueId]/pr-comments-{owner}-{repo}-{prNumber}.md` containing: PR header → File comments (by path/line, threaded) → General discussion comments. Reports stats on completion.

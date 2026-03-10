@@ -1,7 +1,7 @@
-#!/usr/bin/env npx ts-node
+#!/usr/bin/env bun
 /**
  * Fetch GitHub PR comments and save to markdown
- * Usage: npx ts-node fetch-pr-comments.ts --pr "owner/repo#123" [--jiraIssueId "EN-1234"]
+ * Usage: bun fetch-pr-comments.ts --pr "owner/repo#123" [--jiraIssueId "EN-1234"]
  */
 
 import { writeFile, mkdir } from 'fs/promises';
@@ -292,7 +292,7 @@ async function main() {
 
 	if (values.help || !values.pr) {
 		console.log(`
-Usage: npx ts-node fetch-pr-comments.ts --pr <pr-identifier> [--jiraIssueId <id>]
+Usage: bun fetch-pr-comments.ts --pr <pr-identifier> [--jiraIssueId <id>]
 
 Arguments:
   --pr, -p         GitHub PR identifier (required)
@@ -301,9 +301,9 @@ Arguments:
   --help, -h       Show this help message
 
 Examples:
-  npx ts-node fetch-pr-comments.ts --pr "https://github.com/owner/repo/pull/123"
-  npx ts-node fetch-pr-comments.ts --pr "owner/repo#123"
-  npx ts-node fetch-pr-comments.ts --pr "123" --jiraIssueId "EN-4526"
+  bun fetch-pr-comments.ts --pr "https://github.com/owner/repo/pull/123"
+  bun fetch-pr-comments.ts --pr "owner/repo#123"
+  bun fetch-pr-comments.ts --pr "123" --jiraIssueId "EN-4526"
 `);
 		process.exit(values.help ? 0 : 1);
 	}

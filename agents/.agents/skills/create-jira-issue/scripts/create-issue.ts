@@ -1,4 +1,4 @@
-#!/usr/bin/env npx ts-node
+#!/usr/bin/env bun
 
 /**
  * Create Jira Issue Script (EN/AW boards)
@@ -7,10 +7,10 @@
  *
  * Usage:
  *   # Via stdin (recommended for complex content):
- *   echo '{"board": "EN", "title": "...", "context": "...", "definitionOfDone": ["..."], "issueType": "Task"}' | npx ts-node create-issue.ts --stdin
+ *   echo '{"board": "EN", "title": "...", "context": "...", "definitionOfDone": ["..."], "issueType": "Task"}' | bun create-issue.ts --stdin
  *
  *   # Via command line arguments:
- *   npx ts-node create-issue.ts --board "EN" --title "..." --context "..." --definitionOfDone "..." --issueType "Task"
+ *   bun create-issue.ts --board "EN" --title "..." --context "..." --definitionOfDone "..." --issueType "Task"
  *
  * Environment variables required:
  *   - JIRA_URL: Jira instance URL (e.g., https://apheris.atlassian.net)
@@ -306,10 +306,10 @@ Create Jira Issue (EN/AW boards)
 
 Usage:
   # Via stdin (recommended):
-  echo '{"board": "EN", "title": "...", "context": "...", "definitionOfDone": ["..."], "issueType": "Task"}' | npx ts-node create-issue.ts --stdin
+  echo '{"board": "EN", "title": "...", "context": "...", "definitionOfDone": ["..."], "issueType": "Task"}' | bun create-issue.ts --stdin
 
   # Via arguments:
-  npx ts-node create-issue.ts --board "EN" --title "..." --context "..." --definitionOfDone "..." [--issueType "Task"]
+  bun create-issue.ts --board "EN" --title "..." --context "..." --definitionOfDone "..." [--issueType "Task"]
 
 Required fields:
   --board             Board to create issue on (EN or AW)

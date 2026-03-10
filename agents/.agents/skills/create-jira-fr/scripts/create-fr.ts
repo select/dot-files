@@ -1,4 +1,4 @@
-#!/usr/bin/env npx ts-node
+#!/usr/bin/env bun
 
 /**
  * Create Jira Feature Request (FR) Script
@@ -7,10 +7,10 @@
  *
  * Usage:
  *   # Via stdin (recommended for complex content):
- *   echo '{"title": "...", "description": "...", "useCase": "...", "expectedBehavior": ["..."], "additionalInfo": "..."}' | npx ts-node create-fr.ts --stdin
+ *   echo '{"title": "...", "description": "...", "useCase": "...", "expectedBehavior": ["..."], "additionalInfo": "..."}' | bun create-fr.ts --stdin
  *
  *   # Via command line arguments:
- *   npx ts-node create-fr.ts --title "..." --description "..." --useCase "..." --expectedBehavior "..." --additionalInfo "..."
+ *   bun create-fr.ts --title "..." --description "..." --useCase "..." --expectedBehavior "..." --additionalInfo "..."
  *
  * Environment variables required:
  *   - JIRA_URL: Jira instance URL (e.g., https://apheris.atlassian.net)
@@ -395,10 +395,10 @@ Create Jira Feature Request (FR)
 
 Usage:
   # Via stdin (recommended):
-  echo '{"title": "...", "description": "...", "useCase": "...", "expectedBehavior": ["..."], "additionalInfo": "...", "footer": {...}}' | npx ts-node create-fr.ts --stdin
+  echo '{"title": "...", "description": "...", "useCase": "...", "expectedBehavior": ["..."], "additionalInfo": "...", "footer": {...}}' | bun create-fr.ts --stdin
 
   # Via arguments:
-  npx ts-node create-fr.ts --title "..." --description "..." --useCase "..." --expectedBehavior "..." [--additionalInfo "..."] [--footer.rfcDocument true] [--footer.testingStrategy true] [--footer.engineeringTasks true] [--footer.documentationTasks true]
+  bun create-fr.ts --title "..." --description "..." --useCase "..." --expectedBehavior "..." [--additionalInfo "..."] [--footer.rfcDocument true] [--footer.testingStrategy true] [--footer.engineeringTasks true] [--footer.documentationTasks true]
 
 Required fields:
   --title             Short, descriptive title

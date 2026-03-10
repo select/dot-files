@@ -101,16 +101,16 @@ When creating an issue, you must gather information for the issue template which
    Simple example:
    ```bash
    echo '{"board": "EN", "title": "...", "context": "...", "definitionOfDone": ["...", "..."], "issueType": "Task"}' | \
-     npx ts-node /path/to/.opencode/skills/create-jira-issue/scripts/create-issue.ts --stdin
+     bun {baseDir}/scripts/create-issue.ts --stdin
    ```
 
    Complex example (with multiline content, special characters):
    ```bash
    # 1. Write JSON to temp file using write tool
    # 2. Pipe file to script
-   cat /home/linux-falko/Dev/hub/ui/.en-issue-input.json | npx ts-node /path/to/create-issue.ts --stdin
+   cat {cwd}/.issue-input.json | bun {baseDir}/scripts/create-issue.ts --stdin
    # 3. Clean up temp file
-   rm /home/linux-falko/Dev/hub/ui/.en-issue-input.json
+   rm {cwd}/.issue-input.json
    ```
 
    The script handles:
@@ -130,7 +130,7 @@ The `scripts/create-issue.ts` script accepts input via:
 **Command line arguments:**
 
 ```bash
-npx ts-node create-issue.ts \
+bun create-issue.ts \
   --board "EN" \
   --title "Implement user authentication" \
   --context "We need to add authentication to secure the API endpoints" \
@@ -155,7 +155,7 @@ echo '{
     "Deployed to staging environment"
   ],
   "issueType": "Task"
-}' | npx ts-node create-issue.ts --stdin
+}' | bun create-issue.ts --stdin
 ```
 
 ### Handling Multiline Content and Special Characters
@@ -170,13 +170,13 @@ When creating issues with complex content (multiline text, special characters, q
 
 ```bash
 # Step 1: Write JSON to temp file (use write tool)
-# File: /home/linux-falko/Dev/hub/ui/.en-issue-input.json
+# File: {cwd}/.issue-input.json
 
 # Step 2: Pipe to script
-cat /home/linux-falko/Dev/hub/ui/.en-issue-input.json | npx ts-node /home/linux-falko/Dev/hub/ui/.opencode/skills/create-jira-issue/scripts/create-issue.ts --stdin
+cat {cwd}/.issue-input.json | bun {baseDir}/scripts/create-issue.ts --stdin
 
 # Step 3: Clean up
-rm /home/linux-falko/Dev/hub/ui/.en-issue-input.json
+rm {cwd}/.issue-input.json
 ```
 
 **Why this approach?**

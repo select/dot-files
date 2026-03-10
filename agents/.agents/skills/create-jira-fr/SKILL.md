@@ -119,7 +119,7 @@ When creating a Feature Request, you must gather information for the FR template
 
    ```bash
    echo '{"title": "...", "description": "...", "useCase": "...", "expectedBehavior": ["...", "..."], "additionalInfo": "..."}' | \
-     npx ts-node /path/to/.opencode/skills/create-jira-fr/scripts/create-fr.ts --stdin
+     bun {baseDir}/scripts/create-fr.ts --stdin
    ```
 
    The script handles:
@@ -139,7 +139,7 @@ The `scripts/create-fr.ts` script accepts input via:
 **Command line arguments:**
 
 ```bash
-npx ts-node create-fr.ts \
+bun create-fr.ts \
   --title "Add dark mode to dashboard" \
   --description "Implement a dark mode theme option for the main dashboard" \
   --useCase "As a user, I want to switch to dark mode so that I can reduce eye strain" \
@@ -167,7 +167,7 @@ echo '{
     "engineeringTasks": true,
     "documentationTasks": false
   }
-}' | npx ts-node create-fr.ts --stdin
+}' | bun create-fr.ts --stdin
 ```
 
 **Script output:**
