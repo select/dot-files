@@ -1,5 +1,5 @@
 @define-color accent_bg_color {color4};
-@define-color accent_fg_color {foreground};
+@define-color accent_fg_color {background};
 @define-color accent_color {color4};
 @define-color window_bg_color {background};
 @define-color window_fg_color {foreground};
@@ -21,3 +21,96 @@
 @define-color error_fg_color {foreground};
 @define-color success_bg_color {color2};
 @define-color success_fg_color {background};
+
+/* ── Inactive / backdrop window state ─────────────────────── */
+/* GTK applies :backdrop to all widgets when the window loses focus */
+headerbar:backdrop,
+.titlebar:backdrop {
+  background-color: {background};
+  color: alpha({foreground}, 0.6);
+  box-shadow: none;
+  border-bottom-color: alpha({color8}, 0.4);
+}
+
+.sidebar:backdrop,
+.navigation-sidebar:backdrop,
+leaflet:backdrop > *,
+.sidebar-pane:backdrop {
+  background-color: {background};
+  color: alpha({foreground}, 0.6);
+}
+
+window:backdrop,
+.background:backdrop {
+  background-color: {background};
+}
+
+/* Keep sidebar list items muted but visible when inactive */
+.navigation-sidebar:backdrop row,
+.sidebar:backdrop row {
+  color: alpha({foreground}, 0.55);
+}
+
+.navigation-sidebar:backdrop row:selected,
+.sidebar:backdrop row:selected {
+  background-color: alpha({color4}, 0.15);
+  color: alpha({color4}, 0.7);
+}
+
+/* ── Suggested-action / primary button (e.g. "Sign in…") ── */
+button.suggested-action,
+button.suggested-action:link {
+  background-color: {color4};
+  color: {background};
+  font-weight: 700;
+  border-radius: 9999px;
+  padding: 10px 28px;
+  border: none;
+  box-shadow: 0 2px 6px alpha({color4}, 0.45);
+  transition: background-color 150ms ease,
+              box-shadow 150ms ease,
+              transform 80ms ease;
+}
+
+button.suggested-action:hover {
+  background-color: mix({color4}, white, 0.12);
+  box-shadow: 0 4px 12px alpha({color4}, 0.55);
+}
+
+button.suggested-action:active {
+  background-color: mix({color4}, black, 0.10);
+  box-shadow: none;
+  transform: scale(0.97);
+}
+
+button.suggested-action:disabled {
+  background-color: alpha({color4}, 0.4);
+  color: alpha({background}, 0.5);
+  box-shadow: none;
+}
+
+/* ── Destructive-action button ─────────────────────────── */
+button.destructive-action {
+  background-color: {color1};
+  color: {background};
+  font-weight: 600;
+  border-radius: 9999px;
+  padding: 10px 28px;
+  border: none;
+  transition: background-color 150ms ease;
+}
+
+button.destructive-action:hover {
+  background-color: mix({color1}, white, 0.10);
+}
+
+button.destructive-action:active {
+  background-color: mix({color1}, black, 0.10);
+}
+
+/* ── Standard buttons ──────────────────────────────────── */
+button {
+  border-radius: 8px;
+  padding: 8px 16px;
+  transition: background-color 120ms ease;
+}
