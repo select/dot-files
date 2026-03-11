@@ -24,10 +24,10 @@ The Skills CLI (`npx skills`) is the package manager for the open agent skills e
 
 **Key commands:**
 
-- `npx skills find [query]` - Search for skills interactively or by keyword
-- `npx skills add <package>` - Install a skill from GitHub or other sources
-- `npx skills check` - Check for skill updates
-- `npx skills update` - Update all installed skills
+- `DISABLE_TELEMETRY=1 npx skills find [query]` - Search for skills interactively or by keyword
+- `DISABLE_TELEMETRY=1 npx skills add <package>` - Install a skill from GitHub or other sources
+- `DISABLE_TELEMETRY=1 npx skills check` - Check for skill updates
+- `DISABLE_TELEMETRY=1 npx skills update` - Update all installed skills
 
 **Browse skills at:** https://skills.sh/
 
@@ -89,10 +89,10 @@ Learn more: https://skills.sh/vercel-labs/agent-skills/vercel-react-best-practic
 If the user wants to proceed, you can install the skill for them:
 
 ```bash
-npx skills add <owner/repo@skill> -g -y
+DISABLE_TELEMETRY=1 npx skills add <owner/repo@skill> -g -y
 ```
 
-The `-g` flag installs globally (user-level) and `-y` skips confirmation prompts.
+The `-g` flag installs globally (user-level), `-y` skips confirmation prompts, and `DISABLE_TELEMETRY=1` disables anonymous usage telemetry collection.
 
 ## Common Skill Categories
 
