@@ -1,19 +1,19 @@
 {
-  "lastChangelogVersion": "0.56.2",
-  "quietStartup": true,
-  "theme": "pywal",
-  "defaultProvider": "amazon-bedrock",
-  "defaultModel": "eu.anthropic.claude-sonnet-4-6",
-  "workingVibe": "star trek",
-  "enabledModels": [
-    "eu.anthropic.claude-sonnet-4-6",
-    "eu.anthropic.claude-opus-4-6"
-  ],
-  "packages": [
-    "npm:pi-powerline-footer",
-    "npm:pi-skill-palette",
-    "npm:@aliou/pi-guardrails",
-    "npm:lsp-pi",
-    "npm:token-rate-pi"
-  ]
+	"lastChangelogVersion": "0.57.1",
+	"quietStartup": true,
+	"theme": "pywal",
+	"defaultProvider": "amazon-bedrock",
+	"defaultModel": "eu.anthropic.claude-opus-4-6-v1",
+	"enabledModels": [
+		"eu.anthropic.claude-sonnet-4-6",
+		"eu.anthropic.claude-opus-4-6"
+	],
+	"packages": [
+		"npm:pi-powerline-footer",
+		"npm:pi-skill-palette",
+		"npm:@aliou/pi-guardrails",
+		"npm:lsp-pi",
+		"npm:token-rate-pi"
+	],
+	"defaultThinkingLevel": "medium"
 }
