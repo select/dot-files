@@ -1,0 +1,49 @@
+[project]
+name = "voice-keyboard"
+version = "0.2.0"
+description = "Fast push-to-talk voice dictation for Linux using faster-whisper"
+authors = [{ name = "Kyle", email = "kyle@ksred.com" }]
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.10,<3.14"
+keywords = ["whisper", "dictation", "voice", "transcription", "speech-to-text", "voice-keyboard"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: X11 Applications",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+]
+dependencies = [
+    "faster-whisper>=1.0.0",
+    "evdev>=1.7.0",
+]
+
+[project.scripts]
+voice-keyboard = "dictate:main"
+
+[project.urls]
+Repository = "https://github.com/yourusername/voice-keyboard"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+
+[tool.hatch.build.targets.wheel]
+only-include = ["dictate.py"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.11.0",
+]
