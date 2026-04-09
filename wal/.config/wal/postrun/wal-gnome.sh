@@ -18,19 +18,22 @@ mkdir -p "$THEME_DIR"
 # Copy generated CSS into the theme
 cp "$SRC" "$THEME_DIR/gnome-shell.css"
 
-# Apply the theme (requires user-themes extension enabled)
-if gsettings set org.gnome.shell.extensions.user-theme name "$THEME_NAME" 2>/dev/null; then
+# Apply the theme and force a reload.
+# Simply setting the same name again fires no gsettings 'changed' signal, so the
+# User Theme extension would silently ignore it. Toggle to "" first to guarantee
+# the signal fires and GNOME Shell re-reads the CSS from disk.
+if gsettings set org.gnome.shell.extensions.user-theme name "" 2>/dev/null; then
+  sleep 0.3
+  gsettings set org.gnome.shell.extensions.user-theme name "$THEME_NAME" 2>/dev/null
   echo "[wal-gnome] Applied GNOME Shell theme: $THEME_NAME"
 else
   echo "[wal-gnome] Could not apply theme — is the user-theme extension enabled?"
   echo "  Enable it with: gnome-extensions enable user-theme@gnome-shell-extensions.gcampax.github.com"
 fi
 
-# Reload GNOME Shell (Wayland: needs re-login; X11: can reload in-place)
+# On X11 we can also trigger an in-process reload as a belt-and-suspenders measure.
 if [[ "$XDG_SESSION_TYPE" == "x11" ]]; then
   busctl --user call org.gnome.Shell /org/gnome/Shell org.gnome.Shell Eval s 'Main.loadTheme();' 2>/dev/null \
-    && echo "[wal-gnome] GNOME Shell theme reloaded." \
-    || echo "[wal-gnome] Could not reload shell in-place (try Alt+F2 → r → Enter)"
-else
-  echo "[wal-gnome] Wayland session: log out and back in (or Alt+F2 → r on X11) to see changes."
+    && echo "[wal-gnome] GNOME Shell theme reloaded (X11 in-place)." \
+    || true
 fi

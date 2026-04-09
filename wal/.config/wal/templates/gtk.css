@@ -1,19 +1,22 @@
+/* ── Libadwaita color variables ───────────────────────────── */
+/* These are consumed by libadwaita and GTK4 apps via @color_name.    */
+/* Changing these affects ALL GTK4 app windows globally.              */
 @define-color accent_bg_color {color4};
 @define-color accent_fg_color {background};
 @define-color accent_color {color4};
-@define-color window_bg_color {background};
-@define-color window_fg_color {foreground};
-@define-color headerbar_bg_color {background};
+@define-color window_bg_color {background};        /* main window background */
+@define-color window_fg_color {foreground};        /* main window text */
+@define-color headerbar_bg_color {background};     /* titlebar / headerbar */
 @define-color headerbar_fg_color {foreground};
-@define-color view_bg_color {background};
+@define-color view_bg_color {background};          /* lists, text views */
 @define-color view_fg_color {foreground};
-@define-color card_bg_color {color0};
+@define-color card_bg_color {color0};              /* card widgets */
 @define-color card_fg_color {foreground};
-@define-color sidebar_bg_color {background};
+@define-color sidebar_bg_color {background};       /* sidebars */
 @define-color sidebar_fg_color {foreground};
-@define-color popover_bg_color {color0};
+@define-color popover_bg_color {color0};           /* popovers / dropdowns */
 @define-color popover_fg_color {foreground};
-@define-color dialog_bg_color {color0};
+@define-color dialog_bg_color {color0};            /* dialog windows */
 @define-color dialog_fg_color {foreground};
 @define-color warning_bg_color {color3};
 @define-color warning_fg_color {background};
@@ -22,8 +25,33 @@
 @define-color success_bg_color {color2};
 @define-color success_fg_color {background};
 
+/* ── DING desktop window (Desktop Icons NG extension) ────── */
+/* DING creates a fullscreen GTK3 ApplicationWindow (maximised on      */
+/* Wayland) with CSS class `window.desktopwindow` that sits on top of  */
+/* the wallpaper and MUST be transparent.                              */
+/*                                                                     */
+/* Two bugs without this rule:                                         */
+/*  1. The `window:backdrop` rule below would override DING's own      */
+/*     transparent background because the desktop window is always in  */
+/*     backdrop state (it is never focused). → solid overlay always.   */
+/*  2. When ANY other window gets focus (floating app, dock popup…),   */
+/*     GTK3 applies the :backdrop pseudo-class to DING's window. The   */
+/*     Yaru GTK3 theme's backdrop rules make it opaque with {background}*/
+/*     → solid overlay whenever a window is focused.                   */
+/*                                                                     */
+/* Fix: force transparent !important so no theme or backdrop rule can  */
+/* override it. DING's process must be restarted to pick up GTK3 CSS   */
+/* changes (the wal-gnome.sh postrun handles this via extension toggle).*/
+window.desktopwindow,
+window.desktopwindow:backdrop {
+  background-color: transparent !important;
+}
+
 /* ── Inactive / backdrop window state ─────────────────────── */
-/* GTK applies :backdrop to all widgets when the window loses focus */
+/* GTK applies :backdrop to all widgets when the window loses focus.  */
+/* NOTE: window:backdrop is intentionally excluded here — it would    */
+/* catch window.desktopwindow (always in backdrop) and paint a solid  */
+/* color over the wallpaper. The DING override above handles that.    */
 headerbar:backdrop,
 .titlebar:backdrop {
   background-color: {background};
@@ -38,11 +66,6 @@ leaflet:backdrop > *,
 .sidebar-pane:backdrop {
   background-color: {background};
   color: alpha({foreground}, 0.6);
-}
-
-window:backdrop,
-.background:backdrop {
-  background-color: {background};
 }
 
 /* Keep sidebar list items muted but visible when inactive */
