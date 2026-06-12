@@ -272,13 +272,12 @@ hl.layer_rule({ match = { namespace = "rofi" }, ignore_alpha = 0 })
 if hl.plugin.dynamic_cursors then
     hl.config { plugin = { dynamic_cursors = {
         enabled   = true,
-        mode      = "stretch",   -- tilt | rotate | stretch | none
+        mode      = "rotate",    -- tilt | rotate | stretch | none
         threshold = 1,           -- lower = more frequent shape updates
 
-        stretch = {
-            limit      = 3000,
-            activation = "negative_quadratic",
-            window     = 100,
+        rotate = {
+            length = 20,   -- px, ideally matches your cursor size
+            offset = 0.0,
         },
 
         shake = {
