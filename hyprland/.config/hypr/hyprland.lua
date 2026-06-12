@@ -264,3 +264,33 @@ hl.window_rule({ match = { title = "(Nextcloud)" }, move = { 1450, 590 } })
 -- Layer rules
 hl.layer_rule({ match = { namespace = "wofi" }, blur = true })
 hl.layer_rule({ match = { namespace = "rofi" }, ignore_alpha = 0 })
+
+-- ── hypr-dynamic-cursors ───────────────────────────────────────────────────
+if hl.plugin.dynamic_cursors then
+    hl.config { plugin = { dynamic_cursors = {
+        enabled   = true,
+        mode      = "tilt",      -- tilt | rotate | stretch | none
+        threshold = 2,
+
+        tilt = {
+            limit      = 5000,
+            activation = "negative_quadratic",
+            window     = 100,
+            full       = 60,
+        },
+
+        shake = {
+            enabled   = true,   -- shake mouse to magnify cursor (easy to find)
+            threshold = 6.0,
+            base      = 4.0,
+            speed     = 4.0,
+            timeout   = 2000,
+        },
+
+        hyprcursor = {
+            enabled    = true,
+            nearest    = 1,
+            resolution = -1,
+        },
+    }}}
+end
