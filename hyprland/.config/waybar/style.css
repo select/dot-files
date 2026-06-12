@@ -10,6 +10,7 @@
 window#waybar {
 	background: rgba(0, 0, 0, 0.5);
 	border-radius: 99px;
+	min-height: 30px;
 }
 
 .modules-left,
@@ -73,9 +74,9 @@ window#waybar {
 }
 
 #custom-power {
-	padding-left: 15px;
-	font-size: 12px;
-	margin-top: 1px;
+	padding-left: 18px;
+	padding-right: 4px;
+	font-size: 13px;
 }
 
 #custom-tools {
