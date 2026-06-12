@@ -39,7 +39,7 @@
 	"reload_style_on_change":true,
 
 	"custom/power":{
-		"format":"󰐥",
+		"format":"󰚌",
 		"on-click": "~/.config/hypr/scripts/wofi_power.sh",
 	},
 
