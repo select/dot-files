@@ -74,6 +74,8 @@ window#waybar {
 
 #custom-power {
 	padding-left: 15px;
+	font-size: 12px;
+	margin-top: 1px;
 }
 
 #custom-tools {
