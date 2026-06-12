@@ -282,7 +282,7 @@ if hl.plugin.dynamic_cursors then
 
         shake = {
             enabled   = true,   -- shake mouse to magnify cursor (easy to find)
-            threshold = 6.0,
+            threshold = 4.0,
             base      = 4.0,
             speed     = 4.0,
             timeout   = 2000,
