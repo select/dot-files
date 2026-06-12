@@ -1,2 +1,7 @@
 .env-private
 termux/.termux/shell
+
+# pywal-generated waybar colors
+hyprland/.config/waybar/colors-waybar.css
+# hypr runtime state (laptop screen on/off preference)
+hyprland/.config/hypr/state/
