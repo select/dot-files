@@ -313,4 +313,11 @@
     ],
     "scroll-step": 1
   }
+  ,"custom/recorder": {
+    "exec": "~/.config/hypr/scripts/recorder-status.sh",
+    "interval": 2,
+    "signal": 8,
+    "return-type": "json",
+    "on-click": "pkill -INT wf-recorder && notify-send -i media-record 'Recording stopped' 'Saved to ~/Videos/Screencasts'"
+  }
 }

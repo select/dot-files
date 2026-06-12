@@ -27,6 +27,7 @@
 	"modules-right": [
 		// "disk", 
 		// "cpu", 
+		"custom/recorder",
 		"hyprland/language", 
 		// "idle_inhibitor", 
 		"memory", 

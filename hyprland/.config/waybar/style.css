@@ -85,6 +85,16 @@ window#waybar {
 	padding: 0 6px;
 }
 
+#custom-recorder {
+	padding: 0 10px;
+	color: #ff4444;
+	animation: blink 1.2s ease-in-out infinite;
+}
+
+#custom-recorder.active {
+	color: #ff2222;
+}
+
 #temperature.critical,
 #pulseaudio.muted {
 	color: #FF0000;

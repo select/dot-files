@@ -20,6 +20,7 @@ case "$selected" in
     *"Stop"*)
         pkill -INT wf-recorder
         notify-send -i media-record "Recording stopped" "Saved to ~/Videos/Screencasts"
+        pkill -SIGRTMIN+8 waybar
         ;;
     *"Screenshot"*"Full"*)
         hyprshot -m output -o "$SCREENSHOTS"
@@ -31,11 +32,13 @@ case "$selected" in
         FILE="$RECORDINGS/$(date +%Y-%m-%d_%H-%M-%S).mp4"
         notify-send -i media-record "Recording started" "Press Print again to stop"
         wf-recorder -f "$FILE" &
+        sleep 0.5 && pkill -SIGRTMIN+8 waybar &
         ;;
     *"Record"*"Region"*)
         AREA=$(slurp 2>/dev/null) || exit 0
         FILE="$RECORDINGS/$(date +%Y-%m-%d_%H-%M-%S).mp4"
         notify-send -i media-record "Recording region" "Press Print again to stop"
         wf-recorder -g "$AREA" -f "$FILE" &
+        sleep 0.5 && pkill -SIGRTMIN+8 waybar &
         ;;
 esac
