@@ -5,6 +5,7 @@ SCREENSHOTS="$HOME/Pictures"
 mkdir -p "$RECORDINGS"
 
 GSR="$HOME/.local/bin/gsr"
+HYPRSHOT="$HOME/.local/bin/hyprshot"
 
 # Wait until gpu-screen-recorder has written its first bytes, then notify + update waybar
 _wait_and_notify() {
@@ -42,11 +43,11 @@ case "$selected" in
         ;;
     *"Screenshot"*"Region"*)
         _settle
-        hyprshot -m region -o "$SCREENSHOTS"
+        "$HYPRSHOT" -m region -o "$SCREENSHOTS"
         ;;
     *"Screenshot"*"Full"*)
         _settle
-        hyprshot -m output -o "$SCREENSHOTS"
+        "$HYPRSHOT" -m output -o "$SCREENSHOTS"
         ;;
     *"Record"*"Region"*)
         _settle
