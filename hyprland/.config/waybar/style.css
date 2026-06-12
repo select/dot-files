@@ -43,6 +43,8 @@ window#waybar {
 #custom-clipboard,
 #custom-colorpicker,
 #custom-settings,
+#custom-system,
+#keyboard-state,
 #bluetooth,
 #pulseaudio,
 #network,
@@ -77,6 +79,10 @@ window#waybar {
 #custom-tools {
 	padding: 0px 10px;
 	margin: 0 5px;
+}
+
+#keyboard-state label {
+	padding: 0 6px;
 }
 
 #temperature.critical,
