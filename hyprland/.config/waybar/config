@@ -45,7 +45,7 @@
 	},
 	"custom/power":{
 		"format":"💀",
-		"on-click": "~/.config/hypr/scripts/ wofi_power.sh",
+		"on-click": "~/.config/hypr/scripts/wofi_power.sh",
 	},
 
 	// Group Settings
