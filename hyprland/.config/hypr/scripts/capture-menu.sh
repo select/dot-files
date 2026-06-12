@@ -50,8 +50,10 @@ case "$selected" in
         _wait_and_notify "$FILE"
         ;;
     *"Record"*"Region"*)
+        REGION=$(slurp 2>/dev/null | awk '{split($1,a,","); print $2"+"a[1]"+"a[2]}') || exit 0
+        [ -z "$REGION" ] && exit 0
         FILE="$RECORDINGS/$(date +%Y-%m-%d_%H-%M-%S).mp4"
-        "$GSR" -w region -f 60 -a default_output \
+        "$GSR" -w region -region "$REGION" -f 60 -a default_output \
                -k h264 -o "$FILE" &
         _wait_and_notify "$FILE"
         ;;
