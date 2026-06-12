@@ -3,8 +3,7 @@
 * {
 	border: none;
 	font-size: 14px;
-/*	font-family: "Hack Nerd Font,Hack NF" ;*/
-font-family: "JetBrainsMono Nerd Font,JetBrainsMono NF" ;
+	font-family: "DejaVuSansM Nerd Font", "DejaVuSansM Nerd Font Propo" ;
 }
 
 
@@ -76,7 +75,6 @@ window#waybar {
 }
 
 #custom-tools {
-	background-image: url("assets/zap.svg");
 	padding: 0px 10px;
 	margin: 0 5px;
 }

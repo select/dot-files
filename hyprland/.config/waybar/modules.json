@@ -120,7 +120,7 @@
 
   // System
   "custom/system": {
-    "format": "",
+    "format": "󰻠",
     "tooltip": false
   },
 
@@ -200,7 +200,7 @@
   },
 
   "custom/tools":{
-    "format":" ",
+    "format":"󰽘",
   },
 
 
