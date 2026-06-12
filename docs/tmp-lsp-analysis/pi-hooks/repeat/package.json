@@ -1,0 +1,19 @@
+{
+  "name": "repeat-pi",
+  "version": "1.0.2",
+  "description": "Repeat tool calls in pi-coding-agent",
+  "type": "module",
+  "keywords": ["pi", "pi-coding-agent", "repeat", "pi-package"],
+  "license": "MIT",
+  "peerDependencies": {
+    "@mariozechner/pi-coding-agent": "^0.50.0",
+    "@mariozechner/pi-tui": "^0.50.0"
+  },
+  "devDependencies": {
+    "@mariozechner/pi-coding-agent": "^0.50.0",
+    "@mariozechner/pi-tui": "^0.50.0"
+  },
+  "pi": {
+    "extensions": ["./repeat.ts"]
+  }
+}

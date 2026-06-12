@@ -111,11 +111,25 @@ async function screenshot() {
 
     const page = await getPage(browser);
 
+    // Clear localStorage before page scripts run (--clear-storage)
+    if (args['clear-storage']) {
+      await page.evaluateOnNewDocument(() => {
+        try { localStorage.clear(); } catch(_) {}
+      });
+    }
+
     // Navigate if URL provided
     if (args.url) {
       await page.goto(args.url, {
-        waitUntil: args['wait-until'] || 'networkidle2'
+        waitUntil: args['wait-until'] || 'load'
       });
+    }
+
+    // Wait for a specific selector to appear (useful for SPAs)
+    if (args['wait-for']) {
+      await page.waitForSelector(args['wait-for'], { timeout: parseInt(args.timeout || '30000') });
+    } else if (args.delay) {
+      await new Promise(resolve => setTimeout(resolve, parseInt(args.delay)));
     }
 
     const screenshotOptions = {
@@ -168,6 +182,7 @@ async function screenshot() {
     if (args.close !== 'false') {
       await closeBrowser();
     }
+    process.exit(0);
   } catch (error) {
     // Enhance error message if selector-related
     if (args.selector) {

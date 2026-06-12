@@ -41,7 +41,7 @@
 		},
 	},
 	// === Plugins ===
-	"plugin": ["opencode-gemini-auth@latest"],
+	"plugin": ["opencode-gemini-auth@latest", "./plugin/aws-sso-autologin.ts"],
 	// === Agent Overrides ===
 	"agent": {},
 }

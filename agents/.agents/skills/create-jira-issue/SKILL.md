@@ -1,18 +1,16 @@
 ---
 name: create-jira-issue
-description: "Create Jira issues for EN (Engineering) or AW (Apheris Web) boards interactively. Use this skill when: create issue, new EN ticket, new AW ticket, jira issue, engineering ticket, create task"
+description: "Create or update Jira issues for EN (Engineering) or AW (Apheris Web) boards interactively. Use this skill when: create issue, update issue, new EN ticket, new AW ticket, jira issue, engineering ticket, create task, fix jira formatting"
 ---
 
 # Purpose
 
-This skill guides you through creating a Jira issue on the EN (Engineering) or AW (Apheris Web) board. It ensures all required template fields are filled, asks clarifying questions for missing information, and presents a preview before submission.
+This skill guides you through creating or updating a Jira issue on the EN (Engineering) or AW (Apheris Web) board. It ensures all required template fields are filled, asks clarifying questions for missing information, and presents a preview before submission.
 
 ## Variables
 
-- JIRA_URL: Jira instance URL (from environment)
-- JIRA_USERNAME: Jira username (from environment)
-- JIRA_API_TOKEN: Jira API token (from environment)
-- Supported project keys: EN, AW
+- **Credentials**: Loaded from `~/.config/atlassian-jira/credentials.json` or environment variables (JIRA_URL, JIRA_USERNAME, JIRA_API_TOKEN)
+- **Supported project keys**: EN, AW
 
 ## Instructions
 
@@ -28,6 +26,9 @@ When creating an issue, you must gather information for the issue template which
 **Optional Fields:**
 
 - **Issue Type**: Type of issue (Task, Bug, Story) - defaults to Task
+- **Assignee**: Display name or email of the person to assign (resolved via Jira user search)
+- **Sprint**: Sprint name (partial match, e.g. "155") or numeric sprint ID
+- **Attachments**: File paths to images/files to attach and embed inline in the description
 
 ## Workflow
 
@@ -97,7 +98,7 @@ When creating an issue, you must gather information for the issue template which
    - Only proceed after explicit user confirmation
    - **For complex/multiline content**: Use the temporary file approach (see "Handling Multiline Content" section below)
    - **For simple content**: Use direct stdin with echo
-   
+
    Simple example:
    ```bash
    echo '{"board": "EN", "title": "...", "context": "...", "definitionOfDone": ["...", "..."], "issueType": "Task"}' | \
@@ -113,11 +114,34 @@ When creating an issue, you must gather information for the issue template which
    rm {cwd}/.issue-input.json
    ```
 
-   The script handles:
-   - Proper Atlassian Document Format (ADF) structure
-   - Input validation
-   - Error handling with detailed messages
-   - Returns JSON with created issue key and URL
+The script handles:
+- Proper Atlassian Document Format (ADF) structure
+- Wiki markup fallback for inline image embedding (via Jira v2 API)
+- Markdown parsing in context field (see below)
+- User search for assignee resolution
+- Sprint lookup by name or ID
+- File attachment upload
+- Input validation
+- Error handling with detailed messages
+- Returns JSON with created issue key and URL
+
+### Markdown Support
+
+The `context` field supports GitHub-flavored markdown which is automatically converted to Jira's Atlassian Document Format:
+
+| Markdown | Result |
+|----------|--------|
+| `**bold**` | Bold text |
+| `` `code` `` | Inline code |
+| `[text](url)` | Clickable link |
+| `1. item` | Numbered list |
+| `- item` | Bullet list |
+| ` ```lang ` | Code block with syntax highlighting |
+
+Example context with markdown:
+```
+"context": "**Problem:**\nThe API returns `500` errors when:\n1. User is not authenticated\n2. Token is expired\n\n**Solution:**\nUse `validateToken()` before each request.\n\n```python\nif not validate_token(token):\n    raise AuthError()\n```\n\n**Reference:** [PR #123](https://github.com/...)"
+```
 
 8. **Report Result**
    - On success: Return the created issue URL (e.g., https://apheris.atlassian.net/browse/EN-XXX)
@@ -137,7 +161,10 @@ bun create-issue.ts \
   --definitionOfDone "Unit tests pass" \
   --definitionOfDone "Code reviewed" \
   --definitionOfDone "Documentation updated" \
-  --issueType "Task"
+  --issueType "Task" \
+  --assignee "Nina Zorina" \
+  --sprint "155" \
+  --attachment "/path/to/screenshot.png"
 ```
 
 **JSON via stdin (recommended for complex content):**
@@ -146,17 +173,37 @@ bun create-issue.ts \
 echo '{
   "board": "EN",
   "title": "Implement user authentication",
-  "context": "We need to add authentication to secure the API endpoints. This is required for the upcoming security audit and will enable us to properly track user actions.",
+  "context": "We need to add authentication to secure the API endpoints.",
   "definitionOfDone": [
     "Unit tests pass with >80% coverage",
     "Code reviewed and approved",
-    "Documentation updated",
-    "Integration tests pass",
-    "Deployed to staging environment"
+    "Documentation updated"
   ],
-  "issueType": "Task"
+  "issueType": "Task",
+  "assignee": "Nina Zorina",
+  "sprint": "155",
+  "attachments": ["/path/to/screenshot.png", "/path/to/mockup.png"]
 }' | bun create-issue.ts --stdin
 ```
+
+When `attachments` are provided, the script:
+1. Creates the issue with ADF description
+2. Uploads each file as a Jira attachment
+3. Re-writes the description using Jira wiki markup (v2 API) with `!filename.png!` syntax for inline rendering
+
+**Updating an existing issue:**
+
+```bash
+echo '{
+  "board": "EN",
+  "title": "Implement user authentication",
+  "context": "Updated context with better formatting...",
+  "definitionOfDone": ["Updated criteria"],
+  "issueKey": "EN-1234"
+}' | bun create-issue.ts --stdin --update
+```
+
+Note: When updating, only the description (context + definition of done) is modified. The title and issue type are not changed. Assignee and sprint can also be set during updates.
 
 ### Handling Multiline Content and Special Characters
 
@@ -197,7 +244,10 @@ rm {cwd}/.issue-input.json
     "Backend: Add proper operationId values to all fine-tune endpoints",
     "Verify all fine-tune endpoints render correctly in API docs UI"
   ],
-  "issueType": "Bug"
+  "issueType": "Bug",
+  "assignee": "Nina Zorina",
+  "sprint": "EN Sprint 155",
+  "attachments": ["/tmp/screenshot-misaligned.png", "/tmp/screenshot-aligned.png"]
 }
 ```
 
@@ -213,6 +263,31 @@ rm {cwd}/.issue-input.json
 ```
 
 ## Cookbook
+
+### Updating an Existing Issue
+
+When asked to update or fix formatting on an existing issue:
+
+1. **Get the issue key** from the user (e.g., EN-1234)
+2. **Prepare the updated content** with proper markdown formatting
+3. **Write JSON to temp file** with `issueKey` field included
+4. **Run the script with `--update` flag**
+
+```bash
+# Write to temp file with issueKey
+cat {cwd}/.issue-input.json | bun {baseDir}/scripts/create-issue.ts --stdin --update
+```
+
+Example JSON for update:
+```json
+{
+  "board": "EN",
+  "title": "Original title",
+  "issueKey": "EN-1234",
+  "context": "**Problem:**\nFormatted content...",
+  "definitionOfDone": ["Criterion 1", "Criterion 2"]
+}
+```
 
 ### Question Flow Examples
 
@@ -241,9 +316,9 @@ rm {cwd}/.issue-input.json
 ### Error Handling
 
 - IF: Jira API returns 401 Unauthorized
-- THEN: Check JIRA_USERNAME and JIRA_API_TOKEN environment variables
+- THEN: Check credentials file at `~/.config/atlassian-jira/credentials.json` or environment variables
 - EXAMPLES:
-  - "Authentication failed. Please verify your JIRA_USERNAME and JIRA_API_TOKEN environment variables are set correctly."
+  - "Authentication failed. Please verify your Jira credentials in ~/.config/atlassian-jira/credentials.json or environment variables."
 
 - IF: Jira API returns 400 Bad Request
 - THEN: Check the request payload format, especially the ADF structure

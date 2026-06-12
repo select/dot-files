@@ -1,9 +1,22 @@
 {
-	"providers": {
-		"openrouter": {
-			"baseUrl": "https://openrouter.ai/api/v1",
-			"apiKey": "OPENROUTER_API_KEY",
-			"api": "openai-completions"
-		}
-	}
+  "providers": {
+    "openrouter": {
+      "baseUrl": "https://openrouter.ai/api/v1",
+      "apiKey": "$OPENROUTER_API_KEY",
+      "api": "openai-completions"
+    },
+    "amazon-bedrock": {
+      "models": [
+        {
+          "id": "eu.anthropic.claude-opus-4-8",
+          "name": "Claude Opus 4.8 (EU)",
+          "reasoning": true,
+          "input": ["text", "image"],
+          "contextWindow": 1000000,
+          "maxTokens": 128000,
+          "cost": { "input": 5.5, "output": 27.5, "cacheRead": 0.55, "cacheWrite": 6.88 }
+        }
+      ]
+    }
+  }
 }

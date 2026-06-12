@@ -1,16 +1,18 @@
 /**
- * web-fetch pi extension
+ * web-fetch pi extension (Lightpanda)
  *
- * A simple, self-contained web fetch tool that:
- *   1. Fetches pages via Node's built-in fetch (no puppeteer / Chromium required)
- *   2. Extracts clean markdown via `uvx trafilatura` (ML-based boilerplate removal)
- *   3. Falls back to basic HTML stripping if trafilatura is unavailable
- *   4. Caches results for 15 minutes to make follow-up questions cheap
+ * A web fetch tool that:
+ *   1. Fetches pages via Lightpanda headless browser (JS-capable, AI-optimized)
+ *   2. Returns clean markdown directly from Lightpanda's built-in extraction
+ *   3. Caches results for 15 minutes to make follow-up questions cheap
  *
- * Inspired by https://github.com/georgebashi/pi-web-fetch
+ * Requires: ~/.local/bin/lightpanda (install via lightpanda skill)
  */
 
 import { spawn } from "node:child_process"
+import { access, constants } from "node:fs/promises"
+import { homedir } from "node:os"
+import { join } from "node:path"
 import type {
 	AgentToolResult,
 	AgentToolUpdateCallback,
@@ -30,6 +32,13 @@ import {
 } from "@mariozechner/pi-coding-agent"
 import { type Component, Text, Markdown } from "@mariozechner/pi-tui"
 import { type Static, Type } from "@sinclair/typebox"
+
+// ---------------------------------------------------------------------------
+// Config
+// ---------------------------------------------------------------------------
+
+const LIGHTPANDA_BIN = join(homedir(), ".local", "bin", "lightpanda")
+const FETCH_TIMEOUT_MS = 30_000
 
 // ---------------------------------------------------------------------------
 // Cache
@@ -57,7 +66,6 @@ function setCache(url: string, content: string): void {
 // ---------------------------------------------------------------------------
 
 function normalizeUrl(raw: string): { url: string } | { error: string } {
-	// Some models prepend "@"
 	const cleaned = raw.startsWith("@") ? raw.slice(1) : raw
 
 	let parsed: URL
@@ -77,86 +85,28 @@ function normalizeUrl(raw: string): { url: string } | { error: string } {
 }
 
 // ---------------------------------------------------------------------------
-// HTTP fetch
+// Lightpanda fetch
 // ---------------------------------------------------------------------------
 
-async function fetchHtml(url: string, signal?: AbortSignal): Promise<{ html: string } | { error: string }> {
-	try {
-		const res = await fetch(url, {
-			signal,
-			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-				Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-				"Accept-Language": "en-US,en;q=0.9",
-			},
-			redirect: "follow",
+function fetchViaLightpanda(url: string, signal?: AbortSignal): Promise<{ markdown: string } | { error: string }> {
+	return new Promise((resolve) => {
+		const args = [
+			"fetch",
+			"--dump", "markdown",
+			"--wait-until", "networkidle",
+			"--wait-ms", String(FETCH_TIMEOUT_MS),
+			url,
+		]
+
+		const proc = spawn(LIGHTPANDA_BIN, args, {
+			stdio: ["ignore", "pipe", "pipe"],
+			timeout: FETCH_TIMEOUT_MS + 5000,
 		})
 
-		if (!res.ok) {
-			return { error: `HTTP ${res.status} ${res.statusText} for ${url}` }
-		}
-
-		const contentType = res.headers.get("content-type") ?? ""
-		if (!contentType.includes("html") && !contentType.includes("text") && !contentType.includes("xml")) {
-			return { error: `Unexpected content-type "${contentType}" — web_fetch only handles HTML pages.` }
-		}
-
-		const html = await res.text()
-		return { html }
-	} catch (err: any) {
-		if (err.name === "AbortError") return { error: "Fetch aborted" }
-		return { error: `Fetch failed: ${err.message}` }
-	}
-}
-
-// ---------------------------------------------------------------------------
-// HTML → Markdown via trafilatura (uvx / uv run)
-// ---------------------------------------------------------------------------
-
-interface Runner {
-	cmd: string
-	args: () => string[]
-}
-
-const RUNNERS: Runner[] = [
-	{ cmd: "uvx", args: () => ["trafilatura", "--markdown", "--formatting"] },
-	{
-		cmd: "uv",
-		args: () => ["run", "--with", "trafilatura", "trafilatura", "--markdown", "--formatting"],
-	},
-	{ cmd: "pipx", args: () => ["run", "trafilatura", "--markdown", "--formatting"] },
-]
-
-let detectedRunner: Runner | null = null
-let runnerChecked = false
-
-async function detectRunner(execFn: ExtensionAPI["exec"]): Promise<Runner | null> {
-	if (runnerChecked) return detectedRunner
-	runnerChecked = true
-	for (const r of RUNNERS) {
-		try {
-			const res = await execFn(r.cmd, ["--version"], { timeout: 5000 })
-			if (res.code === 0) {
-				detectedRunner = r
-				return r
-			}
-		} catch {
-			// try next
-		}
-	}
-	return null
-}
-
-function extractViaTrafilatura(html: string, runner: Runner, signal?: AbortSignal): Promise<{ markdown: string } | { error: string }> {
-	return new Promise((resolve) => {
-		const proc = spawn(runner.cmd, runner.args(), { stdio: ["pipe", "pipe", "pipe"] })
 		let stdout = ""
 		let stderr = ""
 
-		const onAbort = () => {
-			proc.kill("SIGTERM")
-		}
+		const onAbort = () => proc.kill("SIGTERM")
 		signal?.addEventListener("abort", onAbort, { once: true })
 
 		proc.stdout.on("data", (d) => { stdout += d.toString() })
@@ -164,53 +114,21 @@ function extractViaTrafilatura(html: string, runner: Runner, signal?: AbortSigna
 
 		proc.on("close", (code) => {
 			signal?.removeEventListener("abort", onAbort)
-			if (signal?.aborted) return resolve({ error: "Aborted" })
-			if (code !== 0) return resolve({ error: `trafilatura exited ${code}: ${stderr.trim() || "(no output)"}` })
+			if (signal?.aborted) return resolve({ error: "Fetch aborted" })
+			if (code !== 0) {
+				const msg = stderr.trim() || "(no output)"
+				return resolve({ error: `Lightpanda exited ${code}: ${msg}` })
+			}
 			const trimmed = stdout.trim()
-			if (!trimmed) return resolve({ error: "trafilatura returned no content — page may be empty or unsupported" })
+			if (!trimmed) return resolve({ error: "Lightpanda returned no content — page may be empty or unsupported" })
 			resolve({ markdown: trimmed })
 		})
 
 		proc.on("error", (err) => {
 			signal?.removeEventListener("abort", onAbort)
-			resolve({ error: `Failed to run ${runner.cmd}: ${err.message}` })
+			resolve({ error: `Failed to run lightpanda: ${err.message}` })
 		})
-
-		proc.stdin.write(html)
-		proc.stdin.end()
 	})
-}
-
-// ---------------------------------------------------------------------------
-// Fallback: simple HTML → text stripping
-// ---------------------------------------------------------------------------
-
-function stripHtml(html: string): string {
-	// Remove <script>, <style>, <nav>, <header>, <footer> blocks
-	let text = html
-		.replace(/<script[\s\S]*?<\/script>/gi, "")
-		.replace(/<style[\s\S]*?<\/style>/gi, "")
-		.replace(/<nav[\s\S]*?<\/nav>/gi, "")
-		.replace(/<header[\s\S]*?<\/header>/gi, "")
-		.replace(/<footer[\s\S]*?<\/footer>/gi, "")
-		// Convert common block elements to newlines
-		.replace(/<\/(p|div|li|h[1-6]|br|tr)>/gi, "\n")
-		.replace(/<br\s*\/?>/gi, "\n")
-		// Strip remaining tags
-		.replace(/<[^>]+>/g, "")
-		// Decode common HTML entities
-		.replace(/&amp;/g, "&")
-		.replace(/&lt;/g, "<")
-		.replace(/&gt;/g, ">")
-		.replace(/&quot;/g, '"')
-		.replace(/&#39;/g, "'")
-		.replace(/&nbsp;/g, " ")
-		// Collapse whitespace
-		.replace(/[ \t]+/g, " ")
-		.replace(/\n{3,}/g, "\n\n")
-		.trim()
-
-	return text
 }
 
 // ---------------------------------------------------------------------------
@@ -231,10 +149,11 @@ export default function (pi: ExtensionAPI) {
 	let cleanupTimer: ReturnType<typeof setInterval> | null = null
 
 	pi.on("session_start", async (_event: SessionStartEvent, ctx: ExtensionContext) => {
-		const runner = await detectRunner(pi.exec.bind(pi))
-		if (!runner) {
+		try {
+			await access(LIGHTPANDA_BIN, constants.X_OK)
+		} catch {
 			ctx.ui.notify(
-				"web_fetch: no Python runner found (uv/uvx, pipx). HTML extraction will use basic tag stripping as fallback.",
+				`web_fetch: Lightpanda not found at ${LIGHTPANDA_BIN}. Install it via the lightpanda skill (bash scripts/install.sh).`,
 				"warning",
 			)
 		}
@@ -258,8 +177,8 @@ export default function (pi: ExtensionAPI) {
 		description: [
 			"Fetches a web page and returns its main content as markdown.",
 			"",
-			"Uses Node.js built-in fetch (no browser required) and trafilatura for",
-			"ML-based boilerplate removal. Falls back to basic HTML stripping.",
+			"Uses Lightpanda headless browser — 9x faster and 16x less memory than",
+			"Chrome. Executes JavaScript for dynamic/SPA pages. Returns clean markdown.",
 			"Results are cached for 15 minutes — asking follow-up questions about",
 			"the same URL is instant.",
 			"",
@@ -268,7 +187,13 @@ export default function (pi: ExtensionAPI) {
 		].join("\n"),
 		parameters: WebFetchParams,
 
-		async execute(_id: string, params: Static<typeof WebFetchParams>, signal: AbortSignal | undefined, onUpdate: AgentToolUpdateCallback | undefined, _ctx: ExtensionContext): Promise<AgentToolResult> {
+		async execute(
+			_id: string,
+			params: Static<typeof WebFetchParams>,
+			signal: AbortSignal | undefined,
+			onUpdate: AgentToolUpdateCallback | undefined,
+			_ctx: ExtensionContext,
+		): Promise<AgentToolResult> {
 			// 1. Validate URL
 			const urlResult = normalizeUrl(params.url)
 			if ("error" in urlResult) {
@@ -283,33 +208,16 @@ export default function (pi: ExtensionAPI) {
 				return buildResult(cached)
 			}
 
-			// 3. Fetch HTML
+			// 3. Fetch via Lightpanda
 			onUpdate?.({ content: [{ type: "text", text: `Fetching ${url}…` }] })
-			const fetchResult = await fetchHtml(url, signal)
-			if ("error" in fetchResult) {
-				return { content: [{ type: "text", text: fetchResult.error }], isError: true }
+			const result = await fetchViaLightpanda(url, signal)
+			if ("error" in result) {
+				return { content: [{ type: "text", text: result.error }], isError: true }
 			}
 
-			// 4. Extract content
-			onUpdate?.({ content: [{ type: "text", text: "Extracting content…" }] })
-			let markdown: string
-
-			if (detectedRunner) {
-				const extracted = await extractViaTrafilatura(fetchResult.html, detectedRunner, signal)
-				if ("markdown" in extracted) {
-					markdown = extracted.markdown
-				} else {
-					// trafilatura failed at runtime — warn and fall back
-					markdown = stripHtml(fetchResult.html)
-					markdown += `\n\n⚠️ trafilatura extraction failed (${extracted.error}). Content above is from basic HTML stripping.`
-				}
-			} else {
-				markdown = stripHtml(fetchResult.html)
-			}
-
-			// 5. Cache and return
-			setCache(url, markdown)
-			return buildResult(markdown)
+			// 4. Cache and return
+			setCache(url, result.markdown)
+			return buildResult(result.markdown)
 		},
 
 		renderCall(args: Static<typeof WebFetchParams>, theme: Theme): Component | undefined {

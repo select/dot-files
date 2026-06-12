@@ -1,19 +1,19 @@
 {
-	"lastChangelogVersion": "0.57.1",
-	"quietStartup": true,
-	"theme": "pywal",
-	"defaultProvider": "amazon-bedrock",
-	"defaultModel": "eu.anthropic.claude-opus-4-6-v1",
-	"enabledModels": [
-		"eu.anthropic.claude-sonnet-4-6",
-		"eu.anthropic.claude-opus-4-6"
-	],
-	"packages": [
-		"npm:pi-powerline-footer",
-		"npm:pi-skill-palette",
-		"npm:@aliou/pi-guardrails",
-		"npm:lsp-pi",
-		"npm:token-rate-pi"
-	],
-	"defaultThinkingLevel": "medium"
+  "lastChangelogVersion": "0.79.1",
+  "quietStartup": true,
+  "theme": "pywal",
+  "defaultProvider": "amazon-bedrock",
+  "defaultModel": "eu.anthropic.claude-opus-4-8",
+  "enabledModels": [
+    "eu.anthropic.claude-sonnet-4-6",
+    "eu.anthropic.claude-opus-4-8"
+  ],
+  "packages": [
+    "npm:pi-skill-palette",
+    "npm:@aliou/pi-guardrails",
+    "npm:lsp-pi",
+    "npm:token-rate-pi",
+    "npm:pi-mcp-adapter"
+  ],
+  "defaultThinkingLevel": "medium"
 }

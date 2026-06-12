@@ -77,6 +77,39 @@ All scripts are in `.claude/skills/chrome-devtools/scripts/`
 - `fill.js` - Fill form fields
 - `evaluate.js` - Execute JavaScript in page context
 
+### Mobile Screenshots
+- `mobile-screenshot.js` - Capture screenshots with mobile device emulation (touch, viewport)
+
+```bash
+bun run mobile-screenshot.js --url <url> --output <path> [--wait-for <selector>] [--clear-storage] [--full-page] [--width 390] [--height 844] [--timeout 10000]
+```
+
+Options:
+- `--url` (required) - URL to navigate to
+- `--output` (required) - Output file path
+- `--wait-for` - CSS selector to wait for before capturing (if omitted, waits 4s)
+- `--clear-storage` - Clear all site storage before navigation
+- `--full-page` - Capture full scrollable page (default: true)
+- `--width` - Viewport width in px (default: 390 = iPhone 14)
+- `--height` - Viewport height in px (default: 844 = iPhone 14)
+- `--timeout` - Max wait time for `--wait-for` selector in ms (default: 10000)
+
+Common viewport sizes:
+- iPhone 14: `--width 390 --height 844`
+- Tablet: `--width 768 --height 1024`
+- Small phone: `--width 320 --height 568`
+
+Example:
+```bash
+cd /home/linux-falko/.pi/agent/skills/chrome-devtools/scripts
+bun run mobile-screenshot.js \
+  --url "http://localhost:8081/?demo&agree-tou" \
+  --output /path/to/docs/screenshots/home-mobile.png \
+  --wait-for "[data-test='model-list']" \
+  --clear-storage \
+  --width 390 --height 844
+```
+
 ### Analysis & Monitoring
 - `snapshot.js` - Extract interactive elements with metadata
 - `console.js` - Monitor console messages/errors

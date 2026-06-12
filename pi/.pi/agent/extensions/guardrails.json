@@ -1,127 +1,200 @@
 {
-  "enabled": true,
-  "features": {
-    "policies": true,
-    "permissionGate": true
-  },
-  "policies": {
-    "rules": [
-      {
-        "id": "secret-files",
-        "description": "Files containing secrets",
-        "patterns": [
-          {
-            "pattern": ".env"
-          },
-          {
-            "pattern": ".env.local"
-          },
-          {
-            "pattern": ".env.production"
-          },
-          {
-            "pattern": ".env.prod"
-          },
-          {
-            "pattern": ".dev.vars"
-          }
-        ],
-        "allowedPatterns": [
-          {
-            "pattern": ".env.example"
-          },
-          {
-            "pattern": ".env.sample"
-          },
-          {
-            "pattern": ".env.test"
-          },
-          {
-            "pattern": "*.example.env"
-          },
-          {
-            "pattern": "*.sample.env"
-          },
-          {
-            "pattern": "*.test.env"
-          }
-        ],
-        "protection": "noAccess",
-        "onlyIfExists": true
-      },
-      {
-        "id": "eslint-config",
-        "description": "ESLint configuration files — handled by protected-files extension (confirm dialog)",
-        "patterns": [
-          {
-            "pattern": "eslint.config.*"
-          }
-        ],
-        "protection": "readOnly",
-        "onlyIfExists": true,
-        "blockMessage": "Editing {file} requires user approval. Explain what change you want to make and why, then ask the user to confirm before proceeding."
-      }
-    ]
-  },
-  "permissionGate": {
-    "patterns": [
-      {
-        "pattern": "git reset --hard",
-        "description": "discards all uncommitted changes",
-        "regex": true
-      },
-      {
-        "pattern": "git reset --(mixed|soft)",
-        "regex": true,
-        "description": "rewrites local commit history"
-      },
-      {
-        "pattern": "git push -(-force|-f)\\b",
-        "regex": true,
-        "description": "force-pushes, can overwrite remote history"
-      },
-      {
-        "pattern": "git push --force-with-lease",
-        "description": "force-pushes with lease check",
-        "regex": true
-      },
-      {
-        "pattern": "git clean -[a-z]*f",
-        "regex": true,
-        "description": "deletes untracked files permanently"
-      },
-      {
-        "pattern": "git branch -D",
-        "description": "force-deletes a branch without merge check",
-        "regex": true
-      },
-      {
-        "pattern": "git rebase\\b",
-        "regex": true,
-        "description": "rewrites commit history"
-      },
-      {
-        "pattern": "git stash (drop|clear)",
-        "regex": true,
-        "description": "permanently deletes stash entries"
-      },
-      {
-        "pattern": "git tag -d",
-        "description": "deletes a tag locally",
-        "regex": true
-      },
-      {
-        "pattern": "git remote remove",
-        "description": "removes a configured remote",
-        "regex": true
-      }
-    ],
-    "requireConfirmation": true,
-    "allowedPatterns": [],
-    "autoDenyPatterns": [],
-    "explainCommands": false,
-    "explainModel": null,
-    "explainTimeout": 5000
-  },
-  "version": "0.8.0-20260228"
+	"$schema": "https://unpkg.com/@aliou/pi-guardrails@0.12.1/schema.json",
+	"enabled": true,
+	"features": {
+		"policies": true,
+		"permissionGate": true
+	},
+	"policies": {
+		"rules": [
+			{
+				"id": "secret-files",
+				"description": "Files containing secrets",
+				"patterns": [
+					{
+						"pattern": ".env"
+					},
+					{
+						"pattern": ".env.local"
+					},
+					{
+						"pattern": ".env.production"
+					},
+					{
+						"pattern": ".env.prod"
+					},
+					{
+						"pattern": ".dev.vars"
+					}
+				],
+				"allowedPatterns": [
+					{
+						"pattern": ".env.example"
+					},
+					{
+						"pattern": ".env.sample"
+					},
+					{
+						"pattern": ".env.test"
+					},
+					{
+						"pattern": "*.test.env"
+					}
+				],
+				"protection": "noAccess",
+				"onlyIfExists": true
+			},
+			{
+				"id": "eslint-config",
+				"description": "ESLint configuration files — handled by protected-files extension (confirm dialog)",
+				"patterns": [
+					{
+						"pattern": "eslint.config.*"
+					}
+				],
+				"protection": "readOnly",
+				"onlyIfExists": true,
+				"blockMessage": "Editing {file} requires user approval. Explain what change you want to make and why, then ask the user to confirm before proceeding."
+			}
+		]
+	},
+	"permissionGate": {
+		"patterns": [
+			{
+				"pattern": "git reset --hard",
+				"description": "discards all uncommitted changes",
+				"regex": true
+			},
+			{
+				"pattern": "git reset --(mixed|soft)",
+				"regex": true,
+				"description": "rewrites local commit history"
+			},
+			{
+				"pattern": "git push -(-force|-f)\\b",
+				"regex": true,
+				"description": "force-pushes, can overwrite remote history"
+			},
+			{
+				"pattern": "git push --force-with-lease",
+				"description": "force-pushes with lease check",
+				"regex": true
+			},
+			{
+				"pattern": "git clean -[a-z]*f",
+				"regex": true,
+				"description": "deletes untracked files permanently"
+			},
+			{
+				"pattern": "git branch -D",
+				"description": "force-deletes a branch without merge check",
+				"regex": true
+			},
+			{
+				"pattern": "git rebase\\b",
+				"regex": true,
+				"description": "rewrites commit history"
+			},
+			{
+				"pattern": "git checkout -- ",
+				"regex": false,
+				"description": "discards all uncommitted changes in the working tree"
+			},
+			{
+				"pattern": "git checkout\b.+-- ",
+				"regex": true,
+				"description": "discards uncommitted changes to files"
+			},
+			{
+				"pattern": "git checkout [^ ]+ [^ ]+\\.(vue|ts|js|json|css|html|md)",
+				"regex": true,
+				"description": "discards uncommitted changes to a file by checking out from index/ref"
+			},
+			{
+				"pattern": "git restore \\.",
+				"regex": true,
+				"description": "discards uncommitted changes in the working tree"
+			},
+			{
+				"pattern": "git stash (drop|clear)",
+				"regex": true,
+				"description": "permanently deletes stash entries"
+			},
+			{
+				"pattern": "git tag -d",
+				"description": "deletes a tag locally",
+				"regex": true
+			},
+			{
+				"pattern": "git remote remove",
+				"description": "removes a configured remote",
+				"regex": true
+			},
+			{
+				"pattern": "kill.*(gnome-shell|mutter|gnome-session|gdm|Xwayland)",
+				"regex": true,
+				"description": "kills compositor/session process — will crash your desktop session"
+			},
+			{
+				"pattern": "systemctl.*(restart|stop).*(gnome-shell|org\\.gnome\\.Shell|mutter|gdm)",
+				"regex": true,
+				"description": "restarts/stops compositor/session — will crash your desktop session on Wayland"
+			},
+			{
+				"pattern": "docker run.*-v.*/etc[:/]",
+				"regex": true,
+				"description": "mounts host /etc into container — root-equivalent access"
+			},
+			{
+				"pattern": "docker run.*-v.*/boot[:/]",
+				"regex": true,
+				"description": "mounts host /boot into container — root-equivalent access"
+			},
+			{
+				"pattern": "docker run.*-v.*/root[:/]",
+				"regex": true,
+				"description": "mounts host /root into container — root-equivalent access"
+			},
+			{
+				"pattern": "docker run.*-v.*/var[:/]",
+				"regex": true,
+				"description": "mounts host /var into container — root-equivalent access"
+			},
+			{
+				"pattern": "docker run.*-v.*/usr[:/]",
+				"regex": true,
+				"description": "mounts host /usr into container — root-equivalent access"
+			},
+			{
+				"pattern": "docker run.*--privileged",
+				"regex": true,
+				"description": "runs container in privileged mode — full root access to host"
+			},
+			{
+				"pattern": "docker run.*--pid[= ]host",
+				"regex": true,
+				"description": "shares host PID namespace — can access host processes"
+			},
+			{
+				"pattern": "docker run.*--net[= ]host",
+				"regex": true,
+				"description": "shares host network namespace — bypasses network isolation"
+			},
+			{
+				"pattern": "docker exec",
+				"regex": false,
+				"description": "executes command in running container"
+			}
+		],
+		"requireConfirmation": true,
+		"allowedPatterns": [],
+		"autoDenyPatterns": []
+	},
+	"version": "0.9.0-20260327",
+	"applyBuiltinDefaults": true,
+	"onboarding": {
+		"completed": true,
+		"completedAt": "2026-04-10T11:13:08.556Z",
+		"version": "0.9.0-20260327"
+	}
 }

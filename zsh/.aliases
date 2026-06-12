@@ -1,4 +1,5 @@
 # File aliases
+alias -s md="glow"
 alias -s json="jless"
 alias -s yaml="jless"
 alias -s yml="jless"
@@ -26,7 +27,7 @@ alias top="htop"
 alias btop="bpytop"
 alias o='xdg-open'
 alias cx='chmod +x'
-alias du='duf'
+alias du='du -sh'
 alias df='duf'
 alias grep='grep --color=always'
 alias mkdir='mkdir -p'

@@ -1,0 +1,22 @@
+{
+  "name": "pi-hooks",
+  "version": "1.0.3",
+  "description": "Collection of pi extensions (checkpoint, lsp, permission, ralph-loop, repeat)",
+  "license": "MIT",
+  "keywords": ["pi-package", "pi", "pi-coding-agent"],
+  "dependencies": {
+    "shell-quote": "^1.8.3",
+    "vscode-languageserver-protocol": "^3.17.5"
+  },
+  "pi": {
+    "extensions": [
+      "./checkpoint/checkpoint.ts",
+      "./lsp/lsp.ts",
+      "./lsp/lsp-tool.ts",
+      "./permission/permission.ts",
+      "./ralph-loop/ralph-loop.ts",
+      "./repeat/repeat.ts",
+      "./token-rate/token-rate.ts"
+    ]
+  }
+}

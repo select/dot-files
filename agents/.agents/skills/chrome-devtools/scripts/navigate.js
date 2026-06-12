@@ -21,7 +21,7 @@ async function navigate() {
     const page = await getPage(browser);
 
     const options = {
-      waitUntil: args['wait-until'] || 'networkidle2',
+      waitUntil: args['wait-until'] || 'load',
       timeout: parseInt(args.timeout || '30000')
     };
 
@@ -38,6 +38,7 @@ async function navigate() {
     if (args.close !== 'false') {
       await closeBrowser();
     }
+    process.exit(0);
   } catch (error) {
     outputError(error);
   }

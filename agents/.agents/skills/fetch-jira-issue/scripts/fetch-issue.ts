@@ -21,6 +21,9 @@ interface JiraContent {
 	content?: JiraContentItem[];
 }
 
+// Module-level media ID to filename map, set before conversion
+let mediaIdMap: Record<string, string> = {};
+
 interface JiraIssue {
 	id: string;
 	key: string;
@@ -134,6 +137,7 @@ function convertContentToMarkdown(content: Array<JiraContent>): string {
 								const href = mark.attrs?.href || '';
 								text = `[${text}](${href})`;
 							}
+							// textColor mark is ignored (no markdown equivalent)
 						}
 					}
 					return text;
@@ -258,6 +262,53 @@ function convertContentToMarkdown(content: Array<JiraContent>): string {
 		} else if (block.type === 'rule') {
 			// Handle horizontal rules
 			markdown += '---\n\n';
+		} else if (block.type === 'expand') {
+			// Handle expand/collapse sections
+			const expandBlock = block as { attrs?: { title?: string }; content?: Array<JiraContent> };
+			const title = expandBlock.attrs?.title || 'Details';
+			markdown += `<details>\n<summary>${title}</summary>\n\n`;
+			if (expandBlock.content) {
+				markdown += convertContentToMarkdown(expandBlock.content) + '\n\n';
+			}
+			markdown += `</details>\n\n`;
+		} else if (block.type === 'blockCard') {
+			// Handle block-level link cards
+			const cardBlock = block as { attrs?: { url?: string } };
+			const url = cardBlock.attrs?.url || '';
+			if (url) {
+				markdown += `${url}\n\n`;
+			}
+		} else if (block.type === 'mediaGroup' || block.type === 'mediaSingle') {
+			// Handle media groups and single media (inline file attachments / images)
+			const mediaItems = block.content || [];
+			for (const media of mediaItems) {
+				const mediaNode = media as { attrs?: { id?: string; type?: string } };
+				const mediaId = mediaNode.attrs?.id;
+				if (mediaId && mediaIdMap[mediaId]) {
+					markdown += `@${mediaIdMap[mediaId]}\n`;
+				} else {
+					markdown += `📎 *(unresolved attached file)*\n`;
+				}
+			}
+			markdown += '\n';
+		} else if (block.type === 'table') {
+			// Handle tables
+			const rows = block.content || [];
+			for (let rowIdx = 0; rowIdx < rows.length; rowIdx++) {
+				const row = rows[rowIdx] as { content?: Array<{ type: string; content?: Array<JiraContent> }> };
+				const cells = row.content || [];
+				const cellTexts = cells.map(cell => {
+					if (cell.content) {
+						return cell.content.map(p => (p as { content?: unknown[] }).content ? processInlineContent((p as { content?: unknown[] }).content!) : '').join(' ');
+					}
+					return '';
+				});
+				markdown += `| ${cellTexts.join(' | ')} |\n`;
+				if (rowIdx === 0) {
+					markdown += `| ${cellTexts.map(() => '---').join(' | ')} |\n`;
+				}
+			}
+			markdown += '\n';
 		}
 	}
 
@@ -414,6 +465,43 @@ Examples:
 		}
 
 		const issue: JiraIssue = await response.json();
+
+		// Fetch rendered fields to build media ID -> filename map
+		try {
+			const renderedUrl = `${JIRA_URL}/rest/api/3/issue/${issueKey}?expand=renderedFields&fields=description,comment`;
+			const renderedResponse = await fetch(renderedUrl, {
+				headers: {
+					Authorization: `Basic ${auth}`,
+					Accept: 'application/json',
+				},
+			});
+			if (renderedResponse.ok) {
+				const renderedData = await renderedResponse.json();
+				const renderedHtml = [
+					renderedData.renderedFields?.description || '',
+					...(renderedData.renderedFields?.comment?.comments?.map(
+						(c: { body?: string }) => c.body || '',
+					) || []),
+				].join('');
+				const mediaRegex =
+					/data-media-services-id="([^"]+)"[^>]*data-attachment-name="([^"]+)"/g;
+				let mediaMatch;
+				while ((mediaMatch = mediaRegex.exec(renderedHtml)) !== null) {
+					mediaIdMap[mediaMatch[1]] = mediaMatch[2];
+				}
+				// Also try reversed attribute order
+				const mediaRegex2 =
+					/data-attachment-name="([^"]+)"[^>]*data-media-services-id="([^"]+)"/g;
+				while ((mediaMatch = mediaRegex2.exec(renderedHtml)) !== null) {
+					mediaIdMap[mediaMatch[2]] = mediaMatch[1];
+				}
+			}
+		} catch (error) {
+			// Non-fatal: media references will show as unresolved
+			console.error(
+				`Warning: Could not fetch rendered fields for media mapping: ${error instanceof Error ? error.message : String(error)}`,
+			);
+		}
 
 		// Fetch comments for the issue
 		const commentsUrl = `${JIRA_URL}/rest/api/3/issue/${issueKey}/comment`;

@@ -18,6 +18,15 @@
       "skillFolderHash": "0cf469325fc508c8812394ee9e8356917c36ed5b",
       "installedAt": "2026-01-29T01:45:04.369Z",
       "updatedAt": "2026-01-29T01:45:04.369Z"
+    },
+    "Lightpanda": {
+      "source": "lightpanda-io/agent-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/lightpanda-io/agent-skill.git",
+      "skillPath": "SKILL.md",
+      "skillFolderHash": "bc562f37dc4c888194159053980c17f80d52b167",
+      "installedAt": "2026-04-24T15:44:42.805Z",
+      "updatedAt": "2026-04-24T15:44:42.805Z"
     }
   },
   "dismissed": {

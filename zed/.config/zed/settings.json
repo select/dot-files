@@ -7,7 +7,20 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
-	"icon_theme": "Catppuccin Frappé",
+	"diff_view_style": "split",
+ "project_panel": {
+  "dock": "left"
+ },
+ "outline_panel": {
+  "dock": "left"
+ },
+ "collaboration_panel": {
+  "dock": "left"
+ },
+ "git_panel": {
+  "dock": "left"
+ },
+ "icon_theme": "Catppuccin Frappé",
 	"colorize_brackets": true,
 	"edit_predictions": {
 		"mode": "subtle",
@@ -118,7 +131,8 @@
 		// "lsp_document_colors": "inlay"
 	},
 	"agent": {
-		"play_sound_when_agent_done": true,
+		"dock": "right",
+  "play_sound_when_agent_done": true,
 		"notify_when_agent_waiting": "all_screens",
 		"profiles": {
 			"minimal": {
