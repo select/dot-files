@@ -157,6 +157,9 @@ hl.config({
         new_status = "master",
     },
 
+    cursor = {
+        no_hardware_cursors = true,  -- software cursors update every frame (smooth plugin animation)
+    },
     misc = {
         force_default_wallpaper  = -1,
         disable_hyprland_logo    = false,
@@ -269,14 +272,13 @@ hl.layer_rule({ match = { namespace = "rofi" }, ignore_alpha = 0 })
 if hl.plugin.dynamic_cursors then
     hl.config { plugin = { dynamic_cursors = {
         enabled   = true,
-        mode      = "tilt",      -- tilt | rotate | stretch | none
-        threshold = 2,
+        mode      = "stretch",   -- tilt | rotate | stretch | none
+        threshold = 1,           -- lower = more frequent shape updates
 
-        tilt = {
-            limit      = 5000,
+        stretch = {
+            limit      = 3000,
             activation = "negative_quadratic",
             window     = 100,
-            full       = 60,
         },
 
         shake = {
