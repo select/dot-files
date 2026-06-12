@@ -318,6 +318,6 @@
     "interval": 2,
     "signal": 8,
     "return-type": "json",
-    "on-click": "pkill -INT wf-recorder && notify-send -i media-record 'Recording stopped' 'Saved to ~/Videos/Screencasts'"
+    "on-click": "pkill -SIGINT -f gpu-screen-recorder && notify-send -i media-record 'Recording stopped' 'Saved to ~/Videos/Screencasts' && pkill -SIGRTMIN+8 waybar"
   }
 }

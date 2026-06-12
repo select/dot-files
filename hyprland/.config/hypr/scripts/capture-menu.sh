@@ -4,7 +4,9 @@ RECORDINGS="$HOME/Videos/Screencasts"
 SCREENSHOTS="$HOME/Pictures"
 mkdir -p "$RECORDINGS"
 
-# Wait until wf-recorder has written its first bytes, then notify + update waybar
+GSR="$HOME/.local/bin/gsr"
+
+# Wait until gpu-screen-recorder has written its first bytes, then notify + update waybar
 _wait_and_notify() {
     local file="$1"
     (
@@ -18,7 +20,7 @@ _wait_and_notify() {
 }
 
 # ── Build menu depending on whether a recording is already running ──────────
-if pgrep -x wf-recorder > /dev/null; then
+if pgrep -f "gpu-screen-recorder" > /dev/null; then
     entries="󰭖  Stop Recording\n󰕨  Screenshot  ·  Full Screen\n󰇵  Screenshot  ·  Region"
     height=165
 else
@@ -31,7 +33,7 @@ selected=$(echo -e "$entries" \
 
 case "$selected" in
     *"Stop"*)
-        pkill -INT wf-recorder
+        pkill -SIGINT -f "gpu-screen-recorder"
         notify-send -i media-record "Recording stopped" "Saved to ~/Videos/Screencasts"
         pkill -SIGRTMIN+8 waybar
         ;;
@@ -43,13 +45,14 @@ case "$selected" in
         ;;
     *"Record"*"Full"*)
         FILE="$RECORDINGS/$(date +%Y-%m-%d_%H-%M-%S).mp4"
-        wf-recorder -f "$FILE" &
+        "$GSR" -w portal -f 60 -a default_output \
+               -restore-portal-session yes -k h264 -o "$FILE" &
         _wait_and_notify "$FILE"
         ;;
     *"Record"*"Region"*)
-        AREA=$(slurp 2>/dev/null) || exit 0
         FILE="$RECORDINGS/$(date +%Y-%m-%d_%H-%M-%S).mp4"
-        wf-recorder -g "$AREA" -f "$FILE" &
+        "$GSR" -w region -f 60 -a default_output \
+               -k h264 -o "$FILE" &
         _wait_and_notify "$FILE"
         ;;
 esac
