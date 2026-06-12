@@ -1,0 +1,200 @@
+// https://github.com/Alexays/Waybar/wiki/Module:-Hyprland
+{
+	"layer": "top", 
+	"position": "bottom",
+	// Load Modules
+	"include": [
+		"~/.config/waybar/modules.json"
+	],
+
+	"modules-left": [
+		"custom/power",
+		"hyprland/workspaces", 
+		"pulseaudio",
+		// "backlight",
+		"custom/clipboard", 
+		"custom/emoji",
+		"group/settings",
+		"custom/empty",
+	],
+	"modules-center": [ "hyprland/window" ],
+	"modules-right": [
+		// "disk", 
+		// "cpu", 
+		"hyprland/language", 
+		// "idle_inhibitor", 
+		"memory", 
+		"bluetooth", 
+		"battery", 
+		"network", 
+		"clock", 
+		"tray"
+	],
+
+	"custom/powerold": {
+		"format" : "⏻ ",
+		"tooltip": false,
+		"menu": "on-click",
+		"menu-file": "~/.config/waybar/power_menu.xml",
+		"menu-actions": {
+			"shutdown": "shutdown",
+			"reboot": "reboot",
+			"suspend": "systemctl suspend",
+			"hibernate": "systemctl hibernate"
+		}
+	},
+	"custom/power":{
+		"format":"💀",
+		"on-click": "~/.config/hypr/wofi_power.sh",
+		"interval":86400
+	},
+	
+	"reload_style_on_change":true,
+
+	"hyprland/workspaces": {
+		"active-only": true,
+		"format": "{icon}",
+		"format-icons": {
+			"active": "",
+			"default": "" 
+		},
+		"window-rewrite": {
+			"firefox": "󰈹",
+			"Alacritty": "󰞷",
+			"slack": "󰒱",
+			"thunderbird": "󰇮",
+			"spotify": "󰓇"
+		},
+		"persistent-workspaces": {
+			"*": [ 1, 2, 3, 4, 5, 6 ]
+		},
+		"on-scroll-up": "hyprctl dispatch workspace e+1",
+		"on-scroll-down": "hyprctl dispatch workspace e-1",
+		"show-special": false
+	},
+	"hyprland/window": {
+		"icon": true,
+		"format": "{title}",
+		"rewrite": {
+			"(.*) — Mozilla Firefox": "$1"
+		},
+		"max-width": "100",
+	},
+
+	"idle_inhibitor":{
+		"format": "<span font='12'>{icon} </span>",
+		"format-icons": {
+			"activated":"󰈈",
+			"deactivated":"󰈉"
+		}
+	},
+
+	"clock": {
+		"format": "{:%Y·%m·%d %H:%M}",
+		"interval":1,
+		"tooltip-format": "\n<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+		"calendar-weeks-pos": "right",
+		"today-format": "<span color='#7645AD'><b><u>{}</u></b></span>",
+		"format-calendar": "<span color='#aeaeae'><b>{}</b></span>",
+		"format-calendar-weeks": "<span color='#aeaeae'><b>W{:%V}</b></span>",
+		"format-calendar-weekdays": "<span color='#aeaeae'><b>{}</b></span>",
+		"on-click": "gnome-calendar"
+	},
+
+	"bluetooth": {
+		"format-on": "󰂯",
+		"format-off": "",
+		"format-disabled": "󰂲",
+		"format-connected": "󰂴",
+		"format-connected-battery": "{device_battery_percentage}% 󰂴",
+		"tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",
+		"tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}",
+		"tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
+		"tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_address}\t{device_battery_percentage}%",
+		"on-click": "blueman-applet"
+	}, 
+
+	"battery": {
+		"interval":1,
+		"states": {
+			"good": 95,
+			"warning": 30,
+			"critical": 20
+		},
+		"format": "{icon} ",
+		"format-charging": "{capacity}% 󰢜 ",
+		"format-plugged": "{capacity}% 󰢜 󰚥",
+		"format-alt": "{time} {icon}",
+		"format-icons": [
+			"󰁻",
+			"󰁼",
+			"󰁾",
+			"󰂀",
+			"󰂂",
+			"󰁹"
+		]
+	},
+	"backlight": {
+		"device": "intel_backlight",
+		"format": "{icon}",
+		"format-icons": [
+			"",
+			"",
+			"",
+			"",
+			"",
+			"",
+			"",
+			"",
+			"",
+			""
+		],
+		"on-scroll-down": "brightnessctl -q s +10%",
+		"on-scroll-up": "brightnessctl -q s -10%",
+		"smooth-scrolling-threshold": 1
+	},
+
+	"disk": {
+		"interval": 30,
+		"format": "  {percentage_used}%",
+		"path": "/"
+	},
+
+	"cpu": {
+		"interval": 5,
+		"format": " {usage}%",
+		"min-length": 6,
+		"max-length": 6,
+		"format-icons": ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
+	},
+
+	"memory": {
+		"format": "{used}GB",
+		"on-click": "gnome-terminal -- bash -c 'htop; exec bash'"
+	},
+
+	"hyprland/language": {
+		"format": "{}",
+		"format-en": "EN",
+		"format-de": "DE",
+		"keyboard-name": "at-translated-set-2-keyboard",
+		"on-click": "hyprctl switchxkblayout at-translated-set-2-keyboard next"
+	},
+
+	"jack": {
+		"format": "{} 󱎔",
+		"format-xrun": "{xruns} xruns",
+		"format-disconnected": "DSP off",
+		"realtime": true
+	},
+
+	"upower": {
+		"show-icon": false,
+		"hide-if-empty": true,
+		"tooltip": true,
+		"tooltip-spacing": 20
+	}
+
+
+
+}

@@ -1,0 +1,162 @@
+@import "colors-waybar.css";
+
+* {
+	border: none;
+	font-size: 14px;
+/*	font-family: "Hack Nerd Font,Hack NF" ;*/
+font-family: "JetBrainsMono Nerd Font,JetBrainsMono NF" ;
+}
+
+
+window#waybar {
+	background: rgba(0, 0, 0, 0.5);
+	border-radius: 99px;
+}
+
+.modules-left,
+.modules-center,
+.modules-right {
+	padding: 4px 0px;
+}
+
+.modules-left {
+	padding-left: 15px;
+	margin-top: 0px;
+}
+.modules-center {
+	padding: 0 15px;
+}
+.modules-right {
+	padding-right: 12px;
+}
+
+
+#custom-icon {
+	background-image: url("./assets/hyprland-icon.png");
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain; 
+	padding: 7px;
+	margin-left: 5px;
+}
+
+#battery,
+#custom-clipboard,
+#custom-colorpicker,
+#custom-settings,
+#bluetooth,
+#pulseaudio,
+#network,
+#disk,
+#memory,
+#backlight,
+#cpu,
+#temperature,
+#custom-weather,
+#idle_inhibitor,
+#jack,
+#tray,
+#window,
+#workspaces,
+#language,
+#clock {
+	padding: 0 8px;
+	color: @foreground;
+}
+
+#pulseaudio {
+	padding-top: 3px;
+}
+#pulseaudio span {
+	font-size: 1.5rem;
+}
+
+#custom-power {
+	padding-left: 15px;
+}
+
+#custom-tools {
+	background-image: url("assets/zap.svg");
+	padding: 0px 10px;
+	margin: 0 5px;
+}
+
+#temperature.critical,
+#pulseaudio.muted {
+	color: #FF0000;
+	padding-top: 0;
+}
+
+#custom-emoji,
+#custom-clipboard {
+	padding: 0 15px;
+}
+
+#custom-settings {
+	margin-right: 15px;
+}
+
+#window {
+	color: @color5;
+}
+#window:hover {
+	color: @foreground;
+}
+
+#workspaces button {
+	color: @color3;
+}
+#workspaces button.urgent {
+	color: #FF0000;
+}
+#workspaces button.visible {
+	color: @color3;
+}
+#workspaces button.empty {
+	color: @color5;
+	opacity: 0.3;
+}
+/*
+#workspaces button.empty
+#workspaces button.active
+#workspaces button.persistent
+#workspaces button.special
+#workspaces button.visible
+#workspaces button.urgent
+*/
+
+#backlight {
+	font-size: 1.2rem;
+}
+
+#clock{
+	color: @color4;
+}
+
+#battery.charging {
+	color: @foreground;
+	background-color: rgba(1, 170, 71,  .29);
+}
+
+#battery.warning:not(.charging) {
+	background-color: #ffbe61;
+	color: black;
+}
+
+#battery.critical:not(.charging) {
+	background-color: #f53c3c;
+	color: @foreground;
+	animation-name: blink;
+	animation-duration: 0.5s;
+	animation-timing-function: linear;
+	animation-iteration-count: infinite;
+	animation-direction: alternate;
+}
+
+
+@keyframes blink {
+	to {
+		background-color: @foreground;
+		color: #000000;
+	}
+}
