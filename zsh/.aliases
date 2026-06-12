@@ -59,6 +59,5 @@ alias j="z"
 # alias llt='ll --tree'
 # alias lt='ll --sort=mod $@'
 # alias lz='ll --sort=size $@'
-# alias l='/home/user/bin/exa'
 # alias lla='ls -alF --group-directories-first --color=always'
 # alias lll='ls -alF --group-directories-first --color=always|more'

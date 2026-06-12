@@ -46,7 +46,7 @@ The `nerd` preset uses `NERD_COLORS` and includes `token_in`/`token_out` segment
 
 **Manual fix applied to installed package:**
 
-In `/home/linux-falko/.nvm/versions/node/v24.14.0/lib/node_modules/pi-powerline-footer/presets.ts`:
+In `~/.nvm/versions/node/v24.14.0/lib/node_modules/pi-powerline-footer/presets.ts`:
 
 ```diff
 - tokens: "primary",
@@ -85,4 +85,4 @@ Same fix applied to `theme.example.json` (`"model"` and `"cost"` also referenced
 
 **Files modified:**
 
-`/home/linux-falko/.nvm/versions/node/v24.14.0/lib/node_modules/pi-powerline-footer/index.ts` — editor render override (lines ~622–670)
+`~/.nvm/versions/node/v24.14.0/lib/node_modules/pi-powerline-footer/index.ts` — editor render override (lines ~622–670)

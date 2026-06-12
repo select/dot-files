@@ -101,7 +101,7 @@ Common viewport sizes:
 
 Example:
 ```bash
-cd /home/linux-falko/.pi/agent/skills/chrome-devtools/scripts
+cd ~/.pi/agent/skills/chrome-devtools/scripts
 bun run mobile-screenshot.js \
   --url "http://localhost:8081/?demo&agree-tou" \
   --output /path/to/docs/screenshots/home-mobile.png \

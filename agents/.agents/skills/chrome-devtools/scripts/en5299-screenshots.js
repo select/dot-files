@@ -1,6 +1,6 @@
 import puppeteer from './node_modules/puppeteer/lib/esm/puppeteer/puppeteer.js';
 
-const OUT = '/home/linux-falko/Dev/hub/ui/docs/screenshots/EN-5299';
+const OUT = `${process.env.HOME}/Dev/hub/ui/docs/screenshots/EN-5299`;
 const URL = 'http://localhost:8081/predict?demo&agree-tou';
 
 // Queries from the issue that demonstrated broken behaviour
@@ -8,7 +8,7 @@ const QUERIES = ['pr', 'pro', 'prot', 'prote', 'proten', 'proteni', 'protenix', 
 
 const browser = await puppeteer.launch({
 	headless: true,
-	executablePath: '/home/linux-falko/.cache/puppeteer/chrome/linux-144.0.7559.96/chrome-linux64/chrome',
+	executablePath: `${process.env.HOME}/.cache/puppeteer/chrome/linux-144.0.7559.96/chrome-linux64/chrome`,
 	args: ['--no-sandbox', '--disable-setuid-sandbox'],
 });
 const page = await browser.newPage();

@@ -20,7 +20,7 @@ export PATH="$PATH:$HOME/.lmstudio/bin"
 export PATH="$HOME/.pixi/bin:$PATH"
 export PATH="$HOME/.poetry/bin:$HOME/snap/bun-js/81/.bun/bin:$PATH"
 # pnpm
-export PNPM_HOME="/home/linux-falko/.local/share/pnpm"
+export PNPM_HOME="$HOME/.local/share/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
