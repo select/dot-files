@@ -4,6 +4,19 @@ RECORDINGS="$HOME/Videos/Screencasts"
 SCREENSHOTS="$HOME/Pictures"
 mkdir -p "$RECORDINGS"
 
+# Wait until wf-recorder has written its first bytes, then notify + update waybar
+_wait_and_notify() {
+    local file="$1"
+    (
+        for i in $(seq 1 20); do
+            sleep 0.3
+            [ -s "$file" ] && break
+        done
+        notify-send -i media-record "Recording started" "Press Print again to stop"
+        pkill -SIGRTMIN+8 waybar
+    ) &
+}
+
 # ── Build menu depending on whether a recording is already running ──────────
 if pgrep -x wf-recorder > /dev/null; then
     entries="󰭖  Stop Recording\n󰕨  Screenshot  ·  Full Screen\n󰇵  Screenshot  ·  Region"
@@ -30,15 +43,13 @@ case "$selected" in
         ;;
     *"Record"*"Full"*)
         FILE="$RECORDINGS/$(date +%Y-%m-%d_%H-%M-%S).mp4"
-        notify-send -i media-record "Recording started" "Press Print again to stop"
         wf-recorder -f "$FILE" &
-        sleep 0.5 && pkill -SIGRTMIN+8 waybar &
+        _wait_and_notify "$FILE"
         ;;
     *"Record"*"Region"*)
         AREA=$(slurp 2>/dev/null) || exit 0
         FILE="$RECORDINGS/$(date +%Y-%m-%d_%H-%M-%S).mp4"
-        notify-send -i media-record "Recording region" "Press Print again to stop"
         wf-recorder -g "$AREA" -f "$FILE" &
-        sleep 0.5 && pkill -SIGRTMIN+8 waybar &
+        _wait_and_notify "$FILE"
         ;;
 esac
