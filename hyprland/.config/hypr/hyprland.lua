@@ -187,7 +187,7 @@ hl.animation({ leaf = "specialWorkspace", enabled = true, speed = 3,  bezier = "
 hl.config({
     input = {
         kb_layout  = "us,de",
-        kb_options = "grp:alt_space_toggle",
+        kb_options = "",
         kb_variant = "",
         kb_model   = "",
         kb_rules   = "",

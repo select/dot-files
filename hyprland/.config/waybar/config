@@ -191,7 +191,7 @@
 		"format-en": "EN",
 		"format-de": "DE",
 		"keyboard-name": "at-translated-set-2-keyboard",
-		"on-click": "hyprctl switchxkblayout at-translated-set-2-keyboard next"
+		"on-click": "~/.config/hypr/scripts/toggle-keyboard-layout.sh"
 	},
 
 
