@@ -13,8 +13,8 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("swww-daemon")
     -- Nextcloud sync
     hl.exec_cmd("nextcloud")
-    -- Polkit authentication agent
-    hl.exec_cmd("/usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1")
+    -- Polkit authentication agent (Hyprland-native)
+    hl.exec_cmd("systemctl --user start hyprpolkitagent.service")
     -- Idle / lock management (hypridle reads ~/.config/hypr/hypridle.conf)
     hl.exec_cmd("hypridle")
     -- Network manager applet
