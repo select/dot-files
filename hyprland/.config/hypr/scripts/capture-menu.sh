@@ -21,15 +21,18 @@ _wait_and_notify() {
 
 # ── Build menu depending on whether a recording is already running ──────────
 if pgrep -f "gpu-screen-recorder" > /dev/null; then
-    entries="󰭖  Stop Recording\n󰕨  Screenshot  ·  Full Screen\n󰇵  Screenshot  ·  Region"
+    entries="󰭖  Stop Recording\n󰇵  Screenshot  ·  Region\n󰕨  Screenshot  ·  Full Screen"
     height=165
 else
-    entries="󰕨  Screenshot  ·  Full Screen\n󰇵  Screenshot  ·  Region\n󰭓  Record  ·  Full Screen\n󰒚  Record  ·  Region"
+    entries="󰇵  Screenshot  ·  Region\n󰕨  Screenshot  ·  Full Screen\n󰒚  Record  ·  Region\n󰭓  Record  ·  Full Screen"
     height=210
 fi
 
 selected=$(echo -e "$entries" \
     | wofi --width 310 --height $height -i -p "Capture" --dmenu --cache-file /dev/null)
+
+# Let wofi's layer surface fully close before slurp/hyprshot grabs the screen
+_settle() { sleep 0.2; }
 
 case "$selected" in
     *"Stop"*)
@@ -37,24 +40,27 @@ case "$selected" in
         notify-send -i media-record "Recording stopped" "Saved to ~/Videos/Screencasts"
         pkill -SIGRTMIN+8 waybar
         ;;
-    *"Screenshot"*"Full"*)
-        hyprshot -m output -o "$SCREENSHOTS"
-        ;;
     *"Screenshot"*"Region"*)
+        _settle
         hyprshot -m region -o "$SCREENSHOTS"
         ;;
-    *"Record"*"Full"*)
-        FILE="$RECORDINGS/$(date +%Y-%m-%d_%H-%M-%S).mp4"
-        "$GSR" -w portal -f 60 -a default_output \
-               -restore-portal-session yes -k h264 -o "$FILE" &
-        _wait_and_notify "$FILE"
+    *"Screenshot"*"Full"*)
+        _settle
+        hyprshot -m output -o "$SCREENSHOTS"
         ;;
     *"Record"*"Region"*)
+        _settle
         REGION=$(slurp 2>/dev/null | awk '{split($1,a,","); print $2"+"a[1]"+"a[2]}') || exit 0
         [ -z "$REGION" ] && exit 0
         FILE="$RECORDINGS/$(date +%Y-%m-%d_%H-%M-%S).mp4"
         "$GSR" -w region -region "$REGION" -f 60 -a default_output \
                -k h264 -o "$FILE" &
+        _wait_and_notify "$FILE"
+        ;;
+    *"Record"*"Full"*)
+        FILE="$RECORDINGS/$(date +%Y-%m-%d_%H-%M-%S).mp4"
+        "$GSR" -w portal -f 60 -a default_output \
+               -restore-portal-session yes -k h264 -o "$FILE" &
         _wait_and_notify "$FILE"
         ;;
 esac
