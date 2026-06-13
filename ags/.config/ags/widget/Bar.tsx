@@ -1,6 +1,6 @@
 import app from "ags/gtk4/app";
 import { Astal, Gtk, Gdk } from "ags/gtk4";
-import { createBinding, createComputed, For } from "ags";
+import { createBinding, createComputed, createState, For } from "ags";
 import { createPoll } from "ags/time";
 import { execAsync } from "ags/process";
 
@@ -199,11 +199,44 @@ function Battery() {
 		"percentage",
 	)((p) => `${Math.round(p * 100)}%`);
 	return (
-		<button class="icon-battery" visible={createBinding(bat, "isPresent")}>
-			<box>
-				<label label={glyph} />
-				<label class="battery-label" label={label} />
-			</box>
+		<button
+			class="icon-battery"
+			tooltipText={label}
+			visible={createBinding(bat, "isPresent")}
+		>
+			<label label={glyph} />
+		</button>
+	);
+}
+
+// --- keyboard layout indicator ---
+function shortLayout(s: string): string {
+	const l = s.toLowerCase();
+	if (l.includes("german") || l.includes("deutsch") || l.includes("(de")) return "DE";
+	if (l.includes("english") || l.includes("(us")) return "EN";
+	const paren = s.match(/\(([^)]+)\)/);
+	return (paren ? paren[1] : s).slice(0, 2).toUpperCase();
+}
+
+function Keyboard() {
+	const hypr = AstalHyprland.get_default();
+	const [layout, setLayout] = createState("");
+	hypr.connect("keyboard-layout", (_h, _kb, lay: string) => setLayout(shortLayout(lay)));
+	// initial value
+	execAsync(["bash", "-c", "hyprctl devices -j"])
+		.then((out) => {
+			const kbs = JSON.parse(out).keyboards ?? [];
+			const main = kbs.find((k: any) => k.main) ?? kbs[0];
+			if (main?.active_keymap) setLayout(shortLayout(main.active_keymap));
+		})
+		.catch(() => {});
+	return (
+		<button
+			class="icon-keyboard"
+			tooltipText="Switch keyboard layout"
+			onClicked={() => execAsync(["bash", "-c", "hyprctl switchxkblayout current next"]).catch(() => {})}
+		>
+			<label class="kbd-label" label={layout} />
 		</button>
 	);
 }
@@ -239,6 +272,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
 
 					<box $type="end" class="boxes">
 						<box class="segment status">
+							<Keyboard />
 							<Mic />
 							<Volume />
 							<Bluetooth />

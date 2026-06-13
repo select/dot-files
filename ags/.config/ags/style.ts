@@ -102,7 +102,8 @@ export function css(p: Palette): string {
 	.icon-messages { color: ${messages}; }
 	.icon-power { color: ${power}; }
 
-	.battery-label { color: ${battery}; font-size: 12px; margin-left: 2px; }
+	.icon-keyboard { color: ${text}; }
+	.kbd-label { font-size: 9px; font-weight: 700; letter-spacing: 1px; opacity: 0.8; }
 
 	.badge {
 		color: ${messages};
