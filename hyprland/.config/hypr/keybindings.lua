@@ -34,13 +34,15 @@ hl.bind(mod() .. "Return",      hl.dsp.exec_cmd(terminal))
 hl.bind(mod() .. "C",           hl.dsp.window.close())
 hl.bind(mod() .. "Q",           hl.dsp.window.close())
 hl.bind(mod("SHIFT") .. "P",    hl.dsp.exec_cmd("~/.config/hypr/scripts/wofi_power.sh"))
+hl.bind(mod("SHIFT") .. "X",    hl.dsp.exec_cmd("ags toggle powermenu")) -- AGS power menu
+hl.bind(mod("CTRL") .. "R",     hl.dsp.exec_cmd("ags quit; ags run ~/.config/ags")) -- reload AGS bar
 hl.bind(mod("SHIFT") .. "F",    hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mod("SHIFT") .. "F",    hl.dsp.window.pin())
 hl.bind(mod() .. "E",           hl.dsp.exec_cmd(fileManager))
 hl.bind(mod() .. "space",       hl.dsp.exec_cmd(menu))
 hl.bind(mod() .. "F",           hl.dsp.exec_cmd("nix run nixpkgs#nwg-drawer"))
 hl.bind(mod() .. "J",           hl.dsp.layout("togglesplit"))
-hl.bind(mod("SHIFT") .. "B",    hl.dsp.exec_cmd("~/.config/hypr/scripts/waybar.sh"))
+hl.bind(mod("SHIFT") .. "B",    hl.dsp.exec_cmd("~/.config/hypr/scripts/bar-toggle.sh")) -- switch Waybar <-> AGS bar
 hl.bind(mod("SHIFT") .. "A",    hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_animations.sh"))
 hl.bind(mod("SHIFT") .. "W",    hl.dsp.exec_cmd("~/.config/hypr/scripts/wallpaper.sh random"))
 hl.bind(mod("SHIFT") .. "E",    hl.dsp.exec_cmd("~/.config/hypr/scripts/wofi-emoji"))

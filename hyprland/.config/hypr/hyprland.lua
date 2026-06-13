@@ -84,6 +84,8 @@ local menu        = "wofi --show drun --allow-images -W 30% -p Run -D key_expand
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
 hl.env("HYPRSHOT_DIR", HOME .. "/Pictures/Screenshots")
+-- AGS/Astal typelibs live under /usr/local (meson default prefix)
+hl.env("GI_TYPELIB_PATH", "/usr/local/lib/x86_64-linux-gnu/girepository-1.0")
 
 -----------------------
 ---- LOOK AND FEEL ----
