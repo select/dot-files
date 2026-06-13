@@ -3,7 +3,7 @@ if [ -z $1 ]; then
 	exit 1
 elif [ $1 == "random" ]; then
 	echo "selecting a random wallpaper"
-	~/.local/bin/wal -n -i ~/Pictures/Wallpapers
+	~/.local/bin/wal -n -i ~/Pictures/Wallpaper
 else
 	echo "selected wallpaper $1"
 	~/.local/bin/wal -n -i "$1" 

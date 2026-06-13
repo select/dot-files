@@ -45,6 +45,7 @@ hl.bind(mod() .. "J",           hl.dsp.layout("togglesplit"))
 hl.bind(mod("SHIFT") .. "B",    hl.dsp.exec_cmd("~/.config/hypr/scripts/bar-toggle.sh")) -- switch Waybar <-> AGS bar
 hl.bind(mod("SHIFT") .. "A",    hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle_animations.sh"))
 hl.bind(mod("SHIFT") .. "W",    hl.dsp.exec_cmd("~/.config/hypr/scripts/wallpaper.sh random"))
+hl.bind(mod() .. "W",           hl.dsp.exec_cmd("~/.config/hypr/scripts/wallpaper-selector.sh")) -- wofi wallpaper picker
 hl.bind(mod("SHIFT") .. "E",    hl.dsp.exec_cmd("~/.config/hypr/scripts/wofi-emoji"))
 hl.bind(mod("SHIFT") .. "M",    hl.dsp.exec_cmd("~/.config/hypr/scripts/mpv-float.sh"))
 hl.bind(mod("SHIFT") .. "D",    hl.dsp.exec_cmd("~/.config/hypr/scripts/laptop-display.sh toggle")) -- enable/disable laptop screen
