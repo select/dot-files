@@ -95,6 +95,15 @@ export function css(p: Palette): string {
 	.status button:hover { background-color: ${segmentSoft}; }
 
 	.icon-mic { color: ${mic}; }
+	.icon-mic.recording {
+		color: #ffffff;
+		background-color: #e53935;
+		border-radius: 9999px;
+		padding: 0;
+		min-width: 26px;
+		min-height: 26px;
+		margin: 0 2px;
+	}
 	.icon-volume { color: ${volume}; }
 	.icon-bluetooth { color: ${bluetooth}; }
 	.icon-wifi { color: ${wifi}; }

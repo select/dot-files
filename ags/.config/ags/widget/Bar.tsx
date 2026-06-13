@@ -80,13 +80,13 @@ function Clock() {
 function Mic() {
 	const wp = AstalWp.get_default()!;
 	const mic = wp.defaultMicrophone;
-	const glyph = createBinding(mic, "mute")((m) => (m ? "󰍭" : "󰍬"));
+	const recording = createBinding(wp.audio, "recorders")((r) => r.length > 0);
+	const muted = createBinding(mic, "mute");
+	const glyph = muted((m) => (m ? "󰍭" : "󰍬"));
+	const cls = recording((r) => (r ? "icon-mic recording" : "icon-mic"));
+	const tip = recording((r) => (r ? "Recording — click to mute" : "Toggle microphone"));
 	return (
-		<button
-			class="icon-mic"
-			tooltipText="Toggle microphone"
-			onClicked={() => (mic.mute = !mic.mute)}
-		>
+		<button class={cls} valign={Gtk.Align.CENTER} tooltipText={tip} onClicked={() => (mic.mute = !mic.mute)}>
 			<label label={glyph} />
 		</button>
 	);
