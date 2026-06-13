@@ -5,6 +5,10 @@
 -- hyprland.start fires once on launch (equivalent to the old `exec-once`).
 
 hl.on("hyprland.start", function()
+    -- Load enabled hyprpm plugins (e.g. dynamic-cursors) on startup.
+    -- Must run first so the plugin drives the forced software cursor
+    -- (no_hardware_cursors = true) instead of it freezing mid-screen.
+    hl.exec_cmd("hyprpm reload -n")
     -- Status bar (ensure pywal colors file exists first, or waybar's CSS import fails)
     hl.exec_cmd("cp -n ~/.cache/wal/colors-waybar.css ~/.config/waybar/colors-waybar.css 2>/dev/null; waybar")
     -- Notification daemon

@@ -116,3 +116,10 @@ walset() {
     xargs -I PANE tmux send-keys -t PANE 'walrefresh' Enter
   fi
 }
+
+# # Restore KITTY_WINDOW_ID inside tmux (lost when tmux session predates kitty launch)
+# if [[ -z "$KITTY_WINDOW_ID" && -n "$TMUX" ]]; then
+#   _kwid=$(tmux show-environment KITTY_WINDOW_ID 2>/dev/null | cut -d= -f2)
+#   [[ -n "$_kwid" ]] && export KITTY_WINDOW_ID="$_kwid"
+#   unset _kwid
+# fi

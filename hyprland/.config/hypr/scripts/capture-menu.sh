@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 
 RECORDINGS="$HOME/Videos/Screencasts"
-SCREENSHOTS="$HOME/Pictures"
+SCREENSHOTS="$HOME/Pictures/Screenshots"
 mkdir -p "$RECORDINGS"
 
 GSR="$HOME/.local/bin/gsr"
 HYPRSHOT="$HOME/.local/bin/hyprshot"
+ADDRECENT="$HOME/.local/bin/add-to-recent"
 
 # Wait until gpu-screen-recorder has written its first bytes, then notify + update waybar
 _wait_and_notify() {
@@ -17,6 +18,7 @@ _wait_and_notify() {
         done
         notify-send -i media-record "Recording started" "Press Print again to stop"
         pkill -SIGRTMIN+8 waybar
+        "$ADDRECENT" "$file"
     ) &
 }
 
@@ -43,11 +45,11 @@ case "$selected" in
         ;;
     *"Screenshot"*"Region"*)
         _settle
-        "$HYPRSHOT" -m region -o "$SCREENSHOTS"
+        "$HYPRSHOT" -m region -o "$SCREENSHOTS" -- "$ADDRECENT"
         ;;
     *"Screenshot"*"Full"*)
         _settle
-        "$HYPRSHOT" -m output -o "$SCREENSHOTS"
+        "$HYPRSHOT" -m output -o "$SCREENSHOTS" -- "$ADDRECENT"
         ;;
     *"Record"*"Region"*)
         _settle
