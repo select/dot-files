@@ -11,5 +11,5 @@ fi
 sleep 1
 cp ~/.cache/wal/colors-waybar.css ~/.config/waybar/colors-waybar.css
 image_path=$(cat ~/.cache/wal/wal)
-swww img "$image_path" --transition-type center --resize crop
+~/.cargo/bin/swww img "$image_path" --transition-type center --resize crop
 notify-send -a hypr "Wallpaper changed $image_path"

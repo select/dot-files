@@ -17,8 +17,8 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("ags run ~/.config/ags")
     -- Notification daemon
     hl.exec_cmd("swaync")
-    -- Wallpaper daemon
-    hl.exec_cmd("swww-daemon")
+    -- Wallpaper daemon (swww lives in ~/.cargo/bin, not on Hyprland's PATH)
+    hl.exec_cmd(os.getenv("HOME") .. "/.cargo/bin/swww-daemon")
     -- Nextcloud sync
     hl.exec_cmd("nextcloud")
     -- Polkit authentication agent (Hyprland-native)
