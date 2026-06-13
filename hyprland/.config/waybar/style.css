@@ -99,6 +99,26 @@ window#waybar {
 	color: #ff2222;
 }
 
+#custom-cursor {
+	padding: 0 10px;
+	margin-left: 6px;
+	color: @foreground;
+}
+
+#custom-swaync {
+	padding: 0 8px;
+}
+#custom-swaync.notification {
+	color: @foreground;
+}
+#custom-swaync.dnd-notification,
+#custom-swaync.dnd-none,
+#custom-swaync.dnd-inhibited-notification,
+#custom-swaync.dnd-inhibited-none {
+	color: #8a8a90;
+	opacity: 0.5;
+}
+
 #temperature.critical,
 #pulseaudio.muted {
 	color: #FF0000;
@@ -122,17 +142,27 @@ window#waybar {
 }
 
 #workspaces button {
-	color: @color3;
+	color: @color6;
 }
-#workspaces button.urgent {
-	color: #FF0000;
+#workspaces button label {
+	color: @color6;
 }
-#workspaces button.visible {
-	color: @color3;
+#workspaces button.active,
+#workspaces button.active label {
+	color: @color4;
 }
-#workspaces button.empty {
-	color: @color5;
-	opacity: 0.3;
+#workspaces button.urgent,
+#workspaces button.urgent label {
+	color: @color1;
+}
+#workspaces button.visible,
+#workspaces button.visible label {
+	color: @color2;
+}
+#workspaces button.empty,
+#workspaces button.empty label {
+	color: @color6;
+	opacity: 0.7;
 }
 /*
 #workspaces button.empty

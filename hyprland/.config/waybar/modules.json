@@ -60,21 +60,21 @@
 
   // Clipboard history
   "custom/clipboard":{
-    "format":"",
+    "format":"󰅇",
     "on-click": "cliphist list | wofi -dmenu | cliphist decode | wl-copy",
-    "tooltip-format": " + V"
+    "tooltip-format": "󰌌 + V"
   },
 
   // Emoji selector
   "custom/emoji": {
-    "format": " ",
-    "on-click": "~/.config/hypr/wofi-emoji",
-    "tooltip-format": " + SHIFT + E"
+    "format": "󰱨 ",
+    "on-click": "gnome-characters",
+    "tooltip-format": "Characters"
   },
 
   // Wallpaper
   "custom/wallpaper": {
-    "format": " ",
+    "format": "󰸉 ",
     "on-click": "~/.config/hypr/scripts/wallpaper-selector.sh",
     "on-click-right": "~/.config/hypr/scripts/wallpaper-selector.sh",
     "tooltip-format": "Left: Select a wallpaper\nRight: Select wallpaper effect"
@@ -82,33 +82,33 @@
 
   // Waybar Theme
   "custom/waybarthemes": {
-    "format": "  ",
+    "format": "󰏘  ",
     "on-click": "~/.config/hypr/scripts/theme-selector.sh",
     "tooltip-format": "Waybar Theme"
   },
 
   // Settings
   "custom/settings": {
-    "format": " ",
+    "format": "󰒓 ",
     // "on-click": "~/.config/hypr/scripts/theme-selector.sh",
     "tooltip-format": "Settings"
   },
 
   // Keybindings
   "custom/keybindings": {
-    "format": "",
+    "format": "󰌌",
     "on-click": "~/.config/hypr/scripts/keybindings.sh",
     "tooltip": false
   },
 
   // Keyboard State
   "keyboard-state": {
-    "numlock": true,
+    "numlock": false,
     "capslock": true,
     "format": "{name} {icon}",
     "format-icons": {
-      "locked": "",
-      "unlocked": ""
+      "locked": "󰌾",
+      "unlocked": "󰌿"
     }
   },
 
@@ -120,7 +120,7 @@
 
   // System
   "custom/system": {
-    "format": "󰻠",
+    "format": "󰋊",
     "tooltip": false
   },
 
@@ -211,7 +211,7 @@
     "format-ethernet":"󰈀",
     "format-disconnected": "󰌙",
     "tooltip-format": "󰈀  IP: {ipaddr} | {ifname} via {gwaddri}",
-    "tooltip-format-wifi": "  {ifname} @ {essid}\nIP: {ipaddr}\nStrength: {signalStrength}%\nFreq: {frequency}MHz\nUp: {bandwidthUpBits} Down: {bandwidthDownBits}",
+    "tooltip-format-wifi": "󰤨  {ifname} @ {essid}\nIP: {ipaddr}\nStrength: {signalStrength}%\nFreq: {frequency}MHz\nUp: {bandwidthUpBits} Down: {bandwidthDownBits}",
     "tooltip-format-ethernet": "󰈀 {ifname}\nIP: {ipaddr}\n up: {bandwidthUpBits} down: {bandwidthDownBits}",
     "tooltip-format-disconnected": "Disconnected",
     "max-length": 50,
@@ -226,28 +226,28 @@
       "critical": 15
     },
     "format": "{icon} {capacity}%",
-    "format-charging": "  {capacity}%",
-    "format-plugged": "  {capacity}%",
+    "format-charging": "󰂄 {capacity}%",
+    "format-plugged": "󰂄 {capacity}%",
     "format-alt": "{icon}  {time}",
     // "format-good": "", // An empty format will hide the module
     // "format-full": "",
-    "format-icons": [" ", " ", " ", " ", " "]
+    "format-icons": ["󰁺", "󰁼", "󰁾", "󰂀", "󰁹"]
   },
 
   // Pulseaudio
   "pulseaudio": {
     "format": "{icon}",
     "format-bluetooth":"󰂰",
-    "format-muted": "",
+    "format-muted": "󰖁",
     "format-icons": {
-      "headphones": "",
+      "headphones": "󰋋",
       "bluetooth": "󰥰",
-      "handsfree": "",
-      "headset": "󱡬",
-      "phone": "",
-      "portable": "",
-      "car": "",
-      "default": ["","",""]
+      "handsfree": "󰋌",
+      "headset": "󰋎",
+      "phone": "󰏲",
+      "portable": "󰓃",
+      "car": "󰄋",
+      "default": ["󰕿","󰖀","󰕾"]
     },
     "justify": "center",
     "on-click": "amixer sset Master toggle",
@@ -276,7 +276,7 @@
 
   // Bluetooth
   "bluetooth": {
-    "format": " {status}",
+    "format": "󰂯 {status}",
     "format-disabled": "",
     "format-off": "",
     "interval": 30,
@@ -295,23 +295,31 @@
   "backlight": {
     "format": "{icon} {percent}%",
     "format-icons": [
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      ""
+      "󰃞",
+      "󰃞",
+      "󰃞",
+      "󰃞",
+      "󰃞",
+      "󰃟",
+      "󰃟",
+      "󰃟",
+      "󰃟",
+      "󰃟",
+      "󰃠",
+      "󰃠",
+      "󰃠",
+      "󰃠",
+      "󰃠"
     ],
     "scroll-step": 1
+  }
+  ,"custom/cursor": {
+    "exec": "~/.config/hypr/scripts/cursor-effect.sh status",
+    "interval": "once",
+    "signal": 9,
+    "return-type": "json",
+    "format": "{}",
+    "on-click": "~/.config/hypr/scripts/cursor-effect.sh next"
   }
   ,"custom/recorder": {
     "exec": "~/.config/hypr/scripts/recorder-status.sh",
@@ -319,5 +327,25 @@
     "signal": 8,
     "return-type": "json",
     "on-click": "pkill -SIGINT -f gpu-screen-recorder && notify-send -i media-record 'Recording stopped' 'Saved to ~/Videos/Screencasts' && pkill -SIGRTMIN+8 waybar"
+  }
+  ,"custom/swaync": {
+    "tooltip": false,
+    "format": "{icon}",
+    "format-icons": {
+      "notification": "󱅫",
+      "none": "󰂚",
+      "dnd-notification": "󰂛",
+      "dnd-none": "󰂛",
+      "inhibited-notification": "󱅫",
+      "inhibited-none": "󰂚",
+      "dnd-inhibited-notification": "󰂛",
+      "dnd-inhibited-none": "󰂛"
+    },
+    "return-type": "json",
+    "exec-if": "which swaync-client",
+    "exec": "swaync-client -swb",
+    "on-click": "swaync-client -t -sw",
+    "on-click-right": "swaync-client -d -sw",
+    "escape": true
   }
 }

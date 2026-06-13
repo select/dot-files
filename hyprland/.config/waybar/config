@@ -20,6 +20,7 @@
 		"group/settings",
 		"keyboard-state",
 		"group/hardware",
+		"custom/cursor",
 		"custom/empty",
 	],
 	"modules-center": [ "hyprland/window" ],
@@ -27,6 +28,7 @@
 		// "disk", 
 		// "cpu", 
 		"custom/recorder",
+		"custom/swaync",
 		"hyprland/language", 
 		// "idle_inhibitor", 
 		"memory", 
@@ -63,8 +65,8 @@
 		"active-only": true,
 		"format": "{icon}",
 		"format-icons": {
-			"active": "",
-			"default": "" 
+			"active": "󰝥",
+			"default": "󰝦" 
 		},
 		"window-rewrite": {
 			"firefox": "󰈹",
@@ -131,7 +133,7 @@
 		},
 		"format": "{icon} ",
 		"format-charging": "{capacity}% 󰂄 ",
-		"format-plugged": "{capacity}% 󰂄 ",
+		"format-plugged": "{capacity}% 󰂄",
 		"format-alt": "{time} {icon}",
 		"format-icons": [
 			"󰁻",
@@ -146,16 +148,16 @@
 		"device": "intel_backlight",
 		"format": "{icon}",
 		"format-icons": [
-			"",
-			"",
-			"",
-			"",
-			"",
-			"",
-			"",
-			"",
-			"",
-			""
+			"󰃞",
+			"󰃞",
+			"󰃞",
+			"󰃟",
+			"󰃟",
+			"󰃟",
+			"󰃠",
+			"󰃠",
+			"󰃠",
+			"󰃠"
 		],
 		"on-scroll-down": "brightnessctl -q s +10%",
 		"on-scroll-up": "brightnessctl -q s -10%",
@@ -164,13 +166,13 @@
 
 	"disk": {
 		"interval": 30,
-		"format": "  {percentage_used}%",
+		"format": "󰋊  {percentage_used}%",
 		"path": "/"
 	},
 
 	"cpu": {
 		"interval": 5,
-		"format": " {usage}%",
+		"format": "󰓅 {usage}%",
 		"min-length": 6,
 		"max-length": 6,
 		"format-icons": ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
