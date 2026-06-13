@@ -84,9 +84,16 @@ function Mic() {
 	const muted = createBinding(mic, "mute");
 	const glyph = muted((m) => (m ? "󰍭" : "󰍬"));
 	const cls = recording((r) => (r ? "icon-mic recording" : "icon-mic"));
-	const tip = recording((r) => (r ? "Recording — click to mute" : "Toggle microphone"));
+	const tip = recording((r) =>
+		r ? "Recording — click to mute" : "Toggle microphone",
+	);
 	return (
-		<button class={cls} valign={Gtk.Align.CENTER} tooltipText={tip} onClicked={() => (mic.mute = !mic.mute)}>
+		<button
+			class={cls}
+			valign={Gtk.Align.CENTER}
+			tooltipText={tip}
+			onClicked={() => (mic.mute = !mic.mute)}
+		>
 			<label label={glyph} />
 		</button>
 	);
@@ -212,7 +219,8 @@ function Battery() {
 // --- keyboard layout indicator ---
 function shortLayout(s: string): string {
 	const l = s.toLowerCase();
-	if (l.includes("german") || l.includes("deutsch") || l.includes("(de")) return "DE";
+	if (l.includes("german") || l.includes("deutsch") || l.includes("(de"))
+		return "DE";
 	if (l.includes("english") || l.includes("(us")) return "EN";
 	const paren = s.match(/\(([^)]+)\)/);
 	return (paren ? paren[1] : s).slice(0, 2).toUpperCase();
@@ -221,7 +229,9 @@ function shortLayout(s: string): string {
 function Keyboard() {
 	const hypr = AstalHyprland.get_default();
 	const [layout, setLayout] = createState("");
-	hypr.connect("keyboard-layout", (_h, _kb, lay: string) => setLayout(shortLayout(lay)));
+	hypr.connect("keyboard-layout", (_h, _kb, lay: string) =>
+		setLayout(shortLayout(lay)),
+	);
 	// initial value
 	execAsync(["bash", "-c", "hyprctl devices -j"])
 		.then((out) => {
@@ -234,7 +244,11 @@ function Keyboard() {
 		<button
 			class="icon-keyboard"
 			tooltipText="Switch keyboard layout"
-			onClicked={() => execAsync(["bash", "-c", "hyprctl switchxkblayout current next"]).catch(() => {})}
+			onClicked={() =>
+				execAsync(["bash", "-c", "hyprctl switchxkblayout current next"]).catch(
+					() => {},
+				)
+			}
 		>
 			<label class="kbd-label" label={layout} />
 		</button>
@@ -255,6 +269,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
 			anchor={BOTTOM | LEFT | RIGHT}
 			exclusivity={Astal.Exclusivity.EXCLUSIVE}
 			layer={Astal.Layer.TOP}
+			marginBottom={4}
 			application={app}
 		>
 			<box halign={Gtk.Align.CENTER}>

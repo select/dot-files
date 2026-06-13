@@ -31,7 +31,7 @@ export function css(p: Palette): string {
 	.bar-inner {
 		background-color: ${alpha("#000000", 0.55)};
 		border-radius: 18px;
-		padding: 4px 12px;
+		padding: 0;
 	}
 
 	/* start (logo+workspaces) and end (status icons) boxes */
