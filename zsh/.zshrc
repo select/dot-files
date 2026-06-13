@@ -19,8 +19,9 @@ export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$HOME/.npm-global/bin:$PAT
 export PATH="$PATH:$HOME/.lmstudio/bin"
 export PATH="$HOME/.pixi/bin:$PATH"
 export PATH="$HOME/.poetry/bin:$HOME/snap/bun-js/81/.bun/bin:$PATH"
-# AGS/Astal typelibs (meson installs under /usr/local)
-export GI_TYPELIB_PATH="/usr/local/lib/x86_64-linux-gnu/girepository-1.0${GI_TYPELIB_PATH:+:$GI_TYPELIB_PATH}"
+# AGS/Astal typelibs (meson installs under /usr/local; AstalTray under ~/.local)
+export GI_TYPELIB_PATH="/usr/local/lib/x86_64-linux-gnu/girepository-1.0:$HOME/.local/lib/x86_64-linux-gnu/girepository-1.0${GI_TYPELIB_PATH:+:$GI_TYPELIB_PATH}"
+export LD_LIBRARY_PATH="$HOME/.local/lib/x86_64-linux-gnu:/usr/local/lib/x86_64-linux-gnu${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 # pnpm
 export PNPM_HOME="$HOME/.local/share/pnpm"
 case ":$PATH:" in

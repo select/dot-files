@@ -138,5 +138,30 @@ export function css(p: Palette): string {
 		min-height: 38px;
 	}
 	.powermenu-box button:hover { background-color: ${accent}; color: ${bg}; }
+
+	/* system tray (bottom-right corner, matches bar segments) */
+	window.Tray { background: transparent; }
+	.tray-inner {
+		background-color: ${alpha("#000000", 0.7)};
+		border-radius: 9999px;
+		padding: 2px 8px;
+	}
+	.tray-item {
+		background: transparent;
+		border: none;
+		box-shadow: none;
+		border-radius: 9999px;
+		padding: 2px 4px;
+		margin: 0 1px;
+		min-height: 0;
+	}
+	.tray-item > button {
+		background: transparent;
+		border: none;
+		box-shadow: none;
+		padding: 0;
+		min-height: 0;
+	}
+	.tray-item:hover { background-color: ${segmentSoft}; }
 	`;
 }

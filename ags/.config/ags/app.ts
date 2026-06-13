@@ -3,6 +3,7 @@ import { palette } from "./lib/wal"
 import { css } from "./style"
 import Bar from "./widget/Bar"
 import PowerMenu from "./widget/PowerMenu"
+import Tray from "./widget/Tray"
 
 app.start({
 	main() {
@@ -16,6 +17,7 @@ app.start({
 		for (const monitor of app.get_monitors()) {
 			Bar(monitor)
 			PowerMenu(monitor)
+			Tray(monitor)
 		}
 	},
 })

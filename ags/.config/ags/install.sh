@@ -58,6 +58,29 @@ build_lib astal/lib/battery
 
 sudo ldconfig
 
+# --- 2b. System tray (AstalTray) ---
+# AstalTray needs `appmenu-glib-translator`, which Ubuntu doesn't package.
+# We build both it and AstalTray into ~/.local (NO sudo, user-local prefix)
+# so they don't pollute /usr/local.
+LOCAL_PREFIX="${HOME}/.local"
+LOCAL_LIBDIR="lib/x86_64-linux-gnu"
+export PKG_CONFIG_PATH="${LOCAL_PREFIX}/${LOCAL_LIBDIR}/pkgconfig:${PKG_CONFIG_PATH:-}"
+export LD_LIBRARY_PATH="${LOCAL_PREFIX}/${LOCAL_LIBDIR}:${LD_LIBRARY_PATH:-}"
+export XDG_DATA_DIRS="${LOCAL_PREFIX}/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+
+build_lib_local() {
+	local path="$1"
+	echo "==> building $path -> ${LOCAL_PREFIX}"
+	( cd "$path"
+		rm -rf build
+		meson setup build --prefix="$LOCAL_PREFIX" --libdir="$LOCAL_LIBDIR" -Dwerror=false
+		meson install -C build )
+}
+
+clone https://github.com/rilian-la-te/vala-panel-appmenu.git vala-panel-appmenu
+build_lib_local vala-panel-appmenu/subprojects/appmenu-glib-translator
+build_lib_local astal/lib/tray
+
 # --- 3. AGS CLI ---
 clone https://github.com/aylur/ags.git ags
 ( cd ags
@@ -69,8 +92,10 @@ clone https://github.com/aylur/ags.git ags
 echo
 echo "Done. AGS version: $(ags --version 2>/dev/null || echo '??')"
 echo
-echo "NOTE: typelibs install under /usr/local. GJS needs GI_TYPELIB_PATH set:"
-echo "  export GI_TYPELIB_PATH=$TYPELIB_DIR"
+echo "NOTE: typelibs install under /usr/local (most libs) and ~/.local (AstalTray)."
+echo "GJS needs both on GI_TYPELIB_PATH plus ~/.local on LD_LIBRARY_PATH:"
+echo "  export GI_TYPELIB_PATH=$TYPELIB_DIR:\$HOME/.local/lib/x86_64-linux-gnu/girepository-1.0"
+echo "  export LD_LIBRARY_PATH=\$HOME/.local/lib/x86_64-linux-gnu:/usr/local/lib/x86_64-linux-gnu"
 echo "(already configured in zsh/.zshrc and hyprland/.config/hypr/hyprland.lua)"
 echo
 echo "Run the bar with:  ags run ~/.config/ags"
