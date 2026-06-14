@@ -113,6 +113,7 @@ function Volume() {
 	return (
 		<button
 			class="icon-volume"
+			valign={Gtk.Align.CENTER}
 			tooltipText="Toggle mute"
 			onClicked={() => (speaker.mute = !speaker.mute)}
 		>
@@ -133,6 +134,7 @@ function Bluetooth() {
 	return (
 		<button
 			class="icon-bluetooth"
+			valign={Gtk.Align.CENTER}
 			tooltipText="Open Bluetooth manager"
 			onClicked={() => execAsync(["blueman-manager"]).catch(() => {})}
 		>
@@ -159,6 +161,7 @@ function Wifi() {
 	return (
 		<button
 			class="icon-wifi"
+			valign={Gtk.Align.CENTER}
 			tooltipText="Network"
 			onClicked={() =>
 				execAsync(["bash", "-c", "nm-connection-editor"]).catch(() => {})
@@ -175,12 +178,13 @@ function Messages() {
 	return (
 		<button
 			class="icon-messages"
+			valign={Gtk.Align.CENTER}
 			tooltipText="Toggle notification center"
 			onClicked={() =>
 				execAsync(["swaync-client", "-t", "-sw"]).catch(() => {})
 			}
 		>
-			<box>
+			<box halign={Gtk.Align.CENTER} valign={Gtk.Align.CENTER}>
 				<label label={count((c) => (c > 0 ? "󱅫" : "󰂚"))} />
 				<label
 					class="badge"
@@ -206,12 +210,14 @@ function Battery() {
 	const label = createComputed(() => {
 		const p = `${Math.round(pct() * 100)}%`;
 		if (state() === AstalBattery.State.CHARGING) return `${p} — charging`;
-		if (state() === AstalBattery.State.FULLY_CHARGED) return `${p} — full (on AC)`;
+		if (state() === AstalBattery.State.FULLY_CHARGED)
+			return `${p} — full (on AC)`;
 		return `${p} — on battery`;
 	});
 	return (
 		<button
 			class="icon-battery"
+			valign={Gtk.Align.CENTER}
 			tooltipText={label}
 			visible={createBinding(bat, "isPresent")}
 		>
@@ -247,6 +253,7 @@ function Keyboard() {
 	return (
 		<button
 			class="icon-keyboard"
+			valign={Gtk.Align.CENTER}
 			tooltipText="Switch keyboard layout"
 			onClicked={() =>
 				execAsync(["bash", "-c", "hyprctl switchxkblayout current next"]).catch(

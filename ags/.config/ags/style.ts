@@ -84,26 +84,23 @@ export function css(p: Palette): string {
 	}
 	.clock:hover { background-color: ${segmentSoft}; border-radius: 9999px; }
 
-	/* right side status icons */
+	/* right side status icons — all round circles via shared shape */
 	.status { padding: 0 2px; }
 	.status button {
-		background: transparent;
+		background-color: transparent;
 		border-radius: 9999px;
-		padding: 2px 6px;
-		margin: 0 1px;
+		padding: 0;
+		min-width: 28px;
+		min-height: 28px;
 		font-size: 14px;
 	}
+	.status button label { margin: 0; }
 	.status button:hover { background-color: ${segmentSoft}; }
 
 	.icon-mic { color: ${mic}; }
 	.icon-mic.recording {
 		color: #ffffff;
 		background-color: #e53935;
-		border-radius: 9999px;
-		padding: 0;
-		min-width: 26px;
-		min-height: 26px;
-		margin: 0 2px;
 	}
 	.icon-volume { color: ${volume}; }
 	.icon-bluetooth { color: ${bluetooth}; }
@@ -153,9 +150,9 @@ export function css(p: Palette): string {
 		border: none;
 		box-shadow: none;
 		border-radius: 9999px;
-		padding: 2px 4px;
-		margin: 0 1px;
-		min-height: 0;
+		padding: 0;
+		min-width: 28px;
+		min-height: 28px;
 	}
 	.tray-item > button {
 		background: transparent;

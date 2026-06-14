@@ -12,6 +12,7 @@ function TrayItem({ item }: { item: AstalTray.TrayItem }) {
 	return (
 		<menubutton
 			class="tray-item"
+			valign={Gtk.Align.CENTER}
 			tooltipMarkup={tooltip}
 			$={(self: Gtk.MenuButton) => {
 				const sync = () => {
