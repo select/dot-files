@@ -51,9 +51,11 @@ export default function PowerMenu(gdkmonitor: Gdk.Monitor) {
 					if (keyval === Gdk.KEY_Escape) close()
 				}}
 			/>
-			{/* full-screen catcher: clicking outside the menu (incl. the icon area) closes it */}
+			{/* full-screen catcher: clicking outside the menu (incl. the icon area) closes it.
+			    Trigger on release (not press) so a button's own click gesture claims the
+			    sequence first and still fires before this ancestor catcher runs. */}
 			<box>
-				<Gtk.GestureClick onPressed={() => close()} />
+				<Gtk.GestureClick onReleased={() => close()} />
 				<revealer
 					halign={Gtk.Align.START}
 					valign={Gtk.Align.END}
@@ -64,8 +66,10 @@ export default function PowerMenu(gdkmonitor: Gdk.Monitor) {
 					transitionDuration={200}
 				>
 					<box class="powermenu-box">
+						{/* claim on release so clicking the box padding doesn't close the
+						    menu, without cancelling the buttons' press gesture */}
 						<Gtk.GestureClick
-							onPressed={(g) => g.set_state(Gtk.EventSequenceState.CLAIMED)}
+							onReleased={(g) => g.set_state(Gtk.EventSequenceState.CLAIMED)}
 						/>
 						{actions.map((a) => (
 							<button tooltipText={a.tooltip} onClicked={() => run(a.cmd)}>
