@@ -43,7 +43,7 @@ export default function Tray(gdkmonitor: Gdk.Monitor) {
 			anchor={BOTTOM | RIGHT}
 			exclusivity={Astal.Exclusivity.IGNORE}
 			layer={Astal.Layer.TOP}
-			marginBottom={6}
+			marginBottom={4}
 			marginEnd={12}
 			application={app}
 		>

@@ -145,6 +145,7 @@ export function css(p: Palette): string {
 		background-color: ${alpha("#000000", 0.7)};
 		border-radius: 9999px;
 		padding: 2px 8px;
+		min-height: 28px;
 	}
 	.tray-item {
 		background: transparent;
