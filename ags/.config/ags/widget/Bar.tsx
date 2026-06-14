@@ -195,16 +195,20 @@ function Messages() {
 function Battery() {
 	const bat = AstalBattery.get_default();
 	const pct = createBinding(bat, "percentage");
-	const charging = createBinding(bat, "charging");
+	// NB: AstalBattery.charging is true whenever on AC (incl. FULLY_CHARGED),
+	// so it falsely showed the charging bolt at 100%. Key off state instead.
+	const state = createBinding(bat, "state");
 	const glyph = createComputed(() => {
-		if (charging()) return "󰂄";
+		if (state() === AstalBattery.State.CHARGING) return "󰂄";
 		const levels = ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"];
 		return levels[Math.min(9, Math.floor(pct() * 10))];
 	});
-	const label = createBinding(
-		bat,
-		"percentage",
-	)((p) => `${Math.round(p * 100)}%`);
+	const label = createComputed(() => {
+		const p = `${Math.round(pct() * 100)}%`;
+		if (state() === AstalBattery.State.CHARGING) return `${p} — charging`;
+		if (state() === AstalBattery.State.FULLY_CHARGED) return `${p} — full (on AC)`;
+		return `${p} — on battery`;
+	});
 	return (
 		<button
 			class="icon-battery"

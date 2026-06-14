@@ -150,3 +150,4 @@ Submodules:
 4. **Never use pip** - always use `uv` for Python
 5. **Use Bun** for TypeScript/JavaScript execution
 6. **Preserve existing formatting** - tabs for TS, spaces may vary elsewhere
+7. **Never run `find /` or other whole-filesystem scans** - they hang and get stuck. Always scope searches to known roots (e.g. `/usr/lib`, `/usr/local/lib`, `~/.local/lib`, the repo dir) or use `fd`/`rg` with an explicit path. For typelibs/gir, look directly in the girepository dirs (e.g. `/usr/local/lib/x86_64-linux-gnu/girepository-1.0`).
