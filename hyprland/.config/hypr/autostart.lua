@@ -33,8 +33,6 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("blueman-applet")
     -- Clipboard history
     hl.exec_cmd("wl-paste --watch cliphist store")
-    -- pyprland
-    hl.exec_cmd("~/.local/bin/pypr")
     -- anacron: catch-up scheduler for the daily music sync job
     -- (Hyprland does not read ~/.config/autostart/*.desktop, so launch it here)
     hl.exec_cmd("anacron -s -t " .. os.getenv("HOME") .. "/.anacron/anacrontab -S " .. os.getenv("HOME") .. "/.anacron/timestamps")
