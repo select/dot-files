@@ -67,7 +67,7 @@ stow -R -v -t ~ zsh
 
 ```bash
 # apt-available
-sudo apt install -y waybar wofi swaylock swayidle hyprlock \
+sudo apt install -y waybar wofi hyprlock \
   cliphist wl-clipboard network-manager-gnome blueman \
   brightnessctl playerctl grim slurp policykit-1-gnome nextcloud-desktop
 
