@@ -5,3 +5,4 @@ termux/.termux/shell
 hyprland/.config/waybar/colors-waybar.css
 # hypr runtime state (laptop screen on/off preference)
 hyprland/.config/hypr/state/
+.obsidian/
