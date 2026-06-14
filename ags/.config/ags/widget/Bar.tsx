@@ -266,6 +266,36 @@ function Keyboard() {
 	);
 }
 
+// --- recording indicator: red dot, visible only while recording, click to stop ---
+function Recorder() {
+	const recording = createPoll(false, 2000, () =>
+		execAsync([
+			"bash",
+			"-c",
+			"pgrep -f '[g]pu-screen-recorder' > /dev/null && echo 1 || echo 0",
+		])
+			.then((o) => o.trim() === "1")
+			.catch(() => false),
+	);
+	return (
+		<button
+			class="icon-recorder"
+			valign={Gtk.Align.CENTER}
+			visible={recording}
+			tooltipText="Recording — click to stop"
+			onClicked={() =>
+				execAsync([
+					"bash",
+					"-c",
+					"pkill -SIGINT -f '[g]pu-screen-recorder'; notify-send -i media-record 'Recording stopped' 'Saved to ~/Videos/Screencasts'",
+				]).catch(() => {})
+			}
+		>
+			<label label="●" />
+		</button>
+	);
+}
+
 export default function Bar(gdkmonitor: Gdk.Monitor) {
 	const { BOTTOM, LEFT, RIGHT } = Astal.WindowAnchor;
 	const width = Math.round((gdkmonitor.get_geometry().width || 1920) * 0.36);
@@ -298,6 +328,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
 
 					<box $type="end" class="boxes">
 						<box class="segment status">
+							<Recorder />
 							<Keyboard />
 							<Mic />
 							<Volume />

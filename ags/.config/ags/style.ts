@@ -104,7 +104,9 @@ export function css(p: Palette): string {
 		background-color: #e53935;
 	}
 	.icon-volume { color: ${volume}; }
-	.icon-bluetooth { color: ${bluetooth}; }
+	.icon-recorder { color: #ff4444; animation: recblink 1.2s ease-in-out infinite; }
+	.icon-recorder:hover { background-color: ${segmentSoft}; color: #ff2222; }
+	@keyframes recblink { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }	.icon-bluetooth { color: ${bluetooth}; }
 	.icon-wifi { color: ${wifi}; }
 	.icon-battery { color: ${battery}; }
 	.icon-messages { color: ${messages}; }
