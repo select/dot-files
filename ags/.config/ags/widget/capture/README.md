@@ -10,4 +10,5 @@ A centered overlay for screenshots and screen recordings. Toggle with **`Print`*
   acts as a stop button
 
 `Esc` or a click outside the panel closes it. The actual work is done by
-`~/.config/hypr/scripts/capture.sh <kind> <mode>` (and `capture.sh stop`).
+[`~/.config/hypr/scripts/capture.sh`](../../../../hyprland/.config/hypr/scripts/capture.sh)
+`<kind> <mode>` (and `capture.sh stop`).

@@ -11,5 +11,5 @@ A centered wallpaper picker showing a 4-column grid of previews. Toggle with
 
 Images are read from `~/Pictures/Wallpaper` (png/jpg only — webp has no loader here,
 so same-named webp copies are deduped out). Selection runs
-`~/.config/hypr/scripts/wallpaper.sh <path>` (or `wallpaper.sh random`). `Esc` or a
-click outside closes it.
+[`~/.config/hypr/scripts/wallpaper.sh`](../../../../hyprland/.config/hypr/scripts/wallpaper.sh)
+`<path>` (or `wallpaper.sh random`). `Esc` or a click outside closes it.
