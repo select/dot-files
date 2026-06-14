@@ -15,17 +15,6 @@ local function mod(extra)
     return mainMod .. " + "
 end
 
--- pypr expose
-hl.bind(mod() .. "B", hl.dsp.exec_cmd("~/.local/bin/pypr expose"))
--- Style the "exposed" special workspace
-hl.workspace_rule({
-    workspace   = "special:exposed",
-    gaps_out    = 60,
-    gaps_in     = 30,
-    border_size = 5,
-    no_shadow   = true,
-})
-
 -- Native cursor zoom: Ctrl+Super + scroll to zoom in/out, middle-click to reset
 -- Animated for smoothness: each scroll sets a target, a timer eases toward it.
 local zoom_target  = 1
