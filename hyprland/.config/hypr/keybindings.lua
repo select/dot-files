@@ -55,7 +55,7 @@ hl.bind(mod("SHIFT") .. "K",    hl.dsp.exec_cmd("~/.config/hypr/scripts/position
 hl.bind(mod("SHIFT") .. "H",    hl.dsp.exec_cmd("~/.config/hypr/scripts/position-floating.sh l"))
 hl.bind(mod("SHIFT") .. "T",    hl.dsp.exec_cmd("~/.local/bin/hyprshot -m window -o ~/Pictures/Screenshots -- ~/.local/bin/add-to-recent"))
 hl.bind(mod("SHIFT") .. "R",    hl.dsp.exec_cmd("~/.local/bin/hyprshot -m region -o ~/Pictures/Screenshots -- ~/.local/bin/add-to-recent"))
-hl.bind("Print",                hl.dsp.exec_cmd("~/.config/hypr/scripts/capture-menu.sh"))
+hl.bind("Print",                hl.dsp.exec_cmd("ags toggle capture")) -- AGS capture (screenshot/record) widget
 hl.bind(mod("SHIFT") .. "N",    hl.dsp.exec_cmd("swaync-client -t -sw"))
 hl.bind(mod() .. "Escape",      hl.dsp.exec_cmd("~/.config/hypr/scripts/lock.sh"))
 hl.bind("ALT + space", hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle-keyboard-layout.sh"))

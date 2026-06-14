@@ -1,6 +1,7 @@
 // Generates the bar stylesheet from the live wal palette.
 import { Palette, lighten, darken, alpha } from "./lib/wal";
 import { wallpaperCss } from "./widget/wallpaper/style";
+import { captureCss } from "./widget/capture/style";
 
 export function css(p: Palette): string {
 	const bg = p.background;
@@ -163,5 +164,6 @@ export function css(p: Palette): string {
 	}
 	.tray-item:hover { background-color: ${segmentSoft}; }
 	${wallpaperCss(p)}
+	${captureCss(p)}
 	`;
 }
