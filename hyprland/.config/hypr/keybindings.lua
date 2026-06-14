@@ -26,8 +26,61 @@ hl.workspace_rule({
     no_shadow   = true,
 })
 
-hl.bind(mod() .. "Z",        hl.dsp.exec_cmd("~/.local/bin/pypr zoom ++0.5"))
-hl.bind(mod("SHIFT") .. "Z", hl.dsp.exec_cmd("~/.local/bin/pypr zoom"))
+-- Native cursor zoom: Ctrl+Super + scroll to zoom in/out, middle-click to reset
+-- Animated for smoothness: each scroll sets a target, a timer eases toward it.
+local zoom_target  = 1
+local zoom_current = 1
+local zoom_timer   = nil
+
+local function zoom_tick()
+    zoom_current = zoom_current + (zoom_target - zoom_current) * 0.2
+    if math.abs(zoom_target - zoom_current) < 0.005 then
+        zoom_current = zoom_target
+        if zoom_timer then zoom_timer:set_enabled(false) end
+    end
+    hl.config({ cursor = { zoom_factor = zoom_current } })
+end
+
+local function zoom_to(target)
+    zoom_target = math.max(target, 1)
+    if zoom_timer then
+        zoom_timer:set_enabled(true)
+    else
+        zoom_timer = hl.timer(zoom_tick, { timeout = 16, type = "repeat" })
+    end
+end
+
+hl.bind(mod("CTRL") .. "mouse_up",   function() zoom_to(zoom_target * 1.25) end)
+hl.bind(mod("CTRL") .. "mouse_down", function() zoom_to(zoom_target / 1.25) end)
+hl.bind(mod("CTRL") .. "mouse:274", function() zoom_to(1) end)
+
+-- Super+Alt + scroll: change the scale factor of the monitor under the cursor.
+-- Hyprland only accepts scales of n/120 where n divides 120*gcd(w,h) (whole-pixel
+-- logical size), so we step to the next genuinely valid scale. Middle-click resets.
+local scale_default = {}
+local function gcd(a, b) while b ~= 0 do a, b = b, a % b end return a end
+local function scale_step(dir)
+    return function()
+        local m = hl.get_monitor_at_cursor()
+        if not m then return end
+        if scale_default[m.name] == nil then scale_default[m.name] = m.scale end
+        local base = 120 * gcd(m.width, m.height)
+        local n = math.floor(m.scale * 120 + 0.5) + dir
+        while n >= 60 and n <= 360 do
+            if base % n == 0 then
+                hl.monitor({ output = m.name, scale = n / 120 })
+                return
+            end
+            n = n + dir
+        end
+    end
+end
+hl.bind(mod("ALT") .. "mouse_up",   scale_step(1))
+hl.bind(mod("ALT") .. "mouse_down", scale_step(-1))
+hl.bind(mod("ALT") .. "mouse:274", function()
+    local m = hl.get_monitor_at_cursor()
+    if m and scale_default[m.name] then hl.monitor({ output = m.name, scale = scale_default[m.name] }) end
+end)
 
 -- Core binds
 hl.bind(mod() .. "Return",      hl.dsp.exec_cmd(terminal))
