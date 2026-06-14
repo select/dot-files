@@ -28,7 +28,7 @@ function refreshRecording() {
 	execAsync([
 		"bash",
 		"-c",
-		"pgrep -f gpu-screen-recorder > /dev/null && echo yes || echo no",
+		"pgrep -f '[g]pu-screen-recorder' > /dev/null && echo yes || echo no",
 	])
 		.then((out) => setRecording(out.trim() === "yes"))
 		.catch(() => setRecording(false));
@@ -101,13 +101,10 @@ export default function Capture(gdkmonitor: Gdk.Monitor) {
 								<box
 									orientation={Gtk.Orientation.VERTICAL}
 									spacing={10}
+									hexpand
 									halign={Gtk.Align.CENTER}
 								>
-									<label
-										class="capture-mode-icon"
-										halign={Gtk.Align.CENTER}
-										label={mo.icon}
-									/>
+									<label class="capture-mode-icon" label={mo.icon} />
 									<label
 										class="capture-mode-label"
 										halign={Gtk.Align.CENTER}

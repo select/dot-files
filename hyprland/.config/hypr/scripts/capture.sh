@@ -29,7 +29,7 @@ _wait_and_notify() {
 }
 
 _stop_recording() {
-	pkill -SIGINT -f "gpu-screen-recorder"
+	pkill -SIGINT -f "[g]pu-screen-recorder"
 	notify-send -i media-record "Recording stopped" "Saved to ~/Videos/Screencasts"
 	pkill -SIGRTMIN+8 waybar
 }
@@ -42,7 +42,7 @@ if [ "$KIND" = "stop" ]; then
 	_stop_recording
 	exit 0
 fi
-if [ "$KIND" = "video" ] && pgrep -f "gpu-screen-recorder" > /dev/null; then
+if [ "$KIND" = "video" ] && pgrep -f "[g]pu-screen-recorder" > /dev/null; then
 	_stop_recording
 	exit 0
 fi
