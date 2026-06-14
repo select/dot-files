@@ -1,19 +1,18 @@
-# AGS Bar
+# AGS Shell
 
-A custom Hyprland top bar built with [AGS v3](https://aylur.github.io/ags/) (Astal + GTK4).
+A custom Hyprland desktop shell built with [AGS v3](https://aylur.github.io/ags/)
+(Astal + GTK4). Colors are pulled live from `~/.cache/wal/colors.json` and
+hot-reload when wal regenerates them.
 
-## Layout
+## Widgets
 
-- **Left** — power-menu trigger (Hyprland logo) + workspace switcher (pill dots)
-- **Center** — clock (`HH:MM`)
-- **Right** — keyboard layout (EN/DE), mic, volume, bluetooth, wifi, notifications, battery
-- **Bottom-right corner** — system tray (separate window): StatusNotifierItem
-  icons for apps like Zoom/Discord. Click an icon for its menu (Quit/etc.).
-
-The mic icon becomes a **white-on-red circle** while any app is recording.
-
-Colors are pulled live from `~/.cache/wal/colors.json` and hot-reload when wal
-regenerates them.
+| Widget | Description | Toggle |
+| ------ | ----------- | ------ |
+| [Bar](widget/bar/) | Bottom panel: workspaces, clock, system status | always on |
+| [Capture](widget/capture/) | Screenshot / screen-record overlay | `Print` |
+| [Wallpaper](widget/wallpaper/) | Wallpaper picker grid | `Super+W` |
+| [Power menu](widget/powermenu/) | Lock / logout / reboot / shutdown | `Super+Shift+X` |
+| [Tray](widget/tray/) | StatusNotifierItem icons (Zoom/Discord/…) | bottom-right corner |
 
 ## Install (Ubuntu — build from source)
 
