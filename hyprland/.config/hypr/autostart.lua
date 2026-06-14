@@ -18,7 +18,9 @@ hl.on("hyprland.start", function()
     -- Notification daemon
     hl.exec_cmd("swaync")
     -- Wallpaper daemon (swww lives in ~/.cargo/bin, not on Hyprland's PATH)
+    -- then restore the last pywal-selected wallpaper (path in ~/.cache/wal/wal)
     hl.exec_cmd(os.getenv("HOME") .. "/.cargo/bin/swww-daemon")
+    hl.exec_cmd("~/.config/hypr/scripts/wallpaper-restore.sh")
     -- Nextcloud sync
     hl.exec_cmd("nextcloud")
     -- Polkit authentication agent (Hyprland-native)
@@ -33,4 +35,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("wl-paste --watch cliphist store")
     -- pyprland
     hl.exec_cmd("~/.local/bin/pypr")
+    -- anacron: catch-up scheduler for the daily music sync job
+    -- (Hyprland does not read ~/.config/autostart/*.desktop, so launch it here)
+    hl.exec_cmd("anacron -s -t " .. os.getenv("HOME") .. "/.anacron/anacrontab -S " .. os.getenv("HOME") .. "/.anacron/timestamps")
 end)
