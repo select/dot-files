@@ -44,7 +44,7 @@ export default function Tray(gdkmonitor: Gdk.Monitor) {
 			exclusivity={Astal.Exclusivity.IGNORE}
 			layer={Astal.Layer.TOP}
 			marginBottom={4}
-			marginRight={4}
+			marginRight={6}
 			application={app}
 		>
 			<box class="tray-inner">

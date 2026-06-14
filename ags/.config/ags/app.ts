@@ -5,6 +5,7 @@ import { css } from "./style"
 import Bar from "./widget/Bar"
 import PowerMenu from "./widget/PowerMenu"
 import Tray from "./widget/Tray"
+import Wallpaper from "./widget/wallpaper/Wallpaper"
 
 app.start({
 	main() {
@@ -27,7 +28,7 @@ app.start({
 
 			for (const monitor of monitors) {
 				if (built.has(monitor)) continue
-				built.set(monitor, [Bar(monitor), PowerMenu(monitor), Tray(monitor)])
+				built.set(monitor, [Bar(monitor), PowerMenu(monitor), Tray(monitor), Wallpaper(monitor)])
 			}
 
 			for (const [monitor, windows] of built) {
