@@ -33,7 +33,7 @@ export function captureCss(p: Palette): string {
 	.capture-mode:hover { opacity: 0.8; background-color: ${alpha(segment, 0.5)}; }
 	.capture-mode.active { opacity: 1; }
 	.capture-mode-icon { font-size: 40px; color: ${text}; }
-	.capture-mode-label { font-size: 12px; text-align: center; color: ${text}; }
+	.capture-mode-label { font-size: 12px; color: ${text}; }
 	.capture-mode.active .capture-mode-icon,
 	.capture-mode.active .capture-mode-label { color: ${accent}; }
 

@@ -9,6 +9,7 @@ import Wallpaper from "./widget/wallpaper/Wallpaper"
 import Capture from "./widget/capture/Capture"
 import Osd from "./widget/osd/Osd"
 import Media from "./widget/media/Media"
+import Sound from "./widget/sound/Sound"
 
 app.start({
 	main() {
@@ -31,7 +32,16 @@ app.start({
 
 			for (const monitor of monitors) {
 				if (built.has(monitor)) continue
-				built.set(monitor, [Bar(monitor), PowerMenu(monitor), Tray(monitor), Wallpaper(monitor), Capture(monitor), Osd(monitor), Media(monitor)])
+				built.set(monitor, [
+					Bar(monitor),
+					PowerMenu(monitor),
+					Tray(monitor),
+					Wallpaper(monitor),
+					Capture(monitor),
+					Osd(monitor),
+					Media(monitor),
+					Sound(monitor),
+				])
 			}
 
 			for (const [monitor, windows] of built) {

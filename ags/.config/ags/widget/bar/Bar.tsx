@@ -114,8 +114,8 @@ function Volume() {
 		<button
 			class="icon-volume"
 			valign={Gtk.Align.CENTER}
-			tooltipText="Toggle mute"
-			onClicked={() => (speaker.mute = !speaker.mute)}
+			tooltipText="Sound settings"
+			onClicked={() => app.toggle_window("sound")}
 		>
 			<label label={glyph} />
 		</button>
