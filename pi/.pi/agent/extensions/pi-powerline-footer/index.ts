@@ -1,6 +1,6 @@
 import type { ExtensionAPI, ReadonlyFooterDataProvider, Theme } from "@mariozechner/pi-coding-agent";
 import type { AssistantMessage } from "@mariozechner/pi-ai";
-import { visibleWidth } from "@mariozechner/pi-tui";
+import { visibleWidth, truncateToWidth } from "@mariozechner/pi-tui";
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
@@ -119,10 +119,13 @@ function computeResponsiveLayout(
   let overflowSegments: { content: string; width: number }[] = [];
   let overflow = false;
   
+  // Top bar gets availableWidth - 2 because of "╭─" prefix
+  const topAvailableWidth = Math.max(0, availableWidth - 2);
+  
   for (const seg of renderedSegments) {
     const neededWidth = seg.width + (topSegments.length > 0 ? sepWidth : 0);
     
-    if (!overflow && currentWidth + neededWidth <= availableWidth) {
+    if (!overflow && currentWidth + neededWidth <= topAvailableWidth) {
       topSegments.push(seg.content);
       currentWidth += neededWidth;
     } else {
@@ -708,7 +711,12 @@ export default function powerlineFooter(pi: ExtensionAPI) {
             result.push(lines[i] || "");
           }
           
-          return result;
+          return result.map(l => {
+            if (visibleWidth(l) > width) {
+              return truncateToWidth(l, width);
+            }
+            return l;
+          });
         };
         
         return editor;
@@ -744,7 +752,8 @@ export default function powerlineFooter(pi: ExtensionAPI) {
             const layout = getResponsiveLayout(width, theme);
             
             if (layout.secondaryContent) {
-              return [layout.secondaryContent];
+              const content = layout.secondaryContent;
+              return [visibleWidth(content) > width ? truncateToWidth(content, width) : content];
             }
             
             return [];
@@ -774,6 +783,8 @@ export default function powerlineFooter(pi: ExtensionAPI) {
                 const contentWidth = visibleWidth(lineContent);
                 if (contentWidth <= width) {
                   notifications.push(lineContent);
+                } else {
+                  notifications.push(truncateToWidth(lineContent, width));
                 }
               }
             }
@@ -805,7 +816,8 @@ export default function powerlineFooter(pi: ExtensionAPI) {
             }
             
             const styledPrompt = `${getFgAnsiCode("sep")}${promptText}${ansi.reset}`;
-            return [` ${prefix}${styledPrompt}`];
+            const lineContent = ` ${prefix}${styledPrompt}`;
+            return [visibleWidth(lineContent) > width ? truncateToWidth(lineContent, width) : lineContent];
           },
         };
       }, { placement: "belowEditor" });
