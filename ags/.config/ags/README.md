@@ -9,6 +9,8 @@ hot-reload when wal regenerates them.
 | Widget | Description | Toggle |
 | ------ | ----------- | ------ |
 | [Bar](widget/bar/) | Bottom panel: workspaces, clock, system status | always on |
+| [Media](widget/media/) | MPRIS player (title + controls), between bar and tray | when playing |
+| [OSD](widget/osd/) | Volume / brightness progress popup | on change |
 | [Capture](widget/capture/) | Screenshot / screen-record overlay | `Print` |
 | [Wallpaper](widget/wallpaper/) | Wallpaper picker grid | `Super+W` |
 | [Power menu](widget/powermenu/) | Lock / logout / reboot / shutdown | `Super+Shift+X` |
