@@ -90,7 +90,7 @@ hl.bind(mod("SHIFT") .. "W",    hl.dsp.exec_cmd("~/.config/hypr/scripts/wallpape
 hl.bind(mod() .. "W",           hl.dsp.exec_cmd("ags toggle wallpaper")) -- AGS wallpaper picker
 hl.bind(mod("SHIFT") .. "E",    hl.dsp.exec_cmd("~/.config/hypr/scripts/wofi-emoji"))
 hl.bind(mod("SHIFT") .. "M",    hl.dsp.exec_cmd("~/.config/hypr/scripts/mpv-float.sh"))
-hl.bind(mod("SHIFT") .. "D",    hl.dsp.exec_cmd("~/.config/hypr/scripts/laptop-display.sh toggle")) -- enable/disable laptop screen
+hl.bind(mod("SHIFT") .. "D",    hl.dsp.exec_cmd("~/.config/hypr/scripts/display-cycle.sh cycle")) -- cycle laptop / both / external
 hl.bind(mod("SHIFT") .. "J",    hl.dsp.exec_cmd("~/.config/hypr/scripts/position-floating.sh t"))
 hl.bind(mod("SHIFT") .. "L",    hl.dsp.exec_cmd("~/.config/hypr/scripts/position-floating.sh r"))
 hl.bind(mod("SHIFT") .. "K",    hl.dsp.exec_cmd("~/.config/hypr/scripts/position-floating.sh b"))
