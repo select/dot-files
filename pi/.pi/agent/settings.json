@@ -1,9 +1,9 @@
 {
-  "lastChangelogVersion": "0.79.3",
+  "lastChangelogVersion": "0.79.4",
   "quietStartup": true,
   "theme": "pywal",
   "defaultProvider": "amazon-bedrock",
-  "defaultModel": "eu.anthropic.claude-sonnet-4-6",
+  "defaultModel": "eu.anthropic.claude-opus-4-8",
   "enabledModels": [
     "eu.anthropic.claude-sonnet-4-6",
     "eu.anthropic.claude-opus-4-8"
