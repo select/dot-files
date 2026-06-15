@@ -61,7 +61,7 @@ export default function Capture(gdkmonitor: Gdk.Monitor) {
 			gdkmonitor={gdkmonitor}
 			anchor={TOP | BOTTOM | LEFT | RIGHT}
 			exclusivity={Astal.Exclusivity.IGNORE}
-			keymode={Astal.Keymode.ON_DEMAND}
+			keymode={Astal.Keymode.EXCLUSIVE}
 			layer={Astal.Layer.OVERLAY}
 			application={app}
 			visible={false}
@@ -73,6 +73,7 @@ export default function Capture(gdkmonitor: Gdk.Monitor) {
 			}
 		>
 			<Gtk.EventControllerKey
+				propagationPhase={Gtk.PropagationPhase.CAPTURE}
 				onKeyPressed={({}, keyval: number) => {
 					if (keyval === Gdk.KEY_Escape) close();
 					if (
