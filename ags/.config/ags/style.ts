@@ -5,6 +5,7 @@ import { trayCss } from "./widget/tray/style";
 import { powerMenuCss } from "./widget/powermenu/style";
 import { wallpaperCss } from "./widget/wallpaper/style";
 import { captureCss } from "./widget/capture/style";
+import { osdCss } from "./widget/osd/style";
 
 export function css(p: Palette): string {
 	return `
@@ -13,5 +14,6 @@ export function css(p: Palette): string {
 	${trayCss(p)}
 	${wallpaperCss(p)}
 	${captureCss(p)}
+	${osdCss(p)}
 	`;
 }

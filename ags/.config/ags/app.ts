@@ -7,6 +7,7 @@ import PowerMenu from "./widget/powermenu/PowerMenu"
 import Tray from "./widget/tray/Tray"
 import Wallpaper from "./widget/wallpaper/Wallpaper"
 import Capture from "./widget/capture/Capture"
+import Osd from "./widget/osd/Osd"
 
 app.start({
 	main() {
@@ -29,7 +30,7 @@ app.start({
 
 			for (const monitor of monitors) {
 				if (built.has(monitor)) continue
-				built.set(monitor, [Bar(monitor), PowerMenu(monitor), Tray(monitor), Wallpaper(monitor), Capture(monitor)])
+				built.set(monitor, [Bar(monitor), PowerMenu(monitor), Tray(monitor), Wallpaper(monitor), Capture(monitor), Osd(monitor)])
 			}
 
 			for (const [monitor, windows] of built) {
