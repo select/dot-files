@@ -46,6 +46,10 @@ function stop() {
 	execAsync([SCRIPT, "stop"]).catch((err) => console.error(err));
 }
 
+function shutter() {
+	recording.get() && kind.get() === "video" ? stop() : capture();
+}
+
 export default function Capture(gdkmonitor: Gdk.Monitor) {
 	const { TOP, BOTTOM, LEFT, RIGHT } = Astal.WindowAnchor;
 
@@ -71,6 +75,12 @@ export default function Capture(gdkmonitor: Gdk.Monitor) {
 			<Gtk.EventControllerKey
 				onKeyPressed={({}, keyval: number) => {
 					if (keyval === Gdk.KEY_Escape) close();
+					if (
+						keyval === Gdk.KEY_space ||
+						keyval === Gdk.KEY_Return ||
+						keyval === Gdk.KEY_KP_Enter
+					)
+						shutter();
 				}}
 			/>
 			{/* full-screen catcher: click outside the panel to close (on release so
@@ -152,9 +162,7 @@ export default function Capture(gdkmonitor: Gdk.Monitor) {
 								tooltipText="Capture"
 								widthRequest={56}
 								heightRequest={56}
-								onClicked={() =>
-									recording.get() && kind.get() === "video" ? stop() : capture()
-								}
+								onClicked={() => shutter()}
 							>
 								<box
 									class="capture-shutter-inner"
