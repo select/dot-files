@@ -109,41 +109,51 @@ export function hyprlandSettingsCss(p: Palette): string {
 		font-weight: 700;
 	}
 
-	/* GtkSwitch custom thin/rounded design */
-	.hypr-switch,
-	.hypr-switch slider {
+	/* Standard GtkSwitch Customization with Ultra specificity */
+	window.HyprlandSettings box.hypr-box button.hypr-row-btn switch.hypr-switch,
+	window.HyprlandSettings box.hypr-box button.hypr-row-btn switch.hypr-switch:hover,
+	window.HyprlandSettings box.hypr-box button.hypr-row-btn switch.hypr-switch:active,
+	window.HyprlandSettings box.hypr-box button.hypr-row-btn switch.hypr-switch:backdrop {
+		border-radius: 9999px;
+		min-width: 24px;
+		min-height: 12px;
+		border: none;
+		outline: none;
+		box-shadow: none;
+		background-image: none;
+		background-color: ${alpha(text, 0.15)};
+		transition: all 200ms ease;
+	}
+
+	window.HyprlandSettings box.hypr-box button.hypr-row-btn switch.hypr-switch:checked,
+	window.HyprlandSettings box.hypr-box button.hypr-row-btn switch.hypr-switch:checked:hover,
+	window.HyprlandSettings box.hypr-box button.hypr-row-btn switch.hypr-switch:checked:active,
+	window.HyprlandSettings box.hypr-box button.hypr-row-btn switch.hypr-switch:checked:backdrop {
+		background-color: ${alpha(text, 0.15)};
+	}
+
+	window.HyprlandSettings box.hypr-box button.hypr-row-btn switch.hypr-switch slider,
+	window.HyprlandSettings box.hypr-box button.hypr-row-btn switch.hypr-switch:hover slider,
+	window.HyprlandSettings box.hypr-box button.hypr-row-btn switch.hypr-switch:active slider,
+	window.HyprlandSettings box.hypr-box button.hypr-row-btn switch.hypr-switch:backdrop slider {
+		border-radius: 9999px;
+		min-width: 10px;
+		min-height: 10px;
+		max-width: 10px;
+		max-height: 10px;
+		margin: 1px;
 		background-image: none;
 		box-shadow: none;
 		border: none;
-		outline: none;
-		padding: 0;
-		margin: 0;
-	}
-
-	.hypr-switch {
-		background-color: ${alpha(text, 0.2)};
-		border-radius: 9999px;
-		min-height: 8px;
-		min-width: 36px;
-		margin: 6px 0;
-	}
-
-	.hypr-switch:checked {
-		background-color: ${alpha(accent, 0.45)};
-	}
-
-	.hypr-switch slider {
 		background-color: #d1d1d6;
-		border-radius: 9999px;
-		min-width: 14px;
-		min-height: 14px;
-		margin: -3px 0;
-		opacity: 0.7;
+		transition: all 200ms ease;
 	}
 
-	.hypr-switch:checked slider {
+	window.HyprlandSettings box.hypr-box button.hypr-row-btn switch.hypr-switch:checked slider,
+	window.HyprlandSettings box.hypr-box button.hypr-row-btn switch.hypr-switch:checked:hover slider,
+	window.HyprlandSettings box.hypr-box button.hypr-row-btn switch.hypr-switch:checked:active slider,
+	window.HyprlandSettings box.hypr-box button.hypr-row-btn switch.hypr-switch:checked:backdrop slider {
 		background-color: ${accent};
-		opacity: 1.0;
 	}
 	`;
 }
