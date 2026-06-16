@@ -65,7 +65,7 @@ next)
 	next_mode="${MODES[$next_idx]}"
 	apply_mode "$next_mode"
 	notify-send -i input-mouse "Mouse effect" "${LABEL[$next_mode]}" -t 1200 2>/dev/null
-	pkill -SIGRTMIN+9 waybar 2>/dev/null
+	pkill -SIGRTMIN+9 waybar 2>/dev/null || true
 	;;
 *)
 	echo "usage: $0 {status|next}" >&2
