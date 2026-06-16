@@ -103,6 +103,7 @@ export default function Bluetooth(gdkmonitor: Gdk.Monitor) {
 			exclusivity={Astal.Exclusivity.IGNORE}
 			keymode={Astal.Keymode.ON_DEMAND}
 			layer={Astal.Layer.OVERLAY}
+			marginBottom={50}
 			application={app}
 			visible={false}
 			$={(self) => {
