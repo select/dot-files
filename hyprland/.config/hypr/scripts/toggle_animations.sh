@@ -1,17 +1,12 @@
 #!/usr/bin/env bash
 
-on=$(hyprctl -j getoption animations:enabled | jq --raw-output '.int')
+# Use .bool from getoption because the new Hyprland Lua parser returns .bool instead of .int
+on=$(hyprctl -j getoption animations:enabled | jq --raw-output '.bool')
 
-if [[ $on -eq 1 ]]; then	
-    hyprctl keyword animations:enabled 0
-    hyprctl keyword general:gaps_in 0
-    hyprctl keyword general:gaps_out 0
-    hyprctl keyword decoration:rounding 0
+if [[ "$on" == "true" ]]; then	
+    hyprctl eval 'hl.config({ animations = { enabled = false }, general = { gaps_in = 0, gaps_out = 0 }, decoration = { rounding = 0 } })'
     notify-send -a hypr "Animations off"
 else
-    hyprctl keyword animations:enabled 1
-    hyprctl keyword general:gaps_in 3
-    hyprctl keyword general:gaps_out 6
-    hyprctl keyword decoration:rounding 10
+    hyprctl eval 'hl.config({ animations = { enabled = true }, general = { gaps_in = 3, gaps_out = 6 }, decoration = { rounding = 10 } })'
     notify-send -a hypr "Animations on"
 fi
