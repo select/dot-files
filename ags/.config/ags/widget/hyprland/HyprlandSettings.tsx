@@ -15,10 +15,10 @@ function close() {
 export default function HyprlandSettings(gdkmonitor: Gdk.Monitor) {
 	const { TOP, BOTTOM, LEFT, RIGHT } = Astal.WindowAnchor
 
-	// Calculate geometry to align above the left side of the centered bar
+	// Calculate geometry to align above the right side of the centered bar
 	const geo = gdkmonitor.get_geometry()
 	const barWidth = Math.round((geo.width || 1920) * 0.36)
-	const marginStart = Math.max(0, Math.round((geo.width - barWidth) / 2))
+	const marginEnd = Math.max(0, Math.round((geo.width - barWidth) / 2))
 
 	// Polling states for real-time reactivity
 	const animationsEnabled = createPoll(true, 1500, () =>
@@ -89,9 +89,9 @@ export default function HyprlandSettings(gdkmonitor: Gdk.Monitor) {
 			<box>
 				<Gtk.GestureClick onReleased={() => close()} />
 				<revealer
-					halign={Gtk.Align.START}
+					halign={Gtk.Align.END}
 					valign={Gtk.Align.END}
-					marginStart={marginStart}
+					marginEnd={marginEnd}
 					marginBottom={0}
 					revealChild={revealed}
 					transitionType={Gtk.RevealerTransitionType.SLIDE_UP}
