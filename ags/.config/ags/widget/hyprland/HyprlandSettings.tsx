@@ -120,6 +120,7 @@ export default function HyprlandSettings(gdkmonitor: Gdk.Monitor) {
 										<label class="hypr-row-desc" halign={Gtk.Align.START} label={animationsEnabled((enabled) => enabled ? "Animations & padding enabled" : "Performance mode (flat/gaps-off)")} />
 									</box>
 									<switch
+										class="hypr-switch"
 										valign={Gtk.Align.CENTER}
 										active={animationsEnabled}
 										onStateSet={(self, state) => {

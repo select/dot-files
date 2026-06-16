@@ -110,9 +110,9 @@ export function hyprlandSettingsCss(p: Palette): string {
 	}
 
 	/* GtkSwitch custom thin/rounded design */
-	window.HyprlandSettings switch,
-	window.HyprlandSettings switch trough,
-	window.HyprlandSettings switch slider {
+	.hypr-switch,
+	.hypr-switch trough,
+	.hypr-switch slider {
 		background-image: none !important;
 		box-shadow: none !important;
 		border: none !important;
@@ -121,13 +121,13 @@ export function hyprlandSettingsCss(p: Palette): string {
 		margin: 0 !important;
 	}
 
-	window.HyprlandSettings switch {
+	.hypr-switch {
 		background: transparent !important;
 		min-width: 36px !important;
 		min-height: 20px !important;
 	}
 
-	window.HyprlandSettings switch trough {
+	.hypr-switch trough {
 		background-color: ${alpha(text, 0.2)} !important;
 		border-radius: 9999px !important;
 		min-height: 8px !important;
@@ -135,11 +135,11 @@ export function hyprlandSettingsCss(p: Palette): string {
 		margin: 6px 0 !important;
 	}
 
-	window.HyprlandSettings switch:checked trough {
+	.hypr-switch:checked trough {
 		background-color: ${alpha(accent, 0.45)} !important;
 	}
 
-	window.HyprlandSettings switch slider {
+	.hypr-switch slider {
 		background-color: #d1d1d6 !important;
 		border-radius: 9999px !important;
 		min-width: 14px !important;
@@ -148,7 +148,7 @@ export function hyprlandSettingsCss(p: Palette): string {
 		opacity: 0.7 !important;
 	}
 
-	window.HyprlandSettings switch:checked slider {
+	.hypr-switch:checked slider {
 		background-color: ${accent} !important;
 		opacity: 1.0 !important;
 	}
