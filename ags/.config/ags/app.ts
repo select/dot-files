@@ -13,6 +13,7 @@ import Sound from "./widget/sound/Sound"
 import Bluetooth from "./widget/bluetooth/Bluetooth"
 import Wifi from "./widget/wifi/Wifi"
 import Power from "./widget/power/Power"
+import HyprlandSettings from "./widget/hyprland/HyprlandSettings"
 
 app.start({
 	main() {
@@ -47,6 +48,7 @@ app.start({
 					Bluetooth(monitor),
 					Wifi(monitor),
 					Power(monitor),
+					HyprlandSettings(monitor),
 				])
 			}
 

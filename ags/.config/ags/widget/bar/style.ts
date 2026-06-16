@@ -55,6 +55,17 @@ export function barCss(p: Palette): string {
 	}
 	.logo:hover { background-color: ${segmentSoft}; }
 
+	/* Hyprland Settings button */
+	.hypr-btn {
+		background: transparent;
+		border-radius: 9999px;
+		padding: 2px 6px;
+		margin: 0;
+		color: ${accent};
+		font-size: 15px;
+	}
+	.hypr-btn:hover { background-color: ${segmentSoft}; }
+
 	/* workspace switcher */
 	.workspaces { padding: 0 2px; }
 	.ws {
