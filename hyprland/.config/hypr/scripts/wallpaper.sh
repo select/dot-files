@@ -12,6 +12,12 @@ sleep 1
 cp ~/.cache/wal/colors-waybar.css ~/.config/waybar/colors-waybar.css
 image_path=$(cat ~/.cache/wal/wal)
 
+# Silently run post-run hooks to update Pi theme, GNOME shell, and Pywalfox in the background
+# (No terminal/shell command injection - purely background compilation & updates)
+python3 "$HOME/.config/wal/postrun/pi-theme.py" >/dev/null 2>&1 &
+bash "$HOME/.config/wal/postrun/wal-gnome.sh" >/dev/null 2>&1 &
+bash "$HOME/.config/wal/postrun/pywalfox-update.sh" >/dev/null 2>&1 &
+
 # Self-heal: the switcher is useless if swww-daemon isn't running, so make sure
 # it's up before trying to set the image. Prefer the systemd user service (it
 # auto-restarts on crash and logs to the journal); fall back to a bare launch.
