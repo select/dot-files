@@ -110,41 +110,47 @@ export function hyprlandSettingsCss(p: Palette): string {
 	}
 
 	/* GtkSwitch custom thin/rounded design */
-	switch,
-	switch trough,
-	switch slider {
-		background-image: none;
-		box-shadow: none;
-		border: none;
-		outline: none;
+	window.HyprlandSettings switch,
+	window.HyprlandSettings switch trough,
+	window.HyprlandSettings switch slider {
+		background-image: none !important;
+		box-shadow: none !important;
+		border: none !important;
+		outline: none !important;
+		padding: 0 !important;
+		margin: 0 !important;
 	}
 
-	switch {
-		background: transparent;
+	window.HyprlandSettings switch {
+		background: transparent !important;
+		min-width: 36px !important;
+		min-height: 20px !important;
 	}
 
-	switch trough {
-		background-color: ${alpha(text, 0.15)};
-		border-radius: 9999px;
-		min-height: 12px;
-		min-width: 44px;
-		margin: 6px 0;
+	window.HyprlandSettings switch trough {
+		background-color: ${alpha(text, 0.2)} !important;
+		border-radius: 9999px !important;
+		min-height: 8px !important;
+		min-width: 36px !important;
+		margin: 6px 0 !important;
 	}
 
-	switch:checked trough {
-		background-color: ${alpha(accent, 0.4)};
+	window.HyprlandSettings switch:checked trough {
+		background-color: ${alpha(accent, 0.45)} !important;
 	}
 
-	switch slider {
-		background-color: #d1d1d6;
-		border-radius: 9999px;
-		min-width: 22px;
-		min-height: 22px;
-		margin: -5px 0;
+	window.HyprlandSettings switch slider {
+		background-color: #d1d1d6 !important;
+		border-radius: 9999px !important;
+		min-width: 14px !important;
+		min-height: 14px !important;
+		margin: -3px 0 !important;
+		opacity: 0.7 !important;
 	}
 
-	switch:checked slider {
-		background-color: ${accent};
+	window.HyprlandSettings switch:checked slider {
+		background-color: ${accent} !important;
+		opacity: 1.0 !important;
 	}
 	`
 }
