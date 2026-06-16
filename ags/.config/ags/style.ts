@@ -8,6 +8,9 @@ import { captureCss } from "./widget/capture/style";
 import { osdCss } from "./widget/osd/style";
 import { mediaCss } from "./widget/media/style";
 import { soundCss } from "./widget/sound/style";
+import { bluetoothCss } from "./widget/bluetooth/style";
+import { wifiCss } from "./widget/wifi/style";
+import { powerCss } from "./widget/power/style";
 
 export function css(p: Palette): string {
 	return `
@@ -19,5 +22,8 @@ export function css(p: Palette): string {
 	${osdCss(p)}
 	${mediaCss(p)}
 	${soundCss(p)}
+	${bluetoothCss(p)}
+	${wifiCss(p)}
+	${powerCss(p)}
 	`;
 }

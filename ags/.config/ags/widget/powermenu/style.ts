@@ -1,29 +1,81 @@
-// Power menu popup stylesheet — kept separate from the global style.
-// Assembled into the global AGS stylesheet by ../../style.ts.
-import { Palette, lighten } from "../../lib/wal";
+import { Palette, lighten, alpha } from "../../lib/wal"
 
 export function powerMenuCss(p: Palette): string {
-	const bg = p.background;
-	const segment = lighten(bg, 0.1);
-	const segmentSoft = lighten(bg, 0.18);
-	const accent = lighten(p.color[5], 0.25);
+	const bg = p.background
+	const segmentSoft = lighten(bg, 0.15)
+	const accent = lighten(p.color[5], 0.25)
+	const text = p.foreground
 
 	return `
-	window.PowerMenu { background: transparent; }
+	window.PowerMenu {
+		background: transparent;
+		font-family: "DejaVuSansM Nerd Font", "Symbols Nerd Font", sans-serif;
+	}
+
 	.powermenu-box {
-		background-color: ${segment};
-		border-radius: 9999px;
-		padding: 6px;
+		background-color: ${alpha("#000000", 0.85)};
+		border: 1px solid ${alpha(text, 0.15)};
+		border-radius: 18px;
+		padding: 16px;
+		min-width: 320px;
+		color: ${text};
 	}
-	.powermenu-box button {
+
+	.powermenu-header {
+		margin-bottom: 12px;
+	}
+
+	.powermenu-title {
+		font-size: 13px;
+		font-weight: 800;
+		color: ${accent};
+		letter-spacing: 0.5px;
+		text-transform: uppercase;
+	}
+
+	.powermenu-section {
+		margin-bottom: 12px;
+	}
+
+	.powermenu-section.last {
+		margin-bottom: 0;
+	}
+
+	.powermenu-list {
+		background-color: ${alpha("#000000", 0.4)};
+		border: 1px solid ${alpha(text, 0.05)};
+		border-radius: 12px;
+		padding: 4px;
+	}
+
+	.powermenu-btn {
+		background-color: transparent;
+		border-radius: 8px;
+		padding: 8px 12px;
+		margin: 2px 0;
+	}
+	.powermenu-btn:hover {
 		background-color: ${segmentSoft};
-		border-radius: 9999px;
-		padding: 6px;
-		margin: 4px;
-		font-size: 18px;
-		min-width: 38px;
-		min-height: 38px;
 	}
-	.powermenu-box button:hover { background-color: ${accent}; color: ${bg}; }
-	`;
+
+	.powermenu-btn-icon {
+		font-size: 16px;
+		margin-right: 12px;
+		color: ${accent};
+		min-width: 20px;
+	}
+
+	.powermenu-btn-title {
+		font-size: 13px;
+		font-weight: 600;
+		color: ${text};
+	}
+
+	.powermenu-btn-desc {
+		font-size: 10px;
+		font-weight: 500;
+		color: ${alpha(text, 0.55)};
+		margin-top: 2px;
+	}
+	`
 }

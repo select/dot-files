@@ -136,7 +136,7 @@ export default function Sound(gdkmonitor: Gdk.Monitor) {
 
 						{/* Speakers / Output Section */}
 						<box class="sound-section" orientation={Gtk.Orientation.VERTICAL}>
-							<label class="sound-title" halign={Gtk.Align.START} label="Output / Speakers" />
+							<label class="sound-title" halign={Gtk.Align.START} label="Speakers" />
 							
 							{/* Volume slider & Mute button row */}
 							<box class="sound-slider-row" valign={Gtk.Align.CENTER}>
@@ -262,7 +262,7 @@ export default function Sound(gdkmonitor: Gdk.Monitor) {
 
 						{/* Microphone / Input Section */}
 						<box class="sound-section last" orientation={Gtk.Orientation.VERTICAL}>
-							<label class="sound-title" halign={Gtk.Align.START} label="Input / Microphone" />
+							<label class="sound-title" halign={Gtk.Align.START} label="Microphone" />
 							
 							{/* Volume slider & Mute button row */}
 							<box class="sound-slider-row" valign={Gtk.Align.CENTER}>

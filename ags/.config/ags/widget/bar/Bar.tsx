@@ -135,8 +135,8 @@ function Bluetooth() {
 		<button
 			class="icon-bluetooth"
 			valign={Gtk.Align.CENTER}
-			tooltipText="Open Bluetooth manager"
-			onClicked={() => execAsync(["blueman-manager"]).catch(() => {})}
+			tooltipText="Bluetooth settings"
+			onClicked={() => app.toggle_window("bluetooth")}
 		>
 			<label label={glyph} />
 		</button>
@@ -162,10 +162,8 @@ function Wifi() {
 		<button
 			class="icon-wifi"
 			valign={Gtk.Align.CENTER}
-			tooltipText="Network"
-			onClicked={() =>
-				execAsync(["bash", "-c", "nm-connection-editor"]).catch(() => {})
-			}
+			tooltipText="Wi-Fi settings"
+			onClicked={() => app.toggle_window("wifi")}
 		>
 			<label label={glyph} />
 		</button>
@@ -220,6 +218,7 @@ function Battery() {
 			valign={Gtk.Align.CENTER}
 			tooltipText={label}
 			visible={createBinding(bat, "isPresent")}
+			onClicked={() => app.toggle_window("power")}
 		>
 			<label label={glyph} />
 		</button>

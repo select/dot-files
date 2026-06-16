@@ -2,15 +2,16 @@ import app from "ags/gtk4/app"
 import { Astal, Gtk, Gdk } from "ags/gtk4"
 import { createState } from "ags"
 import { execAsync } from "ags/process"
+import Pango from "gi://Pango"
 
-type Action = { icon: string; tooltip: string; cmd: string }
+type Action = { icon: string; title: string; desc: string; cmd: string }
 
 const actions: Action[] = [
-	{ icon: "󰌾", tooltip: "Lock", cmd: "~/.config/hypr/scripts/lock.sh" },
-	{ icon: "󰍃", tooltip: "Logout", cmd: "hyprctl dispatch exit" },
-	{ icon: "󰤄", tooltip: "Suspend", cmd: "systemctl suspend" },
-	{ icon: "󰜉", tooltip: "Reboot", cmd: "systemctl reboot" },
-	{ icon: "󰐥", tooltip: "Shutdown", cmd: "systemctl poweroff -i" },
+	{ icon: "󰌾", title: "Lock Screen", desc: "Lock the active session", cmd: "~/.config/hypr/scripts/lock.sh" },
+	{ icon: "󰍃", title: "Logout", desc: "Exit Hyprland session", cmd: "hyprctl dispatch exit" },
+	{ icon: "󰤄", title: "Suspend", desc: "Put system into low-power sleep", cmd: "systemctl suspend" },
+	{ icon: "󰜉", title: "Reboot", desc: "Restart the computer", cmd: "systemctl reboot" },
+	{ icon: "󰐥", title: "Shutdown", desc: "Power off the system", cmd: "systemctl poweroff -i" },
 ]
 
 const [revealed, setRevealed] = createState(false)
@@ -51,9 +52,6 @@ export default function PowerMenu(gdkmonitor: Gdk.Monitor) {
 					if (keyval === Gdk.KEY_Escape) close()
 				}}
 			/>
-			{/* full-screen catcher: clicking outside the menu (incl. the icon area) closes it.
-			    Trigger on release (not press) so a button's own click gesture claims the
-			    sequence first and still fires before this ancestor catcher runs. */}
 			<box>
 				<Gtk.GestureClick onReleased={() => close()} />
 				<revealer
@@ -65,17 +63,52 @@ export default function PowerMenu(gdkmonitor: Gdk.Monitor) {
 					transitionType={Gtk.RevealerTransitionType.SLIDE_UP}
 					transitionDuration={200}
 				>
-					<box class="powermenu-box">
-						{/* claim on release so clicking the box padding doesn't close the
-						    menu, without cancelling the buttons' press gesture */}
+					<box class="powermenu-box" orientation={Gtk.Orientation.VERTICAL}>
 						<Gtk.GestureClick
 							onReleased={(g) => g.set_state(Gtk.EventSequenceState.CLAIMED)}
 						/>
-						{actions.map((a) => (
-							<button tooltipText={a.tooltip} onClicked={() => run(a.cmd)}>
-								<label label={a.icon} />
-							</button>
-						))}
+
+						{/* Header Section */}
+						<box class="powermenu-header" valign={Gtk.Align.CENTER}>
+							<label class="powermenu-title" halign={Gtk.Align.START} label="Power Menu" />
+						</box>
+
+						{/* Actions Section */}
+						<box class="powermenu-section last" orientation={Gtk.Orientation.VERTICAL}>
+							<box class="powermenu-list" orientation={Gtk.Orientation.VERTICAL}>
+								{actions.map((a) => (
+									<button
+										class="powermenu-btn"
+										onClicked={() => run(a.cmd)}
+										tooltipText={a.desc}
+									>
+										<box valign={Gtk.Align.CENTER} hexpand>
+											<label
+												class="powermenu-btn-icon"
+												label={a.icon}
+											/>
+											<box orientation={Gtk.Orientation.VERTICAL} halign={Gtk.Align.START} hexpand>
+												<label
+													class="powermenu-btn-title"
+													ellipsize={Pango.EllipsizeMode.END}
+													maxWidthChars={20}
+													halign={Gtk.Align.START}
+													label={a.title}
+												/>
+												<label
+													class="powermenu-btn-desc"
+													ellipsize={Pango.EllipsizeMode.END}
+													maxWidthChars={26}
+													halign={Gtk.Align.START}
+													label={a.desc}
+												/>
+											</box>
+										</box>
+									</button>
+								))}
+							</box>
+						</box>
+
 					</box>
 				</revealer>
 			</box>

@@ -10,6 +10,9 @@ import Capture from "./widget/capture/Capture"
 import Osd from "./widget/osd/Osd"
 import Media from "./widget/media/Media"
 import Sound from "./widget/sound/Sound"
+import Bluetooth from "./widget/bluetooth/Bluetooth"
+import Wifi from "./widget/wifi/Wifi"
+import Power from "./widget/power/Power"
 
 app.start({
 	main() {
@@ -41,6 +44,9 @@ app.start({
 					Osd(monitor),
 					Media(monitor),
 					Sound(monitor),
+					Bluetooth(monitor),
+					Wifi(monitor),
+					Power(monitor),
 				])
 			}
 
