@@ -11,6 +11,39 @@ import AstalBluetooth from "gi://AstalBluetooth";
 import AstalBattery from "gi://AstalBattery";
 import AstalNotifd from "gi://AstalNotifd";
 
+// --- hover-to-swap menu behavior ---
+const BAR_WINDOWS = ["powermenu", "sound", "bluetooth", "wifi", "power"];
+
+function isAnyBarWindowOpen(): boolean {
+	return BAR_WINDOWS.some((name) => {
+		const win = app.get_window(name);
+		return win && win.get_visible();
+	});
+}
+
+function switchToWindow(targetName: string) {
+	for (const name of BAR_WINDOWS) {
+		const win = app.get_window(name);
+		if (win) {
+			if (name === targetName) {
+				win.set_visible(true);
+			} else {
+				win.set_visible(false);
+			}
+		}
+	}
+}
+
+function setupHover(self: Gtk.Button, windowName: string) {
+	const controller = new Gtk.EventControllerMotion();
+	controller.connect("enter", () => {
+		if (isAnyBarWindowOpen()) {
+			switchToWindow(windowName);
+		}
+	});
+	self.add_controller(controller);
+}
+
 // --- left: power trigger + workspace switcher ---
 function Logo() {
 	return (
@@ -18,6 +51,7 @@ function Logo() {
 			class="logo"
 			tooltipText="Power menu"
 			onClicked={() => app.toggle_window("powermenu")}
+			$={(self) => setupHover(self, "powermenu")}
 		>
 			<label label="󰚌" />
 		</button>
@@ -116,6 +150,7 @@ function Volume() {
 			valign={Gtk.Align.CENTER}
 			tooltipText="Sound settings"
 			onClicked={() => app.toggle_window("sound")}
+			$={(self) => setupHover(self, "sound")}
 		>
 			<label label={glyph} />
 		</button>
@@ -137,6 +172,7 @@ function Bluetooth() {
 			valign={Gtk.Align.CENTER}
 			tooltipText="Bluetooth settings"
 			onClicked={() => app.toggle_window("bluetooth")}
+			$={(self) => setupHover(self, "bluetooth")}
 		>
 			<label label={glyph} />
 		</button>
@@ -164,6 +200,7 @@ function Wifi() {
 			valign={Gtk.Align.CENTER}
 			tooltipText="Wi-Fi settings"
 			onClicked={() => app.toggle_window("wifi")}
+			$={(self) => setupHover(self, "wifi")}
 		>
 			<label label={glyph} />
 		</button>
@@ -219,6 +256,7 @@ function Battery() {
 			tooltipText={label}
 			visible={createBinding(bat, "isPresent")}
 			onClicked={() => app.toggle_window("power")}
+			$={(self) => setupHover(self, "power")}
 		>
 			<label label={glyph} />
 		</button>
