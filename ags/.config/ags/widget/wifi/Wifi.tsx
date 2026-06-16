@@ -106,7 +106,7 @@ export default function Wifi(gdkmonitor: Gdk.Monitor) {
 					halign={Gtk.Align.END}
 					valign={Gtk.Align.END}
 					marginEnd={marginEnd}
-					marginBottom={50}
+					marginBottom={0}
 					revealChild={revealed}
 					transitionType={Gtk.RevealerTransitionType.SLIDE_UP}
 					transitionDuration={200}

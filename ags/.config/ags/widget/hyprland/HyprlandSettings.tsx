@@ -92,7 +92,7 @@ export default function HyprlandSettings(gdkmonitor: Gdk.Monitor) {
 					halign={Gtk.Align.START}
 					valign={Gtk.Align.END}
 					marginStart={marginStart}
-					marginBottom={50}
+					marginBottom={0}
 					revealChild={revealed}
 					transitionType={Gtk.RevealerTransitionType.SLIDE_UP}
 					transitionDuration={200}
@@ -116,8 +116,8 @@ export default function HyprlandSettings(gdkmonitor: Gdk.Monitor) {
 								<box valign={Gtk.Align.CENTER} hexpand>
 									<label class="hypr-row-icon" label="󰵈" />
 									<box orientation={Gtk.Orientation.VERTICAL} halign={Gtk.Align.START} hexpand>
-										<label class="hypr-row-title" label="Animations" />
-										<label class="hypr-row-desc" label={animationsEnabled((enabled) => enabled ? "Animations & padding enabled" : "Performance mode (flat/gaps-off)")} />
+										<label class="hypr-row-title" halign={Gtk.Align.START} label="Animations" />
+										<label class="hypr-row-desc" halign={Gtk.Align.START} label={animationsEnabled((enabled) => enabled ? "Animations & padding enabled" : "Performance mode (flat/gaps-off)")} />
 									</box>
 									<switch
 										valign={Gtk.Align.CENTER}
@@ -138,8 +138,8 @@ export default function HyprlandSettings(gdkmonitor: Gdk.Monitor) {
 								<box valign={Gtk.Align.CENTER} hexpand>
 									<label class="hypr-row-icon" label="󰳽" />
 									<box orientation={Gtk.Orientation.VERTICAL} halign={Gtk.Align.START} hexpand>
-										<label class="hypr-row-title" label="Mouse Effect" />
-										<label class="hypr-row-desc" label={createComputed(() => `Active mode: ${cursorEffectLabel()}`)} />
+										<label class="hypr-row-title" halign={Gtk.Align.START} label="Mouse Effect" />
+										<label class="hypr-row-desc" halign={Gtk.Align.START} label={createComputed(() => `Active mode: ${cursorEffectLabel()}`)} />
 									</box>
 									<box class="hypr-badge" valign={Gtk.Align.CENTER}>
 										<label label={cursorEffectLabel} />
@@ -152,8 +152,8 @@ export default function HyprlandSettings(gdkmonitor: Gdk.Monitor) {
 								<box valign={Gtk.Align.CENTER} hexpand>
 									<label class="hypr-row-icon" label="󰍹" />
 									<box orientation={Gtk.Orientation.VERTICAL} halign={Gtk.Align.START} hexpand>
-										<label class="hypr-row-title" label="Display Layout" />
-										<label class="hypr-row-desc" label={createComputed(() => `Active screens: ${displayModeLabel()}`)} />
+										<label class="hypr-row-title" halign={Gtk.Align.START} label="Display Layout" />
+										<label class="hypr-row-desc" halign={Gtk.Align.START} label={createComputed(() => `Active screens: ${displayModeLabel()}`)} />
 									</box>
 									<box class="hypr-badge" valign={Gtk.Align.CENTER}>
 										<label label={displayModeLabel} />

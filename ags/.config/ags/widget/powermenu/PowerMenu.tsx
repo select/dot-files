@@ -59,7 +59,7 @@ export default function PowerMenu(gdkmonitor: Gdk.Monitor) {
 					halign={Gtk.Align.START}
 					valign={Gtk.Align.END}
 					marginStart={marginStart}
-					marginBottom={50}
+					marginBottom={0}
 					revealChild={revealed}
 					transitionType={Gtk.RevealerTransitionType.SLIDE_UP}
 					transitionDuration={200}
