@@ -11,7 +11,7 @@ export function osdCss(p: Palette): string {
 	return `
 	window.Osd { background: transparent; }
 	.osd-box {
-		background-color: ${alpha(segment, 0.95)};
+		background-color: ${alpha("#000000", 0.5)};
 		border-radius: 9999px;
 		padding: 10px 18px;
 		margin: 4px;

@@ -13,7 +13,8 @@ export function wallpaperCss(p: Palette): string {
 	window.Wallpaper { background: ${alpha("#000000", 0.45)}; }
 
 	.wallpaper-panel {
-		background-color: ${alpha(bg, 0.96)};
+		background-color: ${alpha("#000000", 0.85)};
+		border: 1px solid ${alpha(text, 0.15)};
 		border-radius: 18px;
 		padding: 16px;
 		min-width: 920px;
