@@ -110,36 +110,41 @@ export function hyprlandSettingsCss(p: Palette): string {
 	}
 
 	/* GtkSwitch custom thin/rounded design */
-	switch {
-		border: none;
-		background: transparent;
+	switch,
+	switch trough,
+	switch slider {
+		background-image: none;
 		box-shadow: none;
+		border: none;
 		outline: none;
 	}
+
+	switch {
+		background: transparent;
+	}
+
 	switch trough {
 		background-color: ${alpha(text, 0.15)};
 		border-radius: 9999px;
-		min-height: 6px;
-		min-width: 36px;
-		border: none;
-		box-shadow: none;
-		outline: none;
+		min-height: 12px;
+		min-width: 44px;
 		margin: 6px 0;
 	}
+
 	switch:checked trough {
-		background-color: ${accent};
+		background-color: ${alpha(accent, 0.4)};
 	}
+
 	switch slider {
 		background-color: #d1d1d6;
 		border-radius: 9999px;
-		min-width: 14px;
-		min-height: 14px;
-		margin: -4px 0;
-		border: none;
-		box-shadow: none;
+		min-width: 22px;
+		min-height: 22px;
+		margin: -5px 0;
 	}
+
 	switch:checked slider {
-		background-color: #ffffff;
+		background-color: ${accent};
 	}
 	`
 }
