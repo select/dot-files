@@ -113,44 +113,44 @@ export function hyprlandSettingsCss(p: Palette): string {
 	.hypr-switch,
 	.hypr-switch trough,
 	.hypr-switch slider {
-		background-image: none !important;
-		box-shadow: none !important;
-		border: none !important;
-		outline: none !important;
-		padding: 0 !important;
-		margin: 0 !important;
+		background-image: none;
+		box-shadow: none;
+		border: none;
+		outline: none;
+		padding: 0;
+		margin: 0;
 	}
 
 	.hypr-switch {
-		background: transparent !important;
-		min-width: 36px !important;
-		min-height: 20px !important;
+		background: transparent;
+		min-width: 36px;
+		min-height: 20px;
 	}
 
 	.hypr-switch trough {
-		background-color: ${alpha(text, 0.2)} !important;
-		border-radius: 9999px !important;
-		min-height: 8px !important;
-		min-width: 36px !important;
-		margin: 6px 0 !important;
+		background-color: ${alpha(text, 0.2)};
+		border-radius: 9999px;
+		min-height: 8px;
+		min-width: 36px;
+		margin: 6px 0;
 	}
 
 	.hypr-switch:checked trough {
-		background-color: ${alpha(accent, 0.45)} !important;
+		background-color: ${alpha(accent, 0.45)};
 	}
 
 	.hypr-switch slider {
-		background-color: #d1d1d6 !important;
-		border-radius: 9999px !important;
-		min-width: 14px !important;
-		min-height: 14px !important;
-		margin: -3px 0 !important;
-		opacity: 0.7 !important;
+		background-color: #d1d1d6;
+		border-radius: 9999px;
+		min-width: 14px;
+		min-height: 14px;
+		margin: -3px 0;
+		opacity: 0.7;
 	}
 
 	.hypr-switch:checked slider {
-		background-color: ${accent} !important;
-		opacity: 1.0 !important;
+		background-color: ${accent};
+		opacity: 1.0;
 	}
 	`
 }
