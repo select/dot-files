@@ -1,10 +1,10 @@
-import { Palette, lighten, alpha } from "../../lib/wal"
+import { Palette, lighten, alpha } from "../../lib/wal";
 
 export function hyprlandSettingsCss(p: Palette): string {
-	const bg = p.background
-	const segmentSoft = lighten(bg, 0.15)
-	const accent = lighten(p.color[4], 0.25)
-	const text = p.foreground
+	const bg = p.background;
+	const segmentSoft = lighten(bg, 0.15);
+	const accent = lighten(p.color[4], 0.25);
+	const text = p.foreground;
 
 	return `
 	window.HyprlandSettings {
@@ -111,7 +111,6 @@ export function hyprlandSettingsCss(p: Palette): string {
 
 	/* GtkSwitch custom thin/rounded design */
 	.hypr-switch,
-	.hypr-switch trough,
 	.hypr-switch slider {
 		background-image: none;
 		box-shadow: none;
@@ -122,12 +121,6 @@ export function hyprlandSettingsCss(p: Palette): string {
 	}
 
 	.hypr-switch {
-		background: transparent;
-		min-width: 36px;
-		min-height: 20px;
-	}
-
-	.hypr-switch trough {
 		background-color: ${alpha(text, 0.2)};
 		border-radius: 9999px;
 		min-height: 8px;
@@ -135,7 +128,7 @@ export function hyprlandSettingsCss(p: Palette): string {
 		margin: 6px 0;
 	}
 
-	.hypr-switch:checked trough {
+	.hypr-switch:checked {
 		background-color: ${alpha(accent, 0.45)};
 	}
 
@@ -152,5 +145,5 @@ export function hyprlandSettingsCss(p: Palette): string {
 		background-color: ${accent};
 		opacity: 1.0;
 	}
-	`
+	`;
 }
