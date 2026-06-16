@@ -385,6 +385,59 @@ function extractCostTotal(usage: any): number {
 	return 0;
 }
 
+const RETROACTIVE_PRICING: Record<string, { input: number; output: number; cacheRead?: number }> = {
+	"vertex-global/gemini-3.5-flash": { input: 1.50, output: 9.00, cacheRead: 0.15 },
+	"vertex-global/gemini-3.1-pro-preview": { input: 2.00, output: 12.00, cacheRead: 0.20 },
+	"vertex/gemini-2.5-flash": { input: 0.30, output: 2.50, cacheRead: 0.03 },
+	"vertex/gemini-2.5-pro": { input: 1.25, output: 10.00, cacheRead: 0.125 },
+};
+
+function getRetroactiveCost(mk: ModelKey, usage: any): number {
+	if (!usage) return 0;
+
+	let pricing = RETROACTIVE_PRICING[mk];
+	if (!pricing) {
+		const parts = mk.split("/");
+		const modelId = parts[parts.length - 1];
+		pricing = RETROACTIVE_PRICING[`vertex-global/${modelId}`] || RETROACTIVE_PRICING[`vertex/${modelId}`];
+	}
+
+	if (!pricing) return 0;
+
+	const readNum = (v: any): number => {
+		if (typeof v === "number") return Number.isFinite(v) ? v : 0;
+		if (typeof v === "string") {
+			const n = Number(v);
+			return Number.isFinite(n) ? n : 0;
+		}
+		return 0;
+	};
+
+	const inputTokens =
+		readNum(usage.promptTokens) ||
+		readNum(usage.prompt_tokens) ||
+		readNum(usage.inputTokens) ||
+		readNum(usage.input_tokens);
+
+	const outputTokens =
+		readNum(usage.completionTokens) ||
+		readNum(usage.completion_tokens) ||
+		readNum(usage.outputTokens) ||
+		readNum(usage.output_tokens);
+
+	const cacheReadTokens =
+		readNum(usage.cacheRead) ||
+		readNum(usage.cache_read) ||
+		readNum(usage.cachedInputTokens) ||
+		readNum(usage.cached_input_tokens);
+
+	const inputCost = (inputTokens / 1_000_000) * pricing.input;
+	const outputCost = (outputTokens / 1_000_000) * pricing.output;
+	const cacheReadCost = pricing.cacheRead ? (cacheReadTokens / 1_000_000) * pricing.cacheRead : 0;
+
+	return inputCost + outputCost + cacheReadCost;
+}
+
 function extractTokensTotal(usage: any): number {
 	// Usage format varies across providers and pi versions.
 	// We try a few common shapes:
@@ -566,7 +619,10 @@ async function parseSessionFile(
 				tokensByModel.set(mk, (tokensByModel.get(mk) ?? 0) + tok);
 			}
 
-			const cost = extractCostTotal(usage);
+			let cost = extractCostTotal(usage);
+			if (cost <= 0) {
+				cost = getRetroactiveCost(mk, usage);
+			}
 			if (cost > 0) {
 				totalCost += cost;
 				costByModel.set(mk, (costByModel.get(mk) ?? 0) + cost);

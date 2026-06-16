@@ -17,6 +17,58 @@
           "cost": { "input": 5.5, "output": 27.5, "cacheRead": 0.55, "cacheWrite": 6.88 }
         }
       ]
+    },
+    "vertex": {
+      "baseUrl": "https://europe-west1-aiplatform.googleapis.com/v1/projects/driven-country-453015-a0/locations/europe-west1/publishers/google",
+      "api": "google-generative-ai",
+      "apiKey": "!gcloud auth application-default print-access-token",
+      "authHeader": true,
+      "models": [
+        {
+          "id": "gemini-2.5-pro",
+          "name": "Gemini 2.5 Pro (Vertex)",
+          "reasoning": true,
+          "input": ["text", "image"],
+          "contextWindow": 1048576,
+          "maxTokens": 65536,
+          "cost": { "input": 1.25, "output": 10.0, "cacheRead": 0.125, "cacheWrite": 0.0 }
+        },
+        {
+          "id": "gemini-2.5-flash",
+          "name": "Gemini 2.5 Flash (Vertex)",
+          "reasoning": true,
+          "input": ["text", "image"],
+          "contextWindow": 1048576,
+          "maxTokens": 65536,
+          "cost": { "input": 0.30, "output": 2.50, "cacheRead": 0.03, "cacheWrite": 0.0 }
+        }
+      ]
+    },
+    "vertex-global": {
+      "baseUrl": "https://aiplatform.googleapis.com/v1/projects/driven-country-453015-a0/locations/global/publishers/google",
+      "api": "google-generative-ai",
+      "apiKey": "!gcloud auth application-default print-access-token",
+      "authHeader": true,
+      "models": [
+        {
+          "id": "gemini-3.1-pro-preview",
+          "name": "Gemini 3.1 Pro (Vertex global)",
+          "reasoning": true,
+          "input": ["text", "image"],
+          "contextWindow": 1048576,
+          "maxTokens": 65536,
+          "cost": { "input": 2.0, "output": 12.0, "cacheRead": 0.20, "cacheWrite": 0.0 }
+        },
+        {
+          "id": "gemini-3.5-flash",
+          "name": "Gemini 3.5 Flash (Vertex global)",
+          "reasoning": true,
+          "input": ["text", "image"],
+          "contextWindow": 1048576,
+          "maxTokens": 65536,
+          "cost": { "input": 1.50, "output": 9.00, "cacheRead": 0.15, "cacheWrite": 0.0 }
+        }
+      ]
     }
   }
 }

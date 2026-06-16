@@ -2,11 +2,12 @@
   "lastChangelogVersion": "0.79.4",
   "quietStartup": true,
   "theme": "pywal",
-  "defaultProvider": "amazon-bedrock",
-  "defaultModel": "eu.anthropic.claude-opus-4-8",
+  "defaultProvider": "vertex-global",
+  "defaultModel": "gemini-3.5-flash",
   "enabledModels": [
     "eu.anthropic.claude-sonnet-4-6",
-    "eu.anthropic.claude-opus-4-8"
+    "eu.anthropic.claude-opus-4-8",
+    "vertex-global/gemini-3.5-flash"
   ],
   "packages": [
     "npm:pi-skill-palette",

@@ -17,10 +17,11 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("ags run ~/.config/ags")
     -- Notification daemon
     hl.exec_cmd("swaync")
-    -- Wallpaper daemon (swww lives in ~/.cargo/bin, not on Hyprland's PATH)
-    -- then restore the last pywal-selected wallpaper (path in ~/.cache/wal/wal)
-    hl.exec_cmd(os.getenv("HOME") .. "/.cargo/bin/swww-daemon")
-    hl.exec_cmd("~/.config/hypr/scripts/wallpaper-restore.sh")
+    -- Wallpaper daemon (swww lives in ~/.cargo/bin, not on Hyprland's PATH).
+    -- Run it as a systemd user service so it auto-restarts on crash and logs to
+    -- the journal (journalctl --user -u swww-daemon). The service's
+    -- ExecStartPost restores the last pywal-selected wallpaper.
+    hl.exec_cmd("systemctl --user start swww-daemon.service")
     -- Nextcloud sync
     hl.exec_cmd("nextcloud")
     -- Polkit authentication agent (Hyprland-native)

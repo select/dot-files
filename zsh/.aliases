@@ -16,6 +16,28 @@ alias -s svg="kitty +kitten icat"
 alias opencode='BUN_TMPDIR=~/.opencode/tmp opencode'
 alias btca='BUN_TMPDIR=~/.btca/tmp btca'
 alias zed='__NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia zed'
+
+# Launch pi with a valid AWS (Bedrock) session.
+# Bedrock models are fetched at pi startup via the AWS SDK, so expired creds at
+# launch -> "No models match pattern eu.anthropic.claude-..." warnings. Vertex/
+# gcloud is handled separately by the vertex-auth pi extension (request-time).
+#   - creds still valid  -> run pi directly
+#   - missing / expired  -> spawn a fresh aws-vault session (refreshes SSO,
+#     opens a browser only when needed). Unsetting AWS_VAULT avoids the
+#     "running in an existing aws-vault subshell" error when the current
+#     subshell's creds have expired.
+pi() {
+	local now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+	if [[ -n "$AWS_CREDENTIAL_EXPIRATION" && "$now" < "$AWS_CREDENTIAL_EXPIRATION" ]]; then
+		command pi "$@"
+	elif command -v aws-vault >/dev/null 2>&1; then
+		[[ -n "$AWS_VAULT" ]] && echo "pi: AWS session expired - refreshing via aws-vault exec test-sso..." >&2
+		( unset AWS_VAULT AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_SECURITY_TOKEN AWS_CREDENTIAL_EXPIRATION
+		  aws-vault exec test-sso -- pi "$@" )
+	else
+		command pi "$@"
+	fi
+}
 # bindkey -s '^A' 'term-cheat --filter^M'
 alias c="br"
 alias icat="kitty +kitten icat"

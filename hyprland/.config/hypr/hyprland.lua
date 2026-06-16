@@ -32,8 +32,18 @@ local function display_mode()
 	return "both"
 end
 
--- Samsung present? hl.get_monitor returns nil if the output is not connected.
-local samsung_connected = hl.get_monitor("DP-2") ~= nil
+-- Samsung present? Check DRM sysfs status, which reflects the PHYSICAL
+-- connection regardless of whether Hyprland currently has the output enabled.
+-- (hl.get_monitor("DP-2") returns nil for a *disabled* monitor too, which used
+--  to create a deadlock: once disabled it could never be re-enabled on reload.)
+local function output_connected(name)
+	local p = io.popen("cat /sys/class/drm/*-" .. name .. "/status 2>/dev/null")
+	if not p then return false end
+	local s = p:read("*a") or ""
+	p:close()
+	return s:find("^connected") ~= nil or s:find("\nconnected") ~= nil
+end
+local samsung_connected = output_connected("DP-2")
 -- Without the Samsung connected, the only sensible mode is "laptop".
 local mode              = samsung_connected and display_mode() or "laptop"
 
