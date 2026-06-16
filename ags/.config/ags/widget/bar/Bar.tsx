@@ -12,7 +12,14 @@ import AstalBattery from "gi://AstalBattery";
 import AstalNotifd from "gi://AstalNotifd";
 
 // --- hover-to-swap menu behavior ---
-const BAR_WINDOWS = ["powermenu", "sound", "bluetooth", "wifi", "power", "hyprland-settings"];
+const BAR_WINDOWS = [
+	"powermenu",
+	"sound",
+	"bluetooth",
+	"wifi",
+	"power",
+	"hyprland-settings",
+];
 
 function isAnyBarWindowOpen(): boolean {
 	return BAR_WINDOWS.some((name) => {
@@ -368,7 +375,6 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
 					<box $type="start" class="boxes">
 						<box class="segment left">
 							<Logo />
-							<HyprlandSettingsButton />
 							<Workspaces />
 						</box>
 					</box>
@@ -387,6 +393,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
 							<Wifi />
 							<Messages />
 							<Battery />
+							<HyprlandSettingsButton />
 						</box>
 					</box>
 				</centerbox>
