@@ -6,6 +6,7 @@ This is a **dotfiles repository** containing personal configuration files for va
 
 ```
 dot-files/
+├── ags/              # Aylur's GTK Shell config (TypeScript/GJS/Astal)
 ├── awesome/          # AwesomeWM window manager (Lua)
 ├── git/              # Git configuration
 ├── mpv/              # MPV media player config
@@ -47,6 +48,24 @@ uv run python <script>.py      # Run Python scripts
 ```
 
 **IMPORTANT**: `pip` is denied in this repository. Always use `uv` for Python package management.
+
+### AGS / Astal (Aylur's GTK Shell)
+
+The bar, powermenu, and overlays are managed via AGS (Astal/GTK4 version).
+
+**Environment Setup (needed for introspected operations or running manually)**:
+```bash
+export GI_TYPELIB_PATH="/usr/local/lib/x86_64-linux-gnu/girepository-1.0:$HOME/.local/lib/x86_64-linux-gnu/girepository-1.0"
+export LD_LIBRARY_PATH="$HOME/.local/lib/x86_64-linux-gnu:/usr/local/lib/x86_64-linux-gnu"
+```
+
+**Common Commands**:
+```bash
+ags list                                               # List running shell instances
+ags quit                                               # Safely terminate the running instance
+nohup ags run ~/.config/ags >/dev/null 2>&1 &          # Launch AGS in the background detached
+ags bundle ags/.config/ags/app.ts /tmp/bundle          # Bundle & validate TypeScript compilation
+```
 
 ## Code Style Guidelines
 
@@ -129,6 +148,9 @@ The following operations require explicit confirmation:
 | `zsh/.zshrc`                               | Shell configuration         |
 | `zsh/.aliases`                             | Shell aliases               |
 | `awesome/rc.lua`                           | Window manager config       |
+| `ags/.config/ags/app.ts`                   | AGS main entry point and window registry |
+| `ags/.config/ags/widget/`                  | Custom GTK4 TSX widgets (bar, wifi, power, etc.) |
+| `ags/.config/ags/style.ts`                 | AGS global stylesheet compiler (with wal colors) |
 
 ## Working with Submodules
 
