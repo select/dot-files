@@ -81,8 +81,13 @@ case "$KIND-$MODE" in
 		;;
 	video-screen)
 		FILE="$RECORDINGS/$(date +%Y-%m-%d_%H-%M-%S).mp4"
-		"$GSR" -w portal -f 60 -a default_output \
-			-restore-portal-session yes -k h264 -o "$FILE" &
+		MONITOR=$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name' 2>/dev/null)
+		if [ -n "$MONITOR" ]; then
+			"$GSR" -w "$MONITOR" -f 60 -a default_output -k h264 -o "$FILE" &
+		else
+			"$GSR" -w portal -f 60 -a default_output \
+				-restore-portal-session yes -k h264 -o "$FILE" &
+		fi
 		_wait_and_notify "$FILE"
 		;;
 esac
