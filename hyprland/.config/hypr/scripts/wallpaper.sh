@@ -30,4 +30,4 @@ if ! ~/.cargo/bin/swww query >/dev/null 2>&1; then
 fi
 
 ~/.cargo/bin/swww img "$image_path" --transition-type center --resize crop
-notify-send -a hypr "Wallpaper changed $image_path"
+notify-send -a hypr "Wallpaper changed" "$(basename "$image_path")"
