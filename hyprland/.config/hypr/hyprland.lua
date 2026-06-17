@@ -101,6 +101,11 @@ local menu        = "wofi --show drun --allow-images -W 30% -p Run -D key_expand
 -------------------------------
 ---- ENVIRONMENT VARIABLES ----
 -------------------------------
+-- Zoom (and others) decide whether to use the PipeWire/portal screen-share path
+-- from XDG_SESSION_TYPE. logind doesn't always export it to the systemd/dbus
+-- activation env, so dbus-activated launches (e.g. the zoommtg:// URL handler)
+-- get isNativeWayland=0 and the screen-share portal picker never opens.
+hl.env("XDG_SESSION_TYPE", "wayland")
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
 hl.env("HYPRSHOT_DIR", HOME .. "/Pictures/Screenshots")

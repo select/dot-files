@@ -5,6 +5,11 @@
 -- hyprland.start fires once on launch (equivalent to the old `exec-once`).
 
 hl.on("hyprland.start", function()
+    -- Push XDG_SESSION_TYPE into the systemd/dbus activation environment so
+    -- dbus-activated launches (e.g. Zoom via the zoommtg:// URL handler) inherit
+    -- it. Without this Zoom reports isNativeWayland=0 and the screen-share
+    -- portal picker never opens.
+    hl.exec_cmd("dbus-update-activation-environment --systemd XDG_SESSION_TYPE")
     -- Load enabled hyprpm plugins (e.g. dynamic-cursors) on startup.
     -- Must run first so the plugin drives the forced software cursor
     -- (no_hardware_cursors = true) instead of it freezing mid-screen.
