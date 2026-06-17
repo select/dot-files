@@ -88,10 +88,6 @@ export default function Wifi(gdkmonitor: Gdk.Monitor) {
 			$={(self) => {
 				self.connect("notify::visible", () => {
 					setRevealed(self.visible)
-					// Automatically scan when window becomes visible
-					if (self.visible && wifi.enabled) {
-						wifi.scan()
-					}
 				})
 			}}
 		>

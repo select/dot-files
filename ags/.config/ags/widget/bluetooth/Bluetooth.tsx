@@ -19,8 +19,69 @@ export default function Bluetooth(gdkmonitor: Gdk.Monitor) {
 	const marginEnd = Math.max(0, Math.round((geo.width - barWidth) / 2))
 
 	const bt = AstalBluetooth.get_default()!
-	const devices = createBinding(bt, "devices")
 	const isPowered = createBinding(bt, "isPowered")
+
+	const [sorted, setSorted] = createState<AstalBluetooth.Device[]>([])
+
+	const updateSorted = () => {
+		const devs = bt.get_devices() || []
+		const sortedList = [...devs].sort((a, b) => {
+			if (a.connected && !b.connected) return -1
+			if (!a.connected && b.connected) return 1
+			
+			if (a.connecting && !b.connecting) return -1
+			if (!a.connecting && b.connecting) return 1
+
+			if (a.paired && !b.paired) return -1
+			if (!a.paired && b.paired) return 1
+
+			const nameA = a.alias || a.name || ""
+			const nameB = b.alias || b.name || ""
+			return nameA.localeCompare(nameB)
+		})
+		setSorted(sortedList)
+	}
+
+	const deviceConnections = new Map<AstalBluetooth.Device, number[]>()
+
+	const trackDevice = (d: AstalBluetooth.Device) => {
+		if (deviceConnections.has(d)) return
+		
+		const c1 = d.connect("notify::connected", updateSorted)
+		const c2 = d.connect("notify::connecting", updateSorted)
+		const c3 = d.connect("notify::paired", updateSorted)
+		deviceConnections.set(d, [c1, c2, c3])
+	}
+
+	const untrackDevice = (d: AstalBluetooth.Device) => {
+		const conns = deviceConnections.get(d)
+		if (conns) {
+			for (const c of conns) {
+				try {
+					d.disconnect(c)
+				} catch {
+					// Silent catch
+				}
+			}
+			deviceConnections.delete(d)
+		}
+	}
+
+	const syncDevices = () => {
+		const currentDevs = bt.get_devices() || []
+		for (const d of deviceConnections.keys()) {
+			if (!currentDevs.includes(d)) {
+				untrackDevice(d)
+			}
+		}
+		for (const d of currentDevs) {
+			trackDevice(d)
+		}
+		updateSorted()
+	}
+
+	bt.connect("notify::devices", syncDevices)
+	syncDevices()
 
 	// State for tracking discovery state of active adapter
 	const [isDiscovering, setIsDiscovering] = createState(false)
@@ -109,10 +170,8 @@ export default function Bluetooth(gdkmonitor: Gdk.Monitor) {
 			$={(self) => {
 				self.connect("notify::visible", () => {
 					setRevealed(self.visible)
-					// Automatically scan when window becomes visible, if powered on
-					if (self.visible && bt.is_powered && bt.adapter) {
-						bt.adapter.start_discovery()
-					} else if (!self.visible && bt.adapter && bt.adapter.discovering) {
+					// Stop discovery if window is hidden and it's scanning
+					if (!self.visible && bt.adapter && bt.adapter.discovering) {
 						bt.adapter.stop_discovery()
 					}
 				})
@@ -203,11 +262,11 @@ export default function Bluetooth(gdkmonitor: Gdk.Monitor) {
 											marginBottom={12}
 											marginStart={12}
 											marginEnd={12}
-											visible={createBinding(bt, "devices")((devs) => devs.length === 0)}
+											visible={sorted((devs) => devs.length === 0)}
 										>
 											<label class="bluetooth-empty-text" label="No devices found" />
 										</box>
-										<For each={devices}>
+										<For each={sorted}>
 											{(d) => {
 												const connected = createBinding(d, "connected")
 												const connecting = createBinding(d, "connecting")
