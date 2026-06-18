@@ -38,6 +38,16 @@ def darken(color, amount):
     return blend(color, "#000000", amount)
 
 
+def is_dark(color):
+    """Determine if a hex color is dark."""
+    try:
+        r, g, b = hex_to_rgb(color)
+        luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255
+        return luminance < 0.5
+    except Exception:
+        return True
+
+
 def main():
     with open(COLORS_FILE) as f:
         wal = json.load(f)
@@ -46,18 +56,20 @@ def main():
     fg = wal["special"]["foreground"]
     colors = wal["colors"]
 
-    # Generate background variants by slightly tinting bg with accent colors
-    # bg_light: slightly lighter than bg (for selected items)
-    # bg_subtle: barely visible lift from bg (for message/tool boxes)
-    # bg_success: bg tinted with green (color2)
-    # bg_error: bg tinted with red (color1)
-    bg_light = lighten(bg, 0.12)
-    bg_subtle = lighten(bg, 0.06)
-    bg_success = blend(bg, colors["color2"], 0.08)
-    bg_error = blend(bg, colors["color1"], 0.08)
-    bg_pending = blend(bg, colors["color4"], 0.06)
-    bg_custom = blend(bg, colors["color5"], 0.06)
-    bg_user = lighten(bg, 0.04)
+    # Use a clean, neutral dimmed black/gray base for the boxes to keep them readable and elegant.
+    if is_dark(bg):
+        box_base = "#161618"  # Beautiful clean dimmed gray-black for boxes
+    else:
+        box_base = "#f4f4f6"  # Clean light-gray for light mode boxes
+
+    # Generate background variants by slightly tinting/lightening our clean box_base
+    bg_light = lighten(box_base, 0.08) if is_dark(bg) else darken(box_base, 0.08)
+    bg_subtle = lighten(box_base, 0.03) if is_dark(bg) else darken(box_base, 0.03)
+    bg_success = blend(box_base, colors["color2"], 0.06)
+    bg_error = blend(box_base, colors["color1"], 0.06)
+    bg_pending = blend(box_base, colors["color4"], 0.05)
+    bg_custom = blend(box_base, colors["color5"], 0.05)
+    bg_user = lighten(box_base, 0.04) if is_dark(bg) else darken(box_base, 0.04)
 
     theme = {
         "$schema": "https://raw.githubusercontent.com/badlogic/pi-mono/main/packages/coding-agent/src/modes/interactive/theme/theme-schema.json",
