@@ -1,9 +1,9 @@
 {
-  "lastChangelogVersion": "0.79.4",
+  "lastChangelogVersion": "0.80.2",
   "quietStartup": true,
   "theme": "pywal",
-  "defaultProvider": "vertex-global",
-  "defaultModel": "gemini-3.5-flash",
+  "defaultProvider": "amazon-bedrock",
+  "defaultModel": "eu.anthropic.claude-sonnet-4-6",
   "enabledModels": [
     "eu.anthropic.claude-sonnet-4-6",
     "eu.anthropic.claude-opus-4-8",

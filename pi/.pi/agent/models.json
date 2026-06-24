@@ -21,7 +21,7 @@
     "vertex": {
       "baseUrl": "https://europe-west1-aiplatform.googleapis.com/v1/projects/driven-country-453015-a0/locations/europe-west1/publishers/google",
       "api": "google-generative-ai",
-      "apiKey": "!gcloud auth application-default print-access-token",
+      "apiKey": "!for i in 1 2 3; do gcloud auth application-default print-access-token && exit 0 || sleep 0.5; done; exit 1",
       "authHeader": true,
       "models": [
         {
@@ -47,7 +47,7 @@
     "vertex-global": {
       "baseUrl": "https://aiplatform.googleapis.com/v1/projects/driven-country-453015-a0/locations/global/publishers/google",
       "api": "google-generative-ai",
-      "apiKey": "!gcloud auth application-default print-access-token",
+      "apiKey": "!for i in 1 2 3; do gcloud auth application-default print-access-token && exit 0 || sleep 0.5; done; exit 1",
       "authHeader": true,
       "models": [
         {
