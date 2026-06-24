@@ -14,6 +14,7 @@ import Bluetooth from "./widget/bluetooth/Bluetooth"
 import Wifi from "./widget/wifi/Wifi"
 import Power from "./widget/power/Power"
 import HyprlandSettings from "./widget/hyprland/HyprlandSettings"
+import Temperature from "./widget/temperature/Temperature"
 
 app.start({
 	main() {
@@ -49,6 +50,7 @@ app.start({
 					Wifi(monitor),
 					Power(monitor),
 					HyprlandSettings(monitor),
+					Temperature(monitor),
 				])
 			}
 

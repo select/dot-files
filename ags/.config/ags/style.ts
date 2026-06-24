@@ -12,6 +12,7 @@ import { bluetoothCss } from "./widget/bluetooth/style";
 import { wifiCss } from "./widget/wifi/style";
 import { powerCss } from "./widget/power/style";
 import { hyprlandSettingsCss } from "./widget/hyprland/style";
+import { temperatureCss } from "./widget/temperature/style";
 
 export function css(p: Palette): string {
 	return `
@@ -27,5 +28,6 @@ export function css(p: Palette): string {
 	${wifiCss(p)}
 	${powerCss(p)}
 	${hyprlandSettingsCss(p)}
+	${temperatureCss(p)}
 	`;
 }
