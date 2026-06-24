@@ -14,6 +14,8 @@ export function mediaCss(p: Palette): string {
 		font-family: "DejaVuSansM Nerd Font", "Symbols Nerd Font", sans-serif;
 		font-size: 13px;
 	}
+	/* full-gap wrapper: transparent, centers the pill within the gap */
+	.media-gap { background: transparent; }
 	/* translucent main container, same as the bar's main bg */
 	.media-inner {
 		background-color: ${alpha("#000000", 0.55)};
@@ -21,6 +23,7 @@ export function mediaCss(p: Palette): string {
 		padding: 2px 4px 2px 14px;
 		min-height: 28px;
 	}
+	/* title fills the pill width (ellipsisizing), controls pinned right */
 	.media-title { margin-right: 8px; }
 	.media-song {
 		color: ${text};
