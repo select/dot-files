@@ -68,6 +68,14 @@ Brand Colors (petrol, teal, fog, etc.)
 | `text-warning`, `text-yellow-500`            | `text-warning`    | Warning state         |
 | `text-info`, `text-blue-500`                 | `text-info`       | Info state            |
 
+### General CSS/Tailwind/Uno Guidelines
+
+- **Pill Shapes over Slightly Rounded Corners:** Always prefer pill shapes (`rounded-full`) over standard slightly rounded edges for buttons, badges, chips, single-line input field containers (text/select), progress bars, toggle switch tracks/knobs, and other compact interactive/static components.
+- **Card Border Radius:** Cards and large structurally prominent panels must have a border radius of `rounded-3xl` (`rounded-24px`).
+- **Intermediate Containers:** Multi-line textareas, sidebars, and larger details pages use `rounded-2xl` where perfect pill shapes are structurally impossible.
+- **Minor Containers:** Small utility overlays like tooltips use `rounded-lg` with contextual compact sizing.
+- **Interactive States & Transitions:** Standardize transitions for interactive hover and focus actions using `transition-colors duration-150` or `transition-all duration-200`.
+
 ## Workflow
 
 > Execute the following steps in order, top to bottom:
