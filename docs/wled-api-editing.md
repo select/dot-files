@@ -19,6 +19,12 @@ palettes, preset structure, and the mismatch between firmware and web-UI indexin
 
 # Authentication
 
+> **Note on palette naming:** WLED does not support naming custom palettes. In the UI they always appear as `~ Custom 0 ~`, `~ Custom 1 ~`, etc. The human name lives in the **preset**, not the palette file.
+
+---
+
+# Authentication
+
 The `/edit` filesystem endpoint requires a PIN unlock — it does **not** use HTTP Basic Auth.
 Unlock by POSTing to `/settings/sec` with the PIN as a form field, which sets a session cookie.
 
@@ -37,11 +43,12 @@ The `/json/state` and `/json/info` endpoints require **no auth**.
 
 The correct upload endpoint is `/upload` (multipart POST), **not** `/edit`.
 `/edit` is for reading and deleting; `/upload` is for writing files.
+The form field name must be **`data`** (matching what `cpal.htm` uses):
 
 ```bash
 curl -c /tmp/wled.txt -b /tmp/wled.txt \
   -X POST http://WLED_IP/upload \
-  -F "file=@/tmp/palette0.json;filename=/palette0.json"
+  -F "data=@/tmp/palette0.json;filename=/palette0.json"
 ```
 
 ---
@@ -60,34 +67,30 @@ Format is a flat array of alternating `position` (0–255) and `"rrggbb"` hex st
 Up to 16 stops per palette. The gradient wraps — first and last colors should transition
 gracefully or the wrap-point will be visible as a jump.
 
-## ⚠️ Pitfall: ESP8266 only loads palette0.json
+## ⚠️ Pitfall: Custom palette indices count down from 255
 
-Despite `cpalcount` reporting the number of palette **files** on the filesystem, the ESP8266
-build only has RAM to load **one** custom palette (`palette0.json`) into the effect engine.
+Both the firmware and the web UI (`index.js`) use the **same** index scheme for custom palettes —
+counting down from 255. With the built-in palette list ending at index 70:
 
-- Setting `pal: 72`, `pal: 73`, etc. silently reverts to `pal: 0` (Default).
-- Only `pal: 71` (→ palette0.json) accepts and holds a set value via the firmware.
-- Confirmed on WLED 0.15.1 / ESP8266 with `cpalcount: 3` yet only slot 71 functioning.
+| File | Index to use |
+|------|--------------|
+| `palette0.json` | **255** |
+| `palette1.json` | **254** |
+| `palette2.json` | **253** |
 
-**Rule:** Always write your working palette to `palette0.json`. The other slots are inert on ESP8266.
+All custom palette files load correctly on ESP8266 (confirmed with `cpalcount: 3`,
+all three slots responding to their respective `255`/`254`/`253` index).
 
-## ⚠️ Pitfall: Firmware vs. Web UI palette index mismatch
-
-The firmware assigns custom palettes sequential IDs starting at the end of the built-in list:
-- `palette0.json` → firmware index **71** (with 71 built-in palettes)
-
-The web UI (`index.js`) renders custom palettes with IDs counting **down from 255**:
-- Custom 0 → DOM `data-id="255"`
-- Custom 1 → DOM `data-id="254"`
-
-If a preset stores `pal: 71` (firmware index), the UI calls `updateSelectedPalette(71)`,
-searches for `.lstI[data-id="71"]` in the DOM, finds nothing, and crashes:
+Setting `pal: 71/72/73` (sequential from end of built-ins) does **not** work — those
+indices resolve to nothing and the value silently reverts to `0` (Default palette).
 
 ```
 TypeError: can't access property "querySelector", n is null
 ```
+This crash occurs when a preset stores the wrong index (e.g. `pal: 71`), because
+`updateSelectedPalette(71)` searches for `.lstI[data-id="71"]` which doesn't exist in the DOM.
 
-**Rule:** Always store `pal: 255` (UI index) in presets for `palette0.json`, not the firmware index.
+**Rule:** Always use `pal: 255` for `palette0.json`, `pal: 254` for `palette1.json`, etc.
 
 ## Reboot required after palette file change
 
