@@ -2,7 +2,6 @@
 type: Playbook
 title: WLED API Editing — Palettes, Presets & Pitfalls
 description: How to create and edit WLED custom palettes and presets via the HTTP API, including all the non-obvious failure modes encountered with ESP8266 WLED 0.15.1.
-resource: http://192.168.1.189
 tags: [wled, led, smart-home, api, schreibtisch]
 timestamp: 2026-06-30T00:00:00Z
 ---
@@ -10,7 +9,8 @@ timestamp: 2026-06-30T00:00:00Z
 # Overview
 
 WLED exposes a JSON API and a filesystem editor (`/edit`) for full programmatic control.
-The device at `192.168.1.189` ("Schreibtisch") runs WLED **0.15.1** on an **ESP8266** with 80 LEDs.
+The "Schreibtisch" device runs WLED **0.15.1** on an **ESP8266** with 80 LEDs.
+The IP is stored in `~/.config/deckblaster.env` as `WLED_SCHREIBTISCH_IP`.
 
 Interacting with WLED via the API has several non-obvious pitfalls, especially around custom
 palettes, preset structure, and the mismatch between firmware and web-UI indexing.
@@ -23,11 +23,14 @@ The `/edit` filesystem endpoint requires a PIN unlock — it does **not** use HT
 Unlock by POSTing to `/settings/sec` with the PIN as a form field, which sets a session cookie.
 
 ```bash
+# Read IP from env file
+WLED_IP=$(grep WLED_SCHREIBTISCH_IP ~/.config/deckblaster.env | cut -d= -f2)
+
 curl -c /tmp/wled.txt -b /tmp/wled.txt \
-  -X POST http://WLED_IP/settings/sec -d "PIN=<pin>"
+  -X POST http://$WLED_IP/settings/sec -d "PIN=<pin>"
 
 # Then pass the cookie jar to all subsequent /edit requests
-curl -c /tmp/wled.txt -b /tmp/wled.txt "http://WLED_IP/edit?list=/"
+curl -c /tmp/wled.txt -b /tmp/wled.txt "http://$WLED_IP/edit?list=/"
 ```
 
 The `/json/state` and `/json/info` endpoints require **no auth**.
@@ -199,7 +202,9 @@ For a slow, dark-patch-free ambient effect: **Flow (`fx=110`), `sx=10–20`, `ix
 # Quick Reference
 
 ```bash
-WLED=http://192.168.1.189
+# IP is in ~/.config/deckblaster.env as WLED_SCHREIBTISCH_IP
+WLED=http://$(grep WLED_SCHREIBTISCH_IP ~/.config/deckblaster.env | cut -d= -f2)
+
 
 # Current state
 curl -s $WLED/json/state | jq '.seg[0] | {fx,pal,sx,ix}'
