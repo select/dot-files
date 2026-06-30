@@ -31,6 +31,8 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("nextcloud")
     -- Polkit authentication agent (Hyprland-native)
     hl.exec_cmd("systemctl --user start hyprpolkitagent.service")
+    -- WLED calendar meeting alert service
+    hl.exec_cmd("systemctl --user start wled-meeting-alert.service")
     -- Idle / lock management (hypridle reads ~/.config/hypr/hypridle.conf)
     hl.exec_cmd("hypridle")
     -- Network manager applet
