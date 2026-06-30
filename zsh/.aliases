@@ -33,7 +33,15 @@ pi() {
 	elif command -v aws-vault >/dev/null 2>&1; then
 		[[ -n "$AWS_VAULT" ]] && echo "pi: AWS session expired - refreshing via aws-vault exec test-sso..." >&2
 		( unset AWS_VAULT AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_SECURITY_TOKEN AWS_CREDENTIAL_EXPIRATION
-		  aws-vault exec test-sso -- pi "$@" )
+		  local real_pi
+		  if [[ -n "$PNPM_HOME" && -x "$PNPM_HOME/pi" ]]; then
+		  	real_pi="$PNPM_HOME/pi"
+		  elif [[ -n "$PNPM_HOME" && -x "$PNPM_HOME/bin/pi" ]]; then
+		  	real_pi="$PNPM_HOME/bin/pi"
+		  else
+		  	real_pi="pi"
+		  fi
+		  aws-vault exec test-sso -- "$real_pi" "$@" )
 	else
 		command pi "$@"
 	fi

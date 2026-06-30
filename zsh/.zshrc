@@ -23,10 +23,14 @@ export PATH="$HOME/.poetry/bin:$HOME/snap/bun-js/81/.bun/bin:$PATH"
 export GI_TYPELIB_PATH="/usr/local/lib/x86_64-linux-gnu/girepository-1.0:$HOME/.local/lib/x86_64-linux-gnu/girepository-1.0${GI_TYPELIB_PATH:+:$GI_TYPELIB_PATH}"
 export LD_LIBRARY_PATH="$HOME/.local/lib/x86_64-linux-gnu:/usr/local/lib/x86_64-linux-gnu${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 # pnpm
-export PNPM_HOME="$HOME/.local/share/pnpm"
+export PNPM_HOME="/home/linux-falko/.local/share/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+case ":$PATH:" in
+  *":$PNPM_HOME/bin:"*) ;;
+  *) export PATH="$PNPM_HOME/bin:$PATH" ;;
 esac
 # pnpm end
 # tabtab source for packages
