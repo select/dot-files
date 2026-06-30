@@ -123,7 +123,7 @@ function Clock() {
 		<button
 			class="clock"
 			tooltipText={date}
-			onClicked={() => execAsync(["gnome-calendar"]).catch(() => {})}
+			onClicked={() => execAsync(["bash", "-c", "~/.config/hypr/scripts/open-calendar.sh"]).catch(() => {})}
 		>
 			<label label={time} />
 		</button>
