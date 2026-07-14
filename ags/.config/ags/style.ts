@@ -13,6 +13,7 @@ import { wifiCss } from "./widget/wifi/style";
 import { powerCss } from "./widget/power/style";
 import { hyprlandSettingsCss } from "./widget/hyprland/style";
 import { temperatureCss } from "./widget/temperature/style";
+import { soilMoistureCss } from "./widget/soilmoisture/style";
 
 export function css(p: Palette): string {
 	return `
@@ -29,5 +30,6 @@ export function css(p: Palette): string {
 	${powerCss(p)}
 	${hyprlandSettingsCss(p)}
 	${temperatureCss(p)}
+	${soilMoistureCss(p)}
 	`;
 }

@@ -15,6 +15,7 @@ import Wifi from "./widget/wifi/Wifi"
 import Power from "./widget/power/Power"
 import HyprlandSettings from "./widget/hyprland/HyprlandSettings"
 import Temperature from "./widget/temperature/Temperature"
+import SoilMoisture from "./widget/soilmoisture/SoilMoisture"
 
 app.start({
 	main() {
@@ -51,6 +52,7 @@ app.start({
 					Power(monitor),
 					HyprlandSettings(monitor),
 					Temperature(monitor),
+					SoilMoisture(monitor),
 				])
 			}
 
