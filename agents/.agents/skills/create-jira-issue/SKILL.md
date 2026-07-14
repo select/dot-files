@@ -11,6 +11,7 @@ This skill guides you through creating or updating a Jira issue on the EN (Engin
 
 - **Credentials**: Loaded from `~/.config/atlassian-jira/credentials.json` or environment variables (JIRA_URL, JIRA_USERNAME, JIRA_API_TOKEN)
 - **Supported project keys**: EN, AW
+- **skillDir**: this skills directory
 
 ## Instructions
 
@@ -102,14 +103,14 @@ When creating an issue, you must gather information for the issue template which
    Simple example:
    ```bash
    echo '{"board": "EN", "title": "...", "context": "...", "definitionOfDone": ["...", "..."], "issueType": "Task"}' | \
-     bun {baseDir}/scripts/create-issue.ts --stdin
+     bun {skillDir}/scripts/create-issue.ts --stdin
    ```
 
    Complex example (with multiline content, special characters):
    ```bash
    # 1. Write JSON to temp file using write tool
    # 2. Pipe file to script
-   cat {cwd}/.issue-input.json | bun {baseDir}/scripts/create-issue.ts --stdin
+   cat {cwd}/.issue-input.json | bun {skillDir}/scripts/create-issue.ts --stdin
    # 3. Clean up temp file
    rm {cwd}/.issue-input.json
    ```
@@ -220,7 +221,7 @@ When creating issues with complex content (multiline text, special characters, q
 # File: {cwd}/.issue-input.json
 
 # Step 2: Pipe to script
-cat {cwd}/.issue-input.json | bun {baseDir}/scripts/create-issue.ts --stdin
+cat {cwd}/.issue-input.json | bun {skillDir}/scripts/create-issue.ts --stdin
 
 # Step 3: Clean up
 rm {cwd}/.issue-input.json
@@ -275,7 +276,7 @@ When asked to update or fix formatting on an existing issue:
 
 ```bash
 # Write to temp file with issueKey
-cat {cwd}/.issue-input.json | bun {baseDir}/scripts/create-issue.ts --stdin --update
+cat {cwd}/.issue-input.json | bun {skillDir}/scripts/create-issue.ts --stdin --update
 ```
 
 Example JSON for update:

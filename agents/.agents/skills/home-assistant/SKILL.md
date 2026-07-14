@@ -1,6 +1,6 @@
 ---
 name: home-assistant
-description: Control Home Assistant devices, lights, switches, and media. Look up room/device states. Use when the user asks to turn on/off lights, check sensors, control media players, or interact with any smart home device.
+description: Control Home Assistant devices, lights, switches, and media. Look up room/device states. Use when the user asks to turn on/off lights, check sensors, control media players, or interact with any smart home device. Also covers the WLED Schreibtisch strip (palettes, presets, PIN unlock).
 ---
 
 # Home Assistant Skill
@@ -45,6 +45,16 @@ mcp({ tool: "homeassistant_GetLiveContext", args: '{}' })
 
 The response lists every entity with its `areas` field. Extract unique area values to get all rooms.
 Use device `names` and `domain` fields to find controllable entities within a room.
+
+## WLED (Schreibtisch strip — not in HA)
+
+The WLED desk strip is controlled directly over its own HTTP API (it is not a HA entity).
+
+> **⚠️ READ FIRST:** before doing *anything* with WLED (palettes, presets, the `/edit`
+> filesystem endpoint, the device PIN, or any state change), you **must** read
+> [resource/wled.md](resource/wled.md). It documents the PIN/cookie unlock, the read-only
+> `/json/cpal` trap, the `255-j` custom-palette index scheme, the upload/reboot flow, and
+> the preset pitfalls — all of which silently fail or crash the web UI if ignored.
 
 ## Beyond MCP: REST API & WebSocket API
 
