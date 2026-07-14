@@ -11,13 +11,16 @@ LOG_FILE = os.path.expanduser("~/.config/hypr/state/zoom-popups.log")
 os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
 
 def ensure_hyprland_signature():
-    """If HYPRLAND_INSTANCE_SIGNATURE is missing (e.g. service started before
-    Hyprland exported it into the systemd user manager), auto-discover it by
-    looking at the socket directories under XDG_RUNTIME_DIR/hypr."""
-    if os.environ.get("HYPRLAND_INSTANCE_SIGNATURE"):
-        return
+    """If HYPRLAND_INSTANCE_SIGNATURE is missing or points to a non-existent
+    directory under XDG_RUNTIME_DIR/hypr (e.g. Hyprland crashed and restarted,
+    leaving the service with a stale signature), auto-discover the active one."""
+    current_sig = os.environ.get("HYPRLAND_INSTANCE_SIGNATURE")
     runtime_dir = os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}")
     hypr_dir = os.path.join(runtime_dir, "hypr")
+
+    if current_sig and os.path.isdir(os.path.join(hypr_dir, current_sig)):
+        return
+
     try:
         entries = [d for d in os.listdir(hypr_dir) if os.path.isdir(os.path.join(hypr_dir, d))]
     except FileNotFoundError:
@@ -39,6 +42,7 @@ def log(msg):
         f.write(formatted + "\n")
 
 def get_zoom_clients():
+    ensure_hyprland_signature()
     try:
         output = subprocess.check_output(["hyprctl", "clients", "-j"], text=True)
         clients = json.loads(output)
