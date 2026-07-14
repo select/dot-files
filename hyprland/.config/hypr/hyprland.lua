@@ -298,16 +298,17 @@ hl.window_rule({ match = { title = "(Nextcloud)" }, move = { 1450, 590 } })
 
 -- Zoom: float popups/toolbars only (main meeting window stays tiled)
 -- Native Wayland Zoom uses class "Zoom"; toolbars have these titles.
-local zoomPopups = { class = "^(Zoom)$", title = "(as_toolbar)|(annotate_toolbar)|(zoom_linux_float_video_window)|(menu window)|(confirm window)|(Leave meeting panel)" }
+local zoomPopups = { class = "^(Zoom)$", title = "(as_toolbar)|(annotate_toolbar)|(zoom_linux_float_video_window)|(menu window)|(confirm window)|(Leave meeting panel)|(Zoom Workplace)|(meeting bottombar popup)|(^zoom$)" }
 hl.window_rule({ match = zoomPopups, float = true })
 -- Keep transient popups (menus / breakout-join) from vanishing on mouse move
-hl.window_rule({ match = { class = "^(Zoom)$", title = "(menu window)|(confirm window)|(Leave meeting panel)" }, stay_focused = true })
+hl.window_rule({ match = { class = "^(Zoom)$", title = "(menu window)|(confirm window)|(Leave meeting panel)|(meeting bottombar popup)" }, stay_focused = true })
 -- Pin toolbar + floating video/participants view so they show on all workspaces
 hl.window_rule({ match = { class = "^(Zoom)$", title = "(as_toolbar)|(annotate_toolbar)|(zoom_linux_float_video_window)" }, pin = true })
 -- Default positions (monitor-relative)
 hl.window_rule({ match = { class = "^(Zoom)$", title = "(as_toolbar)" }, move = { 1127, 17 } })
 hl.window_rule({ match = { class = "^(Zoom)$", title = "(zoom_linux_float_video_window)" }, move = { 2821, 256 } })
 hl.window_rule({ match = { class = "^(Zoom)$", title = "(annotate_toolbar)" }, move = { 2893, 1560 } })
+hl.window_rule({ match = { class = "^(Zoom)$", title = "^(meeting bottombar popup)$" }, size = { 500, 600 } })
 
 -- Layer rules
 hl.layer_rule({ match = { namespace = "wofi" }, blur = true })
