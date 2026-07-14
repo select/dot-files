@@ -22,8 +22,9 @@ export PATH="$HOME/.poetry/bin:$HOME/snap/bun-js/81/.bun/bin:$PATH"
 # AGS/Astal typelibs (meson installs under /usr/local; AstalTray under ~/.local)
 export GI_TYPELIB_PATH="/usr/local/lib/x86_64-linux-gnu/girepository-1.0:$HOME/.local/lib/x86_64-linux-gnu/girepository-1.0${GI_TYPELIB_PATH:+:$GI_TYPELIB_PATH}"
 export LD_LIBRARY_PATH="$HOME/.local/lib/x86_64-linux-gnu:/usr/local/lib/x86_64-linux-gnu${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-# pnpm
-export PNPM_HOME="/home/linux-falko/.local/share/pnpm"
+
+# ========= PNPM =========
+export PNPM_HOME="$HOME/.local/share/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
@@ -33,6 +34,7 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME/bin:$PATH" ;;
 esac
 # pnpm end
+
 # tabtab source for packages
 # uninstall by removing these lines
 [[ -f ~/.config/tabtab/zsh/__tabtab.zsh ]] && . ~/.config/tabtab/zsh/__tabtab.zsh || true
@@ -98,35 +100,8 @@ if [ -f ~/.cache/wal/sequences ]; then
   cat ~/.cache/wal/sequences
 fi
 
-# Alias to refresh pywal colors in current shell
-walrefresh() {
-  cat ~/.cache/wal/sequences
-  bash ~/.config/wal/postrun/wal-gnome.sh 2>/dev/null
-  bash ~/.config/wal/postrun/pywalfox-update.sh 2>/dev/null
-}
+# AsyncAPI CLI Autocomplete
 
-# Function to run wal and refresh all tmux panes
-walset() {
-  wal -s "$@" && cat ~/.cache/wal/sequences
-  # Generate pi-theme.json from pywal colors
-  python3 ~/.config/wal/postrun/pi-theme.py 2>/dev/null
-  # Apply wal colors to GNOME Shell top bar
-  bash ~/.config/wal/postrun/wal-gnome.sh 2>/dev/null
-  # Send updated colors to Firefox via pywalfox
-  bash ~/.config/wal/postrun/pywalfox-update.sh 2>/dev/null
-  # Reload tmux config and colors
-  tmux source-file ~/.cache/wal/colors-tmux.conf 2>/dev/null
-  tmux source-file ~/.config/tmux/tmux.conf 2>/dev/null
-  if [ -n "$TMUX" ]; then
-    # Refresh all tmux panes
-    tmux list-panes -s -F '#{session_name}:#{window_index}.#{pane_index}' | \
-    xargs -I PANE tmux send-keys -t PANE 'walrefresh' Enter
-  fi
-}
+ASYNCAPI_AC_ZSH_SETUP_PATH=/home/linux-falko/.cache/@asyncapi/cli/autocomplete/zsh_setup && test -f $ASYNCAPI_AC_ZSH_SETUP_PATH && source $ASYNCAPI_AC_ZSH_SETUP_PATH; # asyncapi autocomplete setup
 
-# # Restore KITTY_WINDOW_ID inside tmux (lost when tmux session predates kitty launch)
-# if [[ -z "$KITTY_WINDOW_ID" && -n "$TMUX" ]]; then
-#   _kwid=$(tmux show-environment KITTY_WINDOW_ID 2>/dev/null | cut -d= -f2)
-#   [[ -n "$_kwid" ]] && export KITTY_WINDOW_ID="$_kwid"
-#   unset _kwid
-# fi
+

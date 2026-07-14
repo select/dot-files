@@ -34,9 +34,7 @@ pi() {
 		[[ -n "$AWS_VAULT" ]] && echo "pi: AWS session expired - refreshing via aws-vault exec test-sso..." >&2
 		( unset AWS_VAULT AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_SECURITY_TOKEN AWS_CREDENTIAL_EXPIRATION
 		  local real_pi
-		  if [[ -n "$PNPM_HOME" && -x "$PNPM_HOME/pi" ]]; then
-		  	real_pi="$PNPM_HOME/pi"
-		  elif [[ -n "$PNPM_HOME" && -x "$PNPM_HOME/bin/pi" ]]; then
+		  if [[ -n "$PNPM_HOME" && -x "$PNPM_HOME/bin/pi" ]]; then
 		  	real_pi="$PNPM_HOME/bin/pi"
 		  else
 		  	real_pi="pi"
@@ -70,8 +68,8 @@ alias 'gcn!'='git commit -v --no-edit --amend "-S"'
 alias p="pnpm"
 alias nodei='node --inspect --inspect-brk'
 alias t="task"
-alias grm="git rebase main"
-alias grmp="git rebase main;gpf"
+alias grm="git fetch origin main;git rebase origin/main"
+alias grmp="grm;gpf"
 alias ghpc="gh pr create"
 alias ghps="gh pr status"
 
