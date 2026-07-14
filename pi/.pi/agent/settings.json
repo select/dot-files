@@ -1,20 +1,24 @@
 {
-  "lastChangelogVersion": "0.80.2",
+  "lastChangelogVersion": "0.80.3",
   "quietStartup": true,
   "theme": "pywal",
   "defaultProvider": "amazon-bedrock",
-  "defaultModel": "eu.anthropic.claude-sonnet-4-6",
+  "defaultModel": "eu.anthropic.claude-sonnet-5",
   "enabledModels": [
     "eu.anthropic.claude-sonnet-4-6",
     "eu.anthropic.claude-opus-4-8",
-    "vertex-global/gemini-3.5-flash"
+    "eu.anthropic.claude-sonnet-5",
+    "global.anthropic.claude-fable-5",
+    "vertex-global/gemini-3.5-flash",
+    "zai.glm-5"
   ],
   "packages": [
     "npm:pi-skill-palette",
     "npm:@aliou/pi-guardrails",
     "npm:lsp-pi",
     "npm:token-rate-pi",
-    "npm:pi-mcp-adapter"
+    "npm:pi-mcp-adapter",
+    "npm:pi-rtk-optimizer"
   ],
   "defaultThinkingLevel": "medium"
 }

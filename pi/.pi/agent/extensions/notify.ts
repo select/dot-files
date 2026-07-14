@@ -55,6 +55,18 @@ const extractLastAssistantText = (
 	return null;
 };
 
+const getLastAssistantMessage = (
+	messages: Array<{ role?: string; content?: unknown; errorMessage?: string }>,
+): { role?: string; content?: unknown; errorMessage?: string } | null => {
+	for (let i = messages.length - 1; i >= 0; i--) {
+		const message = messages[i];
+		if (message?.role === "assistant") {
+			return message;
+		}
+	}
+	return null;
+};
+
 const plainMarkdownTheme: MarkdownTheme = {
 	heading: (text) => text,
 	link: (text) => text,
@@ -96,6 +108,18 @@ const formatNotification = (
 
 export default function (pi: ExtensionAPI) {
 	pi.on("agent_end", async (event) => {
+		const lastMessage = getLastAssistantMessage(event.messages ?? []);
+		if (lastMessage?.errorMessage) {
+			const errStr = lastMessage.errorMessage;
+			if (
+				errStr.includes("RESOURCE_EXHAUSTED") ||
+				errStr.includes("Too Many Requests") ||
+				errStr.includes("429")
+			) {
+				return;
+			}
+		}
+
 		const lastText = extractLastAssistantText(event.messages ?? []);
 		const { title, body } = formatNotification(lastText);
 		notify(title, body);
