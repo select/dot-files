@@ -132,7 +132,6 @@ export interface SegmentContext {
   contextPercent: number;
   contextWindow: number;
   autoCompactEnabled: boolean;
-  usingSubscription: boolean;
   sessionStartTime: number;
   
   // Git

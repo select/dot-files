@@ -1,0 +1,51 @@
+# Herdr keybindings matching tmux/.config/tmux/tmux.conf.
+# Ctrl-A enters prefix mode. It intentionally takes precedence over the
+# shell/editor "beginning of line" shortcut while Herdr is focused.
+onboarding = false
+
+[keys]
+prefix = "ctrl+a"
+
+# Pane focus and swapping.
+focus_pane_left = "alt+left"
+focus_pane_right = "alt+right"
+focus_pane_up = "alt+up"
+focus_pane_down = "alt+down"
+swap_pane_left = "alt+shift+left"
+swap_pane_right = "alt+shift+right"
+swap_pane_up = "alt+shift+up"
+swap_pane_down = "alt+shift+down"
+
+# tmux split-window -v/-h, respectively.
+split_horizontal = "ctrl+e"
+split_vertical = "ctrl+o"
+new_tab = "ctrl+t"
+# Herdr 0.7.5 cannot parse PageUp/PageDown as configured shortcuts.
+# Keep the equivalent Shift-arrow bindings; Alt-PageUp/PageDown remain unbound.
+previous_tab = "shift+left"
+next_tab = "shift+right"
+# Switch workspaces directly; Herdr 0.7.5 does not parse PageUp/PageDown.
+previous_workspace = "alt+["
+next_workspace = "alt+]"
+zoom = "ctrl+x"
+
+# Keep the tmux prefix reload shortcut.
+reload_config = "prefix+r"
+
+# Herdr has a resize mode rather than tmux-style direct directional resize
+# actions. The default binding is Ctrl-A followed by r.
+
+# Use the host terminal's ANSI palette. Kitty includes pywal's generated
+# ~/.cache/wal/colors-kitty.conf, so Herdr follows the active wal theme.
+[theme]
+name = "terminal"
+
+[ui]
+# Draw a shared divider between panes instead of a blank row/column gap.
+pane_gaps = false
+# Keep pane frames visible while panes remain flush (no blank gaps).
+pane_borders = true
+
+show_agent_labels_on_pane_borders = false
+[experimental]
+kitty_graphics = true

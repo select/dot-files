@@ -26,7 +26,7 @@ Customizes the default [pi](https://github.com/badlogic/pi-mono) editor with a p
 
 **Context awareness** — Color-coded warnings at 70% (yellow) and 90% (red) context usage. Auto-compact indicator when enabled.
 
-**Token intelligence** — Smart formatting (1.2k, 45M), subscription detection (shows "(sub)" vs dollar cost).
+**Token intelligence** — Smart formatting (1.2k, 45M) and API-equivalent dollar cost, including subscription-backed providers.
 
 ## Installation
 

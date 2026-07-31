@@ -576,11 +576,6 @@ export default function powerlineFooter(pi: ExtensionAPI) {
     const gitBranch = footerDataRef?.getGitBranch() ?? null;
     const gitStatus = getGitStatus(gitBranch);
 
-    // Check if using OAuth subscription
-    const usingSubscription = ctx.model
-      ? ctx.modelRegistry?.isUsingOAuth?.(ctx.model) ?? false
-      : false;
-
     return {
       model: ctx.model,
       thinkingLevel: thinkingLevelFromSession || getThinkingLevelFn?.() || "off",
@@ -589,7 +584,6 @@ export default function powerlineFooter(pi: ExtensionAPI) {
       contextPercent,
       contextWindow,
       autoCompactEnabled: ctx.settingsManager?.getCompactionSettings?.()?.enabled ?? true,
-      usingSubscription,
       sessionStartTime,
       git: gitStatus,
       extensionStatuses: footerDataRef?.getExtensionStatuses() ?? new Map(),

@@ -24,7 +24,8 @@ action="${1:-cycle}"
 # Disconnected outputs do not appear in `hyprctl monitors all`.
 connected() { hyprctl -j monitors all 2>/dev/null | grep -q "\"name\": \"$1\""; }
 laptop_connected()   { connected "eDP-1"; }
-external_connected() { connected "DP-2"; }
+# External may be DisplayPort or HDMI depending on cable/dock.
+external_connected() { connected "DP-2" || connected "HDMI-A-1"; }
 
 # Is a target mode safe (leaves at least one real screen on)?
 mode_ok() {

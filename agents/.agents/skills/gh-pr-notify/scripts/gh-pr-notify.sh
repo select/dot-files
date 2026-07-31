@@ -1,14 +1,24 @@
 #!/usr/bin/env bash
 # Monitor GitHub PR checks and send a desktop notification when done.
-# Usage: gh-pr-notify.sh <pr-number> [repo] [poll-interval-seconds]
+# Optionally send the same notification to a phone with phone-notify.
+# Usage: gh-pr-notify.sh <pr-number> [repo] [poll-interval-seconds] [--phone]
 
 set -euo pipefail
 
 PR="${1:?Usage: gh-pr-notify.sh <pr-number> [repo] [poll-interval]}"
 REPO="${2:-apheris/hub}"
 INTERVAL="${3:-15}"
+PHONE_NOTIFY="${4:-}"
+
+if [[ -n "$PHONE_NOTIFY" && "$PHONE_NOTIFY" != "--phone" ]]; then
+	echo "Unknown notification option: ${PHONE_NOTIFY}" >&2
+	exit 2
+fi
 
 echo "🔍 Monitoring PR #${PR} in ${REPO} (polling every ${INTERVAL}s)..."
+if [[ "$PHONE_NOTIFY" == "--phone" ]]; then
+	echo "   Phone notifications enabled"
+fi
 
 # Get commit SHA and title
 SHA=$(gh pr view "$PR" --repo "$REPO" --json headRefOid --jq .headRefOid)
@@ -49,6 +59,10 @@ while true; do
 		fi
 
 		notify-send -u normal -i "$icon" "$summary" "$body"
+		if [[ "$PHONE_NOTIFY" == "--phone" ]]; then
+			phone-notify --url "https://github.com/${REPO}/pull/${PR}" "$summary" "$body" || \
+				echo "⚠️  Failed to send phone notification" >&2
+		fi
 		echo ""
 		echo "$summary"
 		echo "$body"
