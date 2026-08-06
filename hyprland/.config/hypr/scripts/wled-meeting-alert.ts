@@ -31,8 +31,7 @@ function log(msg: string) {
 function loadConfig() {
   const env: Record<string, string> = {};
   const paths = [
-    join(homedir(), ".config", "deckblaster.env"),
-    join(homedir(), ".config", "streamdeck.env")
+    join(homedir(), ".config", "deckblaster.env")
   ];
 
   for (const p of paths) {
