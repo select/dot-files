@@ -39,6 +39,12 @@ export default function HyprlandSettings(gdkmonitor: Gdk.Monitor) {
 			.catch(() => "both")
 	)
 
+	const lockTimeout = createPoll("30", 1500, () =>
+		execAsync(["bash", `${GLib.get_home_dir()}/.config/hypr/scripts/lock-timeout.sh`, "get"])
+			.then((o) => o.trim())
+			.catch(() => "30")
+	)
+
 	const toggleAnimations = () => {
 		execAsync(["bash", `${GLib.get_home_dir()}/.config/hypr/scripts/toggle_animations.sh`])
 			.catch((err) => console.error("Error toggling animations:", err))
@@ -54,6 +60,11 @@ export default function HyprlandSettings(gdkmonitor: Gdk.Monitor) {
 			.catch((err) => console.error("Error cycling display mode:", err))
 	}
 
+	const cycleLockTimeout = () => {
+		execAsync(["bash", `${GLib.get_home_dir()}/.config/hypr/scripts/lock-timeout.sh`, "next"])
+			.catch((err) => console.error("Error updating screen lock timeout:", err))
+	}
+
 	const displayModeLabel = createComputed(() => {
 		const m = displayMode()
 		if (m === "laptop") return "Laptop"
@@ -65,6 +76,8 @@ export default function HyprlandSettings(gdkmonitor: Gdk.Monitor) {
 		const m = cursorEffect()
 		return m.charAt(0).toUpperCase() + m.slice(1)
 	})
+
+	const lockTimeoutLabel = createComputed(() => `${lockTimeout()} min`)
 
 	return (
 		<window
@@ -158,6 +171,20 @@ export default function HyprlandSettings(gdkmonitor: Gdk.Monitor) {
 									</box>
 									<box class="hypr-badge" valign={Gtk.Align.CENTER}>
 										<label label={displayModeLabel} />
+									</box>
+								</box>
+							</button>
+
+							{/* Screen Lock Timeout Cycle */}
+							<button class="hypr-row-btn" onClicked={cycleLockTimeout}>
+								<box valign={Gtk.Align.CENTER} hexpand>
+									<label class="hypr-row-icon" label="󰌾" />
+									<box orientation={Gtk.Orientation.VERTICAL} halign={Gtk.Align.START} hexpand>
+										<label class="hypr-row-title" halign={Gtk.Align.START} label="Screen Lock" />
+										<label class="hypr-row-desc" halign={Gtk.Align.START} label="Lock after inactivity — click to change" />
+									</box>
+									<box class="hypr-badge" valign={Gtk.Align.CENTER}>
+										<label label={lockTimeoutLabel} />
 									</box>
 								</box>
 							</button>

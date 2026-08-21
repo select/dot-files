@@ -1,7 +1,0 @@
-{
-	"patterns": [
-		"eslint.config.*",
-		"regex:tsconfig(\\..*)?\\.json$",
-		".prettierrc*"
-	]
-}

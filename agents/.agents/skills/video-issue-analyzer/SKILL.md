@@ -1,6 +1,7 @@
 ---
 name: video-issue-analyzer
 description: "Analyze video attachments from Jira issue reports using Gemini vision. Use this skill when: analyze video, video issue, video bug report, reproduce from video, video analysis, screen recording analysis, video attachment"
+disable-model-invocation: true
 ---
 
 # Purpose

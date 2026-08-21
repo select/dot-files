@@ -1,18 +1,17 @@
 {
-  "lastChangelogVersion": "0.83.0",
+  "lastChangelogVersion": "0.84.2",
   "quietStartup": true,
   "theme": "pywal",
-  "defaultProvider": "github-copilot",
-  "defaultModel": "gpt-5.6-sol",
+  "defaultProvider": "amazon-bedrock",
+  "defaultModel": "eu.anthropic.claude-sonnet-5",
   "enabledModels": [
     "eu.anthropic.claude-opus-5",
-    "eu.anthropic.claude-opus-4-8",
     "eu.anthropic.claude-sonnet-5",
     "vertex-global/gemini-3.6-flash",
+    "vertex-global/gemini-3.7-flash",
     "vertex-global/gemini-3.5-flash-lite",
     "github-copilot/gpt-5.6-sol",
-    "github-copilot/gpt-5.6-terra",
-    "zai.glm-5"
+    "github-copilot/gpt-5.6-terra"
   ],
   "packages": [
     "npm:pi-skill-palette",

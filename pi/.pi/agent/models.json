@@ -8,7 +8,7 @@
     "vertex-global": {
       "baseUrl": "https://aiplatform.googleapis.com/v1/projects/driven-country-453015-a0/locations/global/publishers/google",
       "api": "google-generative-ai",
-      "apiKey": "!for i in 1 2 3; do gcloud auth application-default print-access-token && exit 0 || sleep 0.5; done; exit 1",
+      "apiKey": "!bun run ~/.pi/agent/extensions/vertex-auth.ts",
       "authHeader": true,
       "models": [
         {
@@ -37,6 +37,15 @@
           "contextWindow": 1048576,
           "maxTokens": 65536,
           "cost": { "input": 1.50, "output": 7.50, "cacheRead": 0.15, "cacheWrite": 0.0 }
+        },
+        {
+          "id": "gemini-3.7-flash",
+          "name": "Gemini 3.7 Flash (Vertex global)",
+          "reasoning": true,
+          "input": ["text", "image"],
+          "contextWindow": 1048576,
+          "maxTokens": 65536,
+          "cost": { "input": 0.375, "output": 1.875, "cacheRead": 0.0375, "cacheWrite": 0.020833 }
         }
       ]
     }

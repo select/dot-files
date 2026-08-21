@@ -1,6 +1,7 @@
 ---
 name: imdb-search
 description: "Look up IMDB IDs, ratings, and vote counts for movies and TV shows using IMDB's public endpoints. Use this skill when: imdb rating, imdb score, imdb votes, find imdb link, movie rating, show rating, imdb id"
+disable-model-invocation: true
 ---
 
 # Purpose

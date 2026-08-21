@@ -1,6 +1,7 @@
 ---
 name: nuxt-auto-import
 description: Guide for checking and fixing Nuxt 4 auto-import usage. Use this when reviewing impors in Vue components, composables, or TypeScript files in a Nuxt 4 project.
+disable-model-invocation: true
 ---
 
 **Auto-imported** = No `import` statement needed. Use directly.

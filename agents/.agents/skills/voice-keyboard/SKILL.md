@@ -1,6 +1,7 @@
 ---
 name: voice-keyboard
 description: "Manage the voice keyboard push-to-talk dictation tool. Use this skill when: start voice keyboard, stop voice keyboard, install voice keyboard, voice dictation, push-to-talk, voice typing"
+disable-model-invocation: true
 ---
 
 # Purpose
