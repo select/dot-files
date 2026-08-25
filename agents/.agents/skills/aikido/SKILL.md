@@ -25,7 +25,7 @@ from the terminal.
 | PR check (CI scan) metadata: gate status, counts, repo id, branch, commit | ✅ `GET /report/ciScans` |
 | Open issue groups + issue details (title, CVE, package, file, severity, fix, reachability) | ✅ `/open-issue-groups`, `/issues/export`, `/issues/{id}`, `/issues/groups/{id}` |
 | Code quality findings for a PR | ✅ `/code-quality/findings?code_repo_id=&pr_number=` (via `get`) |
-| **The exact per-scan list of "new issues" of a feature-branch scan** | ❌ not exposed publicly — only counts. Correlate with repo issues, or open the scan URL in a logged-in browser (`chrome-devtools` skill) |
+| **The exact per-scan list of "new issues" of a feature-branch scan** | ❌ not exposed publicly — only counts. Correlate with repository issues and clearly state the result is a correlation, not a direct scan-to-issue mapping. |
 
 ## Workflow
 
@@ -39,29 +39,40 @@ from the terminal.
    Prints: PR/commit, check conclusion, scan URL, `N new HIGH / M new MEDIUM` counts, and — with credentials —
    the matching `ciScans` record, the Aikido `code_repo_id`, and the repo's open issue groups.
 
-2. **Identify the offending finding.** Use the severity/type counts from step 1 and match against the repo's
-   issues, filtering by what the PR touched (e.g. dependency changes → `--type open_source`):
+2. **Correlate dependency findings automatically** (preferred for npm/pnpm PRs):
+
+   ```bash
+   bun {baseDir}/scripts/aikido.ts pr-findings https://github.com/owner/repo/pull/123
+   ```
+
+   This compares the base/head `pnpm-lock.yaml`, identifies added package versions, queries both **open and
+   closed** Aikido Open Source issues, enriches matching candidates with `/issues/{id}`, and validates that
+   their severity totals equal the scan's counts. It also runs `pnpm audit --lockfile-only` in a temporary
+   directory as a clearly labelled secondary cross-check. Issue details are cached for 24 hours in
+   `~/.cache/aikido/issues`; on an Aikido `429`, the command waits one minute and retries.
+
+   The output calls a result **high-confidence correlated** only if the package/version and per-severity counts
+   match. It is still not a direct API mapping: Aikido does not expose the exact issue IDs for a feature scan.
+
+3. **Manual investigation** — use this for non-dependency findings or unmatched totals:
 
    ```bash
    bun {baseDir}/scripts/aikido.ts repos hub                       # get code_repo_id
-   bun {baseDir}/scripts/aikido.ts groups --repo-id 123 --limit 50
-   bun {baseDir}/scripts/aikido.ts issues --repo hub --severities critical,high --type open_source
+   bun {baseDir}/scripts/aikido.ts issues --repo hub --status closed --severities critical,high --type open_source
    bun {baseDir}/scripts/aikido.ts issue 456789                    # full detail incl. CVE + fix
    bun {baseDir}/scripts/aikido.ts group 3022                      # the ?groupId= from the scan URL
    ```
 
-3. **Fallback for exact feature-branch findings** — if the counts cannot be attributed with confidence,
-   use the `chrome-devtools` skill with the user's logged-in browser profile to open
-   `https://app.aikido.dev/featurebranch/scan/<scanId>` and read the findings table, or ask the user to paste it.
-
-4. **Report** back with: severity, type, package/file, CVE, why the PR introduced it, and the fix
-   (upgrade/peerDependency/ignore-with-justification).
+4. **Report** back with: severity, type, package/file, CVE, why the PR introduced it, the fix
+   (upgrade/peerDependency/ignore-with-justification), and the correlation confidence. If totals do not
+   match, report that the public API cannot establish an exact per-scan issue list.
 
 ## Commands
 
 | Command | Purpose |
 | --- | --- |
-| `pr <ref>` | Aikido check runs on a PR + scan/repo detail |
+| `pr <ref>` | Aikido check runs and per-severity counts on a PR |
+| `pr-findings <ref>` | Correlate a dependency PR's scan counts with lockfile changes, open/closed issues, and npm audit |
 | `scan <id> [--repo-id N]` | one PR check's metadata (pages `/report/ciScans` to find it) |
 | `scans [--repo-id N] [--search S] [--gate-status failed]` | recent PR checks |
 | `repos [name]` | code repositories with their Aikido ids |
