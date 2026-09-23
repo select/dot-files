@@ -9,7 +9,6 @@ import AstalWp from "gi://AstalWp";
 import AstalNetwork from "gi://AstalNetwork";
 import AstalBluetooth from "gi://AstalBluetooth";
 import AstalBattery from "gi://AstalBattery";
-import AstalNotifd from "gi://AstalNotifd";
 
 // --- hover-to-swap menu behavior ---
 const BAR_WINDOWS = [
@@ -227,9 +226,9 @@ function Wifi() {
 	);
 }
 
+// SwayNC owns org.freedesktop.Notifications, so do not initialize AstalNotifd
+// here. Doing so prevents AGS from constructing the bar while SwayNC is running.
 function Messages() {
-	const notifd = AstalNotifd.get_default();
-	const count = createBinding(notifd, "notifications")((n) => n.length);
 	return (
 		<button
 			class="icon-messages"
@@ -239,14 +238,7 @@ function Messages() {
 				execAsync(["swaync-client", "-t", "-sw"]).catch(() => {})
 			}
 		>
-			<box halign={Gtk.Align.CENTER} valign={Gtk.Align.CENTER}>
-				<label label={count((c) => (c > 0 ? "󱅫" : "󰂚"))} />
-				<label
-					class="badge"
-					visible={count((c) => c > 0)}
-					label={count((c) => `${c}`)}
-				/>
-			</box>
+			<label label="󰂚" />
 		</button>
 	);
 }
