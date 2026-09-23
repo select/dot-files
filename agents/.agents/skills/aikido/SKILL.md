@@ -33,7 +33,7 @@ from the terminal.
 
    ```bash
    bun {baseDir}/scripts/aikido.ts pr https://github.com/owner/repo/pull/123
-   # or: apheris/hub#2603 · 2603 (current repo) · add --no-api to skip Aikido API
+   # or: owner/repo#123 · 123 (current repo)
    ```
 
    Prints: PR/commit, check conclusion, scan URL, `N new HIGH / M new MEDIUM` counts, and — with credentials —
@@ -57,10 +57,10 @@ from the terminal.
 3. **Manual investigation** — use this for non-dependency findings or unmatched totals:
 
    ```bash
-   bun {baseDir}/scripts/aikido.ts repos hub                       # get code_repo_id
-   bun {baseDir}/scripts/aikido.ts issues --repo hub --status closed --severities critical,high --type open_source
-   bun {baseDir}/scripts/aikido.ts issue 456789                    # full detail incl. CVE + fix
-   bun {baseDir}/scripts/aikido.ts group 3022                      # the ?groupId= from the scan URL
+   bun {baseDir}/scripts/aikido.ts repos sample-app                # get code_repo_id
+   bun {baseDir}/scripts/aikido.ts issues --repo sample-app --status closed --severities critical,high --type open_source
+   bun {baseDir}/scripts/aikido.ts issue 123456                    # full detail incl. CVE + fix
+   bun {baseDir}/scripts/aikido.ts group 1234                      # the ?groupId= from the scan URL
    ```
 
 4. **Report** back with: severity, type, package/file, CVE, why the PR introduced it, the fix

@@ -28,15 +28,6 @@
       "installedAt": "2026-08-19T07:55:04Z",
       "updatedAt": "2026-08-19T07:55:04Z"
     },
-    "semantic-coloring": {
-      "source": "apheris/agents",
-      "sourceType": "github",
-      "sourceUrl": "https://github.com/apheris/agents.git",
-      "skillPath": "skills/semantic-coloring/SKILL.md",
-      "skillFolderHash": "a5bacd01ce15a807233d635ae8af586e0ce713e1",
-      "installedAt": "2026-08-17T08:52:11Z",
-      "updatedAt": "2026-08-17T08:52:11Z"
-    },
     "typescript": {
       "source": "pproenca/dot-skills",
       "sourceType": "github",
