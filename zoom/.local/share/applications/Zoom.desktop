@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Zoom Workplace
+Comment=Zoom Video Conference (meeting CPU scheduling and diagnostics)
+Exec=/bin/sh -c "exec \\"\\$HOME/.local/bin/zoom-meeting\\" \\"\\$@\\"" zoom-meeting %U
+Icon=Zoom
+Terminal=false
+Type=Application
+Categories=Network;
+StartupWMClass=zoom
+MimeType=x-scheme-handler/zoommtg;x-scheme-handler/zoomus;x-scheme-handler/tel;x-scheme-handler/callto;x-scheme-handler/zoomphonecall;x-scheme-handler/zoomphonesms;x-scheme-handler/zoomcontactcentercall;application/x-zoom;
+X-KDE-Protocols=zoommtg;zoomus;tel;callto;zoomphonecall;zoomphonesms;zoomcontactcentercall;
+Name[en_US]=Zoom Workplace

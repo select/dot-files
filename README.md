@@ -19,6 +19,7 @@ Each directory is a stow package that mirrors the home directory structure:
 | `hyprland/` | Hyprland WM + waybar/swaync/wofi/etc | `~/.config/hypr/`, etc. |
 | `ags/`      | [AGS desktop shell](ags/.config/ags/README.md) (bar, capture, wallpaper, …) | `~/.config/ags/` |
 | `wal/`      | Pywal color scheme generator         | `~/.config/wal/` |
+| `zoom/`     | [Zoom scheduling and diagnostics](zoom/README.md) | User units + Zoom launcher |
 | `chrome/`   | ChromeGPU launcher: Wayland + Intel WebGPU, separate profile | `~/.local/bin/chromegpu`, app menu + desktop shortcut |
 | `pi/`       | Pi coding agent config               | `~/.pi/`         |
 | `agents/`   | Shared agent skills                  | `~/.agents/`     |

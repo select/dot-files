@@ -1,0 +1,11 @@
+[Unit]
+Description=Bounded Zoom screen-sharing diagnostics (metadata only)
+
+[Service]
+Type=exec
+ExecStart=/usr/bin/python3 %h/.local/lib/zoom-meeting/diagnostics.py
+Slice=background.slice
+Nice=10
+CPUWeight=10
+UMask=0077
+TimeoutStopSec=10

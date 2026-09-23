@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Preserve normal Zoom URL handling, but isolate every launch and its children.
+set -euo pipefail
+
+if [[ ${XDG_SESSION_TYPE:-wayland} != wayland ]]; then
+	exec /usr/bin/zoom "$@"
+fi
+
+# Diagnostic failures must not prevent joining a meeting.
+systemctl --user start zoom-diagnostics.service || printf 'Zoom diagnostics could not start\n' >&2
+
+environment=(
+	--setenv=XDG_SESSION_TYPE=wayland
+	--setenv=XDG_CURRENT_DESKTOP=Hyprland
+	--setenv=DESKTOP_SESSION=hyprland
+	--setenv=QT_QPA_PLATFORM=wayland
+)
+for variable in WAYLAND_DISPLAY DISPLAY XAUTHORITY XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS; do
+	if [[ -n ${!variable:-} ]]; then
+		environment+=("--setenv=$variable=${!variable}")
+	fi
+done
+
+# ExitType=cgroup follows Zoom's children even if ZoomLauncher exits first.
+# Each URL launch gets its own unit; Zoom forwards URLs to its existing instance.
+exec systemd-run --user --quiet --collect \
+	--unit="zoom-workplace-$(cat /proc/sys/kernel/random/uuid)" \
+	--slice=meetings.slice \
+	--property=ExitType=cgroup \
+	--property=CPUWeight=300 \
+	"${environment[@]}" \
+	/usr/bin/zoom "$@"

@@ -1,0 +1,5 @@
+[Unit]
+Description=Zoom meeting CPU scheduling group
+
+[Slice]
+CPUWeight=300
