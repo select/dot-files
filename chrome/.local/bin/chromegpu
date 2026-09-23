@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# Keep WebGPU's GPU-selection settings separate from normal Chrome sessions.
+exec /usr/bin/google-chrome \
+  --user-data-dir="${XDG_CONFIG_HOME:-$HOME/.config}/chromegpu" \
+  --no-first-run \
+  --ozone-platform=wayland \
+  --enable-features=ForceEnableWebGpuInterop \
+  --use-webgpu-power-preference=force-low-power \
+  "$@"

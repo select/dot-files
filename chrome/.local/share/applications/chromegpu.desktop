@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=ChromeGPU
+Comment=Google Chrome with WebGPU on Intel graphics and Wayland
+Exec=chromegpu %U
+TryExec=/usr/bin/google-chrome
+Icon=google-chrome
+Terminal=false
+Categories=Network;WebBrowser;
+Keywords=WebGPU;GPU;Chrome;Browser;
+StartupNotify=true
