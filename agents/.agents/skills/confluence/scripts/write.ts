@@ -7,7 +7,7 @@
  *
  * Update an existing page (round-trip after read.ts + edits):
  *   bun write.ts --file ./page.md
- *   bun write.ts --file ./notes.md --id 4620156929
+ *   bun write.ts --file ./notes.md --id 123456789
  *
  * Create a new page:
  *   bun write.ts --file ./notes.md --title "My New Page" --space AP --parentId 123456
@@ -20,8 +20,11 @@ import { readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { parseArgs } from "node:util";
 import {
+	assessMarkdownRoundTripRisks,
 	buildFrontmatter,
 	createOrUpdatePage,
+	findPageByTitle,
+	getPage,
 	loadConfig,
 	markdownToStorage,
 	parseFrontmatter,
@@ -38,11 +41,12 @@ async function main() {
 			space: { type: "string" },
 			parentId: { type: "string" },
 			"write-back": { type: "boolean", default: false },
+			"force-lossy": { type: "boolean", default: false },
 		},
 	});
 
 	if (!values.file) {
-		console.error('Usage: bun write.ts --file <md> [--id <pageId>] [--title "..." --space KEY] [--parentId <id>]');
+		console.error('Usage: bun write.ts --file <md> [--id <pageId>] [--title "..." --space KEY] [--parentId <id>] [--force-lossy]');
 		process.exit(1);
 	}
 
@@ -65,17 +69,41 @@ async function main() {
 	const content = h1 && title === h1 ? body.replace(/^#\s+.+\n+/, "") : body;
 
 	const cfg = loadConfig();
+	let existingPage = id ? await getPage(cfg, id) : undefined;
+	if (!existingPage && title && space) {
+		const found = await findPageByTitle(cfg, space, title);
+		if (found) existingPage = await getPage(cfg, found.id);
+	}
+
+	if (existingPage) {
+		if (meta.version !== undefined && meta.version !== existingPage.version) {
+			throw new Error(
+				`Refusing to overwrite page ${existingPage.id}: the Markdown was read at version ${meta.version}, ` +
+					`but Confluence is now at version ${existingPage.version}. Read the page again before editing.`,
+			);
+		}
+		const risks = assessMarkdownRoundTripRisks(existingPage.storage);
+		if (risks.length > 0 && !values["force-lossy"]) {
+			throw new Error(
+				`Refusing a lossy Markdown update of page ${existingPage.id}. The current page contains:\n` +
+					risks.map((risk) => `  - ${risk}`).join("\n") +
+					"\nUse the Confluence UI or edit the storage-format XHTML through the API so these features are preserved. " +
+					"Pass --force-lossy only when intentionally replacing the page's native formatting.",
+			);
+		}
+	}
+
 	const { storage, localMedia } = markdownToStorage(content, dirname(values.file));
 
 	const result = await createOrUpdatePage(cfg, {
-		id,
+		id: existingPage?.id ?? id,
 		spaceKey: space ?? "",
 		parentId,
 		title: title!,
 		storage,
 	});
 
-	console.log(`${id ? "Updated" : result.version > 1 ? "Updated" : "Created"}: ${result.url}`);
+	console.log(`${existingPage ? "Updated" : result.version > 1 ? "Updated" : "Created"}: ${result.url}`);
 	console.log(`Version: ${result.version}  Id: ${result.id}`);
 
 	if (localMedia.size > 0) {

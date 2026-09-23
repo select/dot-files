@@ -18,11 +18,11 @@ import { basename, dirname, isAbsolute, relative, resolve } from "node:path";
 // ── Config / auth ───────────────────────────────────────────────────────────
 
 export interface ConfluenceConfig {
-	/** Site root without trailing /wiki, e.g. https://apheris.atlassian.net */
+	/** Site root without trailing /wiki, e.g. https://wiki.example.com */
 	site: string;
-	/** REST base, e.g. https://apheris.atlassian.net/wiki/rest/api */
+	/** REST base, e.g. https://wiki.example.com/wiki/rest/api */
 	apiBase: string;
-	/** Web base for browser links, e.g. https://apheris.atlassian.net/wiki */
+	/** Web base for browser links, e.g. https://wiki.example.com/wiki */
 	webBase: string;
 	headers: Record<string, string>;
 }
@@ -342,6 +342,31 @@ function decodeEntities(s: string): string {
 
 function escapeXml(s: string): string {
 	return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// ── Markdown round-trip safety ────────────────────────────────────────────────
+
+/**
+ * Reports storage-format features that the Markdown converter cannot preserve
+ * faithfully. Updating such a page through read.ts -> write.ts would replace
+ * Confluence-native formatting with the converter's simpler representation.
+ */
+export function assessMarkdownRoundTripRisks(storage: string): string[] {
+	const risks: string[] = [];
+	const add = (message: string) => {
+		if (!risks.includes(message)) risks.push(message);
+	};
+
+	if (/<ac:structured-macro\b/i.test(storage)) add("Confluence macros (for example TOC, panels, or code blocks)");
+	if (/\sstyle="[^"]+"/i.test(storage)) add("inline styles, colors, or highlighting");
+	if (/<ac:inline-comment-marker\b/i.test(storage)) add("inline comments");
+	if (/<ac:link\b|<ri:page\b/i.test(storage)) add("Confluence page links");
+	if (/<ac:image\b/i.test(storage)) add("image sizing, alignment, or other image metadata");
+	if (/<ac:(?:task-list|layout|status|emoticon|adf-extension)\b/i.test(storage)) add("Confluence-native content elements");
+	if (/<(?:table|tr|th|td)\b[^>]*(?:colspan|rowspan|style|data-|ac:)/i.test(storage)) add("table layout or cell metadata");
+	if (/&(?:ldquo|rdquo|lsquo|rsquo|laquo|raquo);|[“”‘’]/i.test(storage)) add("typographic quotes or quote entities");
+
+	return risks;
 }
 
 // ── Markdown -> Confluence storage format ─────────────────────────────────────

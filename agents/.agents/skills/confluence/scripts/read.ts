@@ -3,11 +3,11 @@
  * Read a Confluence page and save it as Markdown.
  *
  * Usage:
- *   bun read.ts --id 4620156929
- *   bun read.ts --url "https://apheris.atlassian.net/wiki/spaces/AP/pages/4620156929/Title"
- *   bun read.ts --title "Using Gemini in pi via Google Vertex AI (ADC)" --space AP
- *   bun read.ts --id 4620156929 --out ./page.md
- *   bun read.ts --id 4620156929 --stdout   # print, don't write a file
+ *   bun read.ts --id 123456789
+ *   bun read.ts --url "https://wiki.example.com/wiki/spaces/AP/pages/123456789/Title"
+ *   bun read.ts --title "Using a cloud model with application default credentials" --space AP
+ *   bun read.ts --id 123456789 --out ./page.md
+ *   bun read.ts --id 123456789 --stdout   # print, don't write a file
  *
  * Writes Markdown with a YAML frontmatter block (confluenceId, title, space,
  * version, url) so the file can be edited and pushed back with write.ts.
@@ -16,7 +16,14 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { parseArgs } from "node:util";
-import { buildFrontmatter, getPage, loadConfig, resolvePageId, storageToMarkdown } from "./confluence.ts";
+import {
+	assessMarkdownRoundTripRisks,
+	buildFrontmatter,
+	getPage,
+	loadConfig,
+	resolvePageId,
+	storageToMarkdown,
+} from "./confluence.ts";
 
 function slug(title: string): string {
 	return title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60);
@@ -38,6 +45,12 @@ async function main() {
 	const cfg = loadConfig();
 	const id = await resolvePageId(cfg, values);
 	const page = await getPage(cfg, id);
+	const roundTripRisks = assessMarkdownRoundTripRisks(page.storage);
+	if (roundTripRisks.length > 0) {
+		console.error("Warning: this page contains Confluence features that Markdown cannot preserve faithfully:");
+		for (const risk of roundTripRisks) console.error(`  - ${risk}`);
+		console.error("write.ts will refuse to replace this page unless --force-lossy is explicitly provided.");
+	}
 
 	const md =
 		buildFrontmatter({

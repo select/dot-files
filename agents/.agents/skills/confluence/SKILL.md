@@ -11,7 +11,7 @@ Interact with Confluence Cloud from the terminal as plain Markdown:
 - **Read** a page (by id, URL, or title) and save it as Markdown with a frontmatter block.
 - **Write** Markdown back as a new or updated page, uploading referenced local images as attachments.
 
-Pages round-trip: `read.ts` writes a YAML frontmatter (`confluenceId`, `title`, `space`, `parentId`, `version`, `url`) so an edited file can be pushed back with `write.ts` without re-specifying anything.
+For simple pages, `read.ts` writes YAML frontmatter (`confluenceId`, `title`, `space`, `parentId`, `version`, `url`) so an edited file can be pushed back with `write.ts` without re-specifying anything. Markdown conversion is not lossless for Confluence-native formatting; the scripts detect risky pages and block destructive updates by default.
 
 ## Variables
 
@@ -59,15 +59,20 @@ Pick the operation from the user's intent:
 
    - Saves to `confluence/<id>-<slug>.md` by default; use `--out <file>` to choose,
      or `--stdout` to print without writing.
-   - The file starts with a frontmatter block used for round-tripping.
+   - The file starts with a frontmatter block used for simple-page round-tripping.
+   - If the page contains macros, colors/styles, inline comments, Confluence links, image metadata, formatted tables, or typographic entities, `read.ts` prints a warning. Treat the Markdown as a readable export, not as a safe update source.
 
 4. **Write** (Markdown → page)
 
-   - **Update an existing page** (after read + edit): the frontmatter carries the id, so just:
+   - **Update a simple existing page** (after read + edit): the frontmatter carries the id, so just:
 
      ```bash
      bun {baseDir}/scripts/write.ts --file <md>
      ```
+
+   - `write.ts` fetches the current page before updating. It refuses stale versions and pages containing features that the Markdown converter cannot preserve.
+   - **For rich existing pages, do not use Markdown round-tripping.** Fetch `body.storage.value`, make a targeted change to that XHTML while retaining all unchanged storage content, and update the page through the Confluence REST API with the next version number. Verify afterward that macros (especially TOC), styles/colors, images, links, and typographic entities remain present.
+   - `--force-lossy` exists only for intentionally replacing rich formatting. **Never pass it merely to get past the guard, and never use it without explicit user approval after explaining what will be lost.**
 
    - **Create a new page**:
 
@@ -95,9 +100,13 @@ Pick the operation from the user's intent:
 ### Edit an existing page
 
 - IF: user wants to change an existing page
-- THEN: `read.ts --id <id>` → edit the Markdown file → `write.ts --file <file>` (id comes from frontmatter)
+- THEN:
+  1. Run `read.ts --id <id>` and inspect its warnings.
+  2. If there are no round-trip risks: edit the Markdown and run `write.ts --file <file>`.
+  3. If risks are reported: use a storage-format-preserving API update, not Markdown conversion.
+  4. Re-fetch and verify the page after publishing.
 - EXAMPLES:
-  - "add a troubleshooting section to page 4620156929"
+  - "add a troubleshooting section to page 123456789"
   - "update the sprint notes wiki page"
 
 ### Publish a new doc
@@ -109,4 +118,4 @@ Pick the operation from the user's intent:
 
 ### Supported Markdown
 
-Headings, paragraphs, **bold**/*italic*/`code`, links, ordered/unordered lists (one nesting level), fenced code blocks (language preserved), GFM tables, blockquotes, horizontal rules, and images (local → attachment, remote → URL). Conversion both ways is best-effort for these elements; very complex Confluence macros are stripped to their text on read.
+Headings, paragraphs, **bold**/*italic*/`code`, links, ordered/unordered lists (one nesting level), fenced code blocks, GFM tables, blockquotes, horizontal rules, and images (local → attachment, remote → URL). Conversion both ways is best-effort. Confluence macros, panel semantics, TOCs, colors/styles, comments, smart-link metadata, image layout, table layout, and some entities are not representable in Markdown and must be preserved by editing storage-format XHTML directly.

@@ -12,8 +12,8 @@ prefer the `JIRA_*` variables (matching the rest of this repo) and fall back to
 
 | Variable | Description | Example |
 | --- | --- | --- |
-| `JIRA_URL` | Atlassian site URL (with or without `/wiki`) | `https://apheris.atlassian.net` |
-| `JIRA_USERNAME` | Atlassian account email | `you@apheris.com` |
+| `JIRA_URL` | Atlassian site URL (with or without `/wiki`) | `https://wiki.example.com` |
+| `JIRA_USERNAME` | Atlassian account email | `you@example.com` |
 | `JIRA_API_TOKEN` | Atlassian API token | `ATATT...` |
 
 Alternatively set `CONFLUENCE_URL` / `CONFLUENCE_USERNAME` / `CONFLUENCE_API_TOKEN`.
