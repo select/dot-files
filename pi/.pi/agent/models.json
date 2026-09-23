@@ -12,15 +12,6 @@
       "authHeader": true,
       "models": [
         {
-          "id": "gemini-3.5-flash",
-          "name": "Gemini 3.5 Flash (Vertex global)",
-          "reasoning": true,
-          "input": ["text", "image"],
-          "contextWindow": 1048576,
-          "maxTokens": 65536,
-          "cost": { "input": 1.50, "output": 9.00, "cacheRead": 0.15, "cacheWrite": 0.0 }
-        },
-        {
           "id": "gemini-3.5-flash-lite",
           "name": "Gemini 3.5 Flash Lite (Vertex global)",
           "reasoning": true,
@@ -30,22 +21,13 @@
           "cost": { "input": 0.30, "output": 2.50, "cacheRead": 0.03, "cacheWrite": 0.083333 }
         },
         {
-          "id": "gemini-3.6-flash",
-          "name": "Gemini 3.6 Flash (Vertex global)",
+          "id": "gemini-3.8-flash",
+          "name": "Gemini 3.8 Flash (Vertex global)",
           "reasoning": true,
           "input": ["text", "image"],
           "contextWindow": 1048576,
           "maxTokens": 65536,
-          "cost": { "input": 1.50, "output": 7.50, "cacheRead": 0.15, "cacheWrite": 0.0 }
-        },
-        {
-          "id": "gemini-3.7-flash",
-          "name": "Gemini 3.7 Flash (Vertex global)",
-          "reasoning": true,
-          "input": ["text", "image"],
-          "contextWindow": 1048576,
-          "maxTokens": 65536,
-          "cost": { "input": 0.375, "output": 1.875, "cacheRead": 0.0375, "cacheWrite": 0.020833 }
+          "cost": { "input": 0.75, "output": 3.75, "cacheRead": 0.075, "cacheWrite": 0 }
         }
       ]
     }
