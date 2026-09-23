@@ -1,11 +1,13 @@
 ---
 name: unit-test-writing
-description: This explains how to write unit test for this project. When a user asks to write unit test, you MUST read this before writing the tests.
+description: Use only when writing or updating unit tests for Nuxt or Vue components, composables, or Pinia stores. Covers Vitest, Vue Test Utils, and Nuxt Test Utils patterns. Do not use for general unit testing, other frameworks, backend or CLI tests, or end-to-end/browser automation tests.
 ---
 
-# UI Testing Rules and Patterns
+# Nuxt/Vue Unit Testing Rules and Patterns
 
-This document outlines the common patterns, conventions, and best practices found in the UI test files.
+Use this skill only when the task involves writing or updating unit tests for Nuxt/Vue UI code. Confirm the framework from the target code or project configuration before applying it; a request to write unit tests alone is not sufficient.
+
+Follow the project's existing test setup. Nuxt-specific helpers and aliases apply only to Nuxt projects; for standalone Vue, use Vue Test Utils and the project's configured imports. The examples below primarily illustrate Nuxt conventions.
 
 ## Import Patterns
 
@@ -336,8 +338,9 @@ import testApi from '~/tests/assets/swagger.json';
 
 ### Component Mounting
 
-- Use `mountSuspended` from `@nuxt/test-utils/runtime` instead of `mount` from `@vue/test-utils`
+- In Nuxt projects, use `mountSuspended` from `@nuxt/test-utils/runtime` when the component needs Nuxt's runtime context
 - `mountSuspended` properly handles Nuxt's async setup and SSR context
+- In standalone Vue projects, use `mount` from `@vue/test-utils`; do not introduce Nuxt dependencies just for testing
 
 ### Data Test Attributes
 
