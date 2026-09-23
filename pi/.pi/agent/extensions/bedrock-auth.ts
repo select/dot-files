@@ -13,7 +13,8 @@ import { bedrockConverseStreamApi, createProvider, getModels } from "@earendil-w
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 
 const PROFILE = "test-sso";
-const LOCK_TIMEOUT_SECONDS = 10 * 60;
+const LOCK_TIMEOUT_SECONDS = 60;
+const EXEC_TIMEOUT_SECONDS = 45;
 const REFRESH_MARGIN_MS = 60_000;
 const MARKER = "PI_AWS_CREDENTIALS=";
 const AWS_VARIABLES = [
@@ -47,6 +48,34 @@ const applyCredentials = (credentials: Record<string, unknown>): boolean => {
 		if (typeof value === "string" && value.length > 0) process.env[variable] = value;
 	}
 	return true;
+};
+
+const cleanupOrphanedLockHolders = async (pi: ExtensionAPI, lockPath: string): Promise<boolean> => {
+	try {
+		const fuser = await pi.exec("fuser", [lockPath]).catch(() => ({ stdout: "", stderr: "", code: 1 }));
+		const rawPids = `${fuser.stdout} ${fuser.stderr}`.trim();
+		if (!rawPids) return false;
+
+		const pids = rawPids
+			.split(/\s+/)
+			.map((p) => Number.parseInt(p.trim(), 10))
+			.filter((p) => Number.isInteger(p) && p > 1 && p !== process.pid);
+
+		let cleaned = false;
+		for (const pid of pids) {
+			const stat = await pi.exec("ps", ["-o", "ppid=,comm=", "-p", String(pid)]).catch(() => ({ stdout: "" }));
+			const [ppidStr] = stat.stdout.trim().split(/\s+/);
+			const ppid = Number.parseInt(ppidStr, 10);
+			// Kill orphaned processes (PPID 1) holding the lock
+			if (ppid === 1) {
+				await pi.exec("kill", ["-9", String(pid)]).catch(() => {});
+				cleaned = true;
+			}
+		}
+		return cleaned;
+	} catch {
+		return false;
+	}
 };
 
 export default function (pi: ExtensionAPI): void {
@@ -86,7 +115,7 @@ export default function (pi: ExtensionAPI): void {
 		return result;
 	};
 
-	const run = async (force: boolean): Promise<{ ok: boolean; error?: string }> => {
+	const run = async (force: boolean, isRetry = false): Promise<{ ok: boolean; error?: string }> => {
 		if (!force && credentialsValid()) return { ok: true };
 
 		const lock = process.env.XDG_RUNTIME_DIR
@@ -96,10 +125,14 @@ export default function (pi: ExtensionAPI): void {
 		const args = [
 			...UNSET_VARIABLES.flatMap((variable) => ["-u", variable]),
 			"flock",
+			"-F",
 			"--exclusive",
 			"--timeout",
 			String(LOCK_TIMEOUT_SECONDS),
 			lock,
+			"timeout",
+			"--kill-after=5s",
+			String(EXEC_TIMEOUT_SECONDS),
 			"aws-vault",
 			"exec",
 			PROFILE,
@@ -108,7 +141,7 @@ export default function (pi: ExtensionAPI): void {
 			"-e",
 			script,
 		];
-		const result = await pi.exec("env", args, { timeout: (LOCK_TIMEOUT_SECONDS + 30) * 1000 }).catch((error) => ({
+		const result = await pi.exec("env", args, { timeout: (LOCK_TIMEOUT_SECONDS + EXEC_TIMEOUT_SECONDS + 10) * 1000 }).catch((error) => ({
 			stdout: "",
 			stderr: error instanceof Error ? error.message : String(error),
 			code: 1,
@@ -116,6 +149,9 @@ export default function (pi: ExtensionAPI): void {
 		}));
 
 		if (result.code !== 0) {
+			if (!isRetry && (await cleanupOrphanedLockHolders(pi, lock))) {
+				return run(force, true);
+			}
 			return { ok: false, error: (result.stderr || result.stdout).trim() || `aws-vault exited with ${result.code}` };
 		}
 
