@@ -1,9 +1,9 @@
 #!/usr/bin/env bun
 
 /**
- * Create Jira Issue Script (EN/AW boards)
+ * Create Jira Issue Script (EN board)
  *
- * Creates an issue on the EN (Engineering) or AW (Apheris Web) board with proper Atlassian Document Format (ADF).
+ * Creates an issue on the EN (Engineering) board with proper Atlassian Document Format (ADF).
  *
  * Usage:
  *   # Via stdin (recommended for complex content):
@@ -17,7 +17,7 @@
 
 import { loadJiraConfig, getAuthHeader } from './jira-config';
 
-type Board = 'EN' | 'AW';
+type Board = 'EN';
 type IssueType = 'Task' | 'Bug' | 'Story';
 
 interface IssueInput {
@@ -54,13 +54,12 @@ interface AdfDocument {
 	content: AdfNode[];
 }
 
-const VALID_BOARDS: Board[] = ['EN', 'AW'];
+const VALID_BOARDS: Board[] = ['EN'];
 const VALID_ISSUE_TYPES: IssueType[] = ['Task', 'Bug', 'Story'];
 
 // Board IDs for sprint lookup
 const BOARD_IDS: Record<Board, number> = {
 	EN: 22,
-	AW: 373,
 };
 
 function createTextNode(
@@ -422,7 +421,7 @@ function validateInput(input: unknown): IssueInput {
 	const obj = input as Record<string, unknown>;
 
 	if (!obj.board || typeof obj.board !== 'string') {
-		throw new Error('board is required and must be a string (EN or AW)');
+		throw new Error('board is required and must be a string (EN)');
 	}
 
 	const board = obj.board.toUpperCase() as Board;
@@ -633,8 +632,8 @@ async function resolveSprintId(
 		return sprintQuery;
 	}
 
-	// Always search by name — numeric strings like "155" refer to sprint names
-	// (e.g. "EN Sprint 155"), not internal Jira sprint IDs.
+	// Always search by name — numeric strings like "123" refer to sprint names
+	// (e.g. "EN Sprint 123"), not internal Jira sprint IDs.
 
 	// Search by name in active/future sprints for the board
 	const boardId = BOARD_IDS[board];
@@ -993,7 +992,7 @@ async function main(): Promise<void> {
 
 		if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
 			console.log(`
-Create/Update Jira Issue (EN/AW boards)
+Create/Update Jira Issue (EN board)
 
 Usage:
   # Create via stdin (recommended):
@@ -1009,7 +1008,7 @@ Usage:
   bun create-issue.ts --update --issueKey "EN-1234" --board "EN" --title "..." --context "..." --definitionOfDone "..."
 
 Required fields:
-  --board             Board to create issue on (EN or AW)
+  --board             Board to create issue on (EN)
   --title             Short, descriptive title
   --context           Background information explaining the issue
   --definitionOfDone  Criteria for completion (can be specified multiple times)

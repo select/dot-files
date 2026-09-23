@@ -1,16 +1,16 @@
 ---
 name: create-jira-issue
-description: "Create or update Jira issues for EN (Engineering) or AW (Apheris Web) boards interactively. Use this skill when: create issue, update issue, new EN ticket, new AW ticket, jira issue, engineering ticket, create task, fix jira formatting"
+description: "Create, update, or move Jira issues for the EN (Engineering) board interactively. Use this skill when: create issue, update issue, move issue, transfer issue, move to EN board, current sprint, new EN ticket, jira issue, engineering ticket, create task, fix jira formatting"
 ---
 
 # Purpose
 
-This skill guides you through creating or updating a Jira issue on the EN (Engineering) or AW (Apheris Web) board. It ensures all required template fields are filled, asks clarifying questions for missing information, and presents a preview before submission.
+This skill guides you through creating, updating, or moving a Jira issue on the EN (Engineering) board. It ensures all required template fields are filled when creating issues, asks clarifying questions for missing information, and presents a preview before making Jira changes.
 
 ## Variables
 
 - **Credentials**: Loaded from `~/.config/atlassian-jira/credentials.json` or environment variables (JIRA_URL, JIRA_USERNAME, JIRA_API_TOKEN)
-- **Supported project keys**: EN, AW
+- **Supported destination project key**: EN
 - **skillDir**: this skills directory
 
 ## Instructions
@@ -19,7 +19,7 @@ When creating an issue, you must gather information for the issue template which
 
 **Required Fields:**
 
-- **Board**: Which board to create the issue on (EN or AW)
+- **Board**: EN (Engineering)
 - **Title**: Short, descriptive title for the issue
 - **Context**: Background information explaining why this issue exists, what problem it solves, or what feature it implements
 - **Definition of Done**: List of criteria that must be met for the issue to be considered complete
@@ -28,12 +28,45 @@ When creating an issue, you must gather information for the issue template which
 
 - **Issue Type**: Type of issue (Task, Bug, Story) - defaults to Task
 - **Assignee**: Display name or email of the person to assign (resolved via Jira user search)
-- **Sprint**: Sprint name (partial match, e.g. "155") or numeric sprint ID
+- **Sprint**: Sprint name (partial match, e.g. "123") or numeric sprint ID
 - **Attachments**: File paths to images/files to attach and embed inline in the description
 
-## Workflow
+## Moving an Existing Issue Between Boards
 
-> Execute the following steps in order, top to bottom:
+Use this workflow instead of the issue-creation workflow when the user asks to move or transfer an existing issue to EN, optionally into a sprint. Do **not** ask for a new title, context, or Definition of Done: the issue and its description are retained by Jira.
+
+1. **Parse and inspect**
+   - Extract the source issue key, target board, optional target issue type, and desired sprint.
+   - Fetch the source issue and list the target board's active sprint(s) and available issue types. The source issue type is retained when a matching type exists in the destination project.
+   - If the user says “current sprint”, use `current`; it resolves to the target board's sole active sprint.
+2. **Resolve missing information**
+   - Use EN as the destination and include it in the confirmation preview.
+   - If the source issue type does not exist in the target project, ask the user to select a target type from the available types.
+   - Ask which sprint to use only if the user requests sprint placement but does not identify one. Do not add a sprint if none was requested.
+3. **Present the move preview and confirm**
+   - State the source key, target board, target issue type, and target sprint (if any).
+   - Clearly say that Jira will assign a new issue key and send its required bulk-move notification.
+   - Use the `question` tool and require explicit confirmation before running the move command.
+4. **Move and assign sprint**
+   - Run the bundled script only after confirmation:
+
+     ```bash
+     bun {skillDir}/scripts/move-issue.ts \
+       --issue "SOURCE-123" \
+       --board "EN" \
+       --sprint "current"
+     ```
+
+   - Add `--issueType "Task"` only when the destination type needs to differ from, or cannot be inferred from, the source type.
+   - The script waits for Jira's asynchronous move operation to finish, then adds the **new** issue key to the sprint. Do not attempt sprint assignment before the move completes.
+5. **Verify and report**
+   - Report the new issue key and URL, target board, and sprint. If sprint assignment fails after a successful transfer, explicitly report the partial success and the new key so it can be corrected.
+
+> A board transfer is not readily reversible. Always obtain confirmation even where the user supplied a direct instruction.
+
+## Issue Creation and Description Update Workflow
+
+> Execute the following steps in order, top to bottom for issue creation:
 
 1. **Parse Initial Input**
    - Analyze the user's initial prompt for any pre-filled information
@@ -50,7 +83,7 @@ When creating an issue, you must gather information for the issue template which
    - For each question, provide context about what's expected
 
    Example questions:
-   - "Which board should this issue be created on?" (options: EN, AW)
+   - Use EN as the board and show it in the preview; no board-selection question is needed.
    - "What should the title be for this issue?"
    - "Can you provide the context? (Background information explaining why this issue exists)"
    - "What are the Definition of Done criteria? (List the conditions that must be met for this to be complete)"
@@ -72,7 +105,7 @@ When creating an issue, you must gather information for the issue template which
    ```markdown
    ## Issue Preview
 
-   **Board:** [EN/AW]
+   **Board:** EN
    **Title:** [title]
    **Type:** [Task/Bug/Story]
 
@@ -101,12 +134,14 @@ When creating an issue, you must gather information for the issue template which
    - **For simple content**: Use direct stdin with echo
 
    Simple example:
+
    ```bash
    echo '{"board": "EN", "title": "...", "context": "...", "definitionOfDone": ["...", "..."], "issueType": "Task"}' | \
      bun {skillDir}/scripts/create-issue.ts --stdin
    ```
 
    Complex example (with multiline content, special characters):
+
    ```bash
    # 1. Write JSON to temp file using write tool
    # 2. Pipe file to script
@@ -116,6 +151,7 @@ When creating an issue, you must gather information for the issue template which
    ```
 
 The script handles:
+
 - Proper Atlassian Document Format (ADF) structure
 - Wiki markup fallback for inline image embedding (via Jira v2 API)
 - Markdown parsing in context field (see below)
@@ -130,22 +166,23 @@ The script handles:
 
 The `context` field supports GitHub-flavored markdown which is automatically converted to Jira's Atlassian Document Format:
 
-| Markdown | Result |
-|----------|--------|
-| `**bold**` | Bold text |
-| `` `code` `` | Inline code |
-| `[text](url)` | Clickable link |
-| `1. item` | Numbered list |
-| `- item` | Bullet list |
-| ` ```lang ` | Code block with syntax highlighting |
+| Markdown      | Result                              |
+| ------------- | ----------------------------------- |
+| `**bold**`    | Bold text                           |
+| `` `code` ``  | Inline code                         |
+| `[text](url)` | Clickable link                      |
+| `1. item`     | Numbered list                       |
+| `- item`      | Bullet list                         |
+| ` ```lang `   | Code block with syntax highlighting |
 
 Example context with markdown:
-```
+
+````
 "context": "**Problem:**\nThe API returns `500` errors when:\n1. User is not authenticated\n2. Token is expired\n\n**Solution:**\nUse `validateToken()` before each request.\n\n```python\nif not validate_token(token):\n    raise AuthError()\n```\n\n**Reference:** [PR #123](https://github.com/...)"
-```
+````
 
 8. **Report Result**
-   - On success: Return the created issue URL (e.g., https://apheris.atlassian.net/browse/EN-XXX)
+   - On success: Return the created issue URL (e.g., https://jira.example.com/browse/EN-1234)
    - On failure: Show error message and offer to retry or save draft locally
 
 ## Script Reference
@@ -163,8 +200,8 @@ bun create-issue.ts \
   --definitionOfDone "Code reviewed" \
   --definitionOfDone "Documentation updated" \
   --issueType "Task" \
-  --assignee "Nina Zorina" \
-  --sprint "155" \
+  --assignee "Alex Example" \
+  --sprint "123" \
   --attachment "/path/to/screenshot.png"
 ```
 
@@ -181,18 +218,29 @@ echo '{
     "Documentation updated"
   ],
   "issueType": "Task",
-  "assignee": "Nina Zorina",
-  "sprint": "155",
+  "assignee": "Alex Example",
+  "sprint": "123",
   "attachments": ["/path/to/screenshot.png", "/path/to/mockup.png"]
 }' | bun create-issue.ts --stdin
 ```
 
 When `attachments` are provided, the script:
+
 1. Creates the issue with ADF description
 2. Uploads each file as a Jira attachment
 3. Re-writes the description using Jira wiki markup (v2 API) with `!filename.png!` syntax for inline rendering
 
-**Updating an existing issue:**
+**Moving an existing issue to another board:**
+
+```bash
+bun move-issue.ts --issue "SOURCE-123" --board "EN" --sprint "current"
+```
+
+The target board must be EN. `SOURCE-123` is a placeholder for an issue in another project. `--sprint current` resolves to that board's active sprint; a name substring or numeric sprint ID is also accepted.
+
+Sprint examples are placeholders, not API payloads: the scripts resolve names to numeric IDs before assigning issues. For `create-issue.ts`, strings (including `"123"`) are name fragments; a JSON number (`123`) is a literal sprint ID. For `move-issue.ts`, a digits-only CLI value (`--sprint 123`) is a literal ID; use `--sprint "Sprint 123"` for a name lookup or `--sprint current` for the active sprint. The script preserves the source issue type when the target project has a type with the same name, or accepts `--issueType` to choose one explicitly. It reports the replacement issue key after Jira completes the asynchronous move.
+
+**Updating an existing issue description:**
 
 ```bash
 echo '{
@@ -228,6 +276,7 @@ rm {cwd}/.issue-input.json
 ```
 
 **Why this approach?**
+
 - Avoids shell escaping issues with quotes, apostrophes, newlines
 - Handles multiline content reliably (investigation findings, code snippets, etc.)
 - No need to escape special characters like `'`, `"`, `\n`, backticks
@@ -238,17 +287,20 @@ rm {cwd}/.issue-input.json
 ```json
 {
   "board": "EN",
-  "title": "Fix API docs rendering for /api/v1/fine-tune endpoints",
-  "context": "The /api/v1/fine-tune* endpoints are not rendering properly.\n\nInvestigation findings:\n\n1. Missing operationId: All fine-tune endpoints have operationId: null\n2. Malformed oneOf in request schema: Uses unnecessary oneOf wrapper\n\nThe ApiDocsMethodView.vue component's resolveRefs() function does not handle the oneOf array properly.\n\nRoot cause: Backend OpenAPI spec generation creates unnecessary oneOf wrappers.",
+  "title": "Fix API docs rendering for /api/v1/jobs endpoints",
+  "context": "The /api/v1/jobs endpoints are not rendering properly.\n\nInvestigation findings:\n\n1. Missing operationId: Job endpoints have operationId: null\n2. Malformed oneOf in request schema: Uses an unnecessary oneOf wrapper\n\nThe API documentation viewer does not handle the oneOf array properly.\n\nRoot cause: Backend OpenAPI spec generation creates unnecessary oneOf wrappers.",
   "definitionOfDone": [
-    "Backend: Remove oneOf wrapper from fine-tune endpoint request schemas",
-    "Backend: Add proper operationId values to all fine-tune endpoints",
-    "Verify all fine-tune endpoints render correctly in API docs UI"
+    "Backend: Remove unnecessary oneOf wrappers from job request schemas",
+    "Backend: Add proper operationId values to all job endpoints",
+    "Verify all job endpoints render correctly in the API docs UI"
   ],
   "issueType": "Bug",
-  "assignee": "Nina Zorina",
-  "sprint": "EN Sprint 155",
-  "attachments": ["/tmp/screenshot-misaligned.png", "/tmp/screenshot-aligned.png"]
+  "assignee": "Alex Example",
+  "sprint": "EN Sprint 123",
+  "attachments": [
+    "/tmp/screenshot-misaligned.png",
+    "/tmp/screenshot-aligned.png"
+  ]
 }
 ```
 
@@ -256,18 +308,18 @@ rm {cwd}/.issue-input.json
 
 ```json
 {
-	"success": true,
-	"key": "EN-1234",
-	"id": "12345",
-	"url": "https://apheris.atlassian.net/browse/EN-1234"
+  "success": true,
+  "key": "EN-1234",
+  "id": "12345",
+  "url": "https://jira.example.com/browse/EN-1234"
 }
 ```
 
 ## Cookbook
 
-### Updating an Existing Issue
+### Updating an Existing Issue Description
 
-When asked to update or fix formatting on an existing issue:
+When asked to update an issue description or fix its formatting:
 
 1. **Get the issue key** from the user (e.g., EN-1234)
 2. **Prepare the updated content** with proper markdown formatting
@@ -280,6 +332,7 @@ cat {cwd}/.issue-input.json | bun {skillDir}/scripts/create-issue.ts --stdin --u
 ```
 
 Example JSON for update:
+
 ```json
 {
   "board": "EN",
@@ -332,6 +385,6 @@ Example JSON for update:
   - "Network error while creating issue. Would you like to save a draft locally to submit later?"
 
 - IF: Invalid board specified
-- THEN: Ask user to choose from valid boards
+- THEN: Explain that only EN is supported and confirm the destination
 - EXAMPLES:
-  - "Invalid board 'XY'. Please choose from: EN (Engineering) or AW (Apheris Web)"
+  - "Invalid board 'XY'. Only EN (Engineering) is supported. Should I use EN?"
