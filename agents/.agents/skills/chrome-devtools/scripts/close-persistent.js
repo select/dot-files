@@ -4,11 +4,7 @@
  */
 import puppeteer from 'puppeteer';
 import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ENDPOINT_FILE = path.join(__dirname, '.browser-endpoint');
+import { ENDPOINT_FILE } from './lib/browser.js';
 
 async function main() {
   if (!fs.existsSync(ENDPOINT_FILE)) {

@@ -3,23 +3,11 @@
  * Monitor network requests
  * Usage: node network.js --url https://example.com [--types xhr,fetch] [--output requests.json]
  */
-import { getBrowser, getPage, closeBrowser, parseArgs, outputJSON, outputError } from './lib/browser.js';
-import fs from 'fs/promises';
+import { runCommand, navigate, waitForReady } from './lib/session.js';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 
-async function monitorNetwork() {
-  const args = parseArgs(process.argv.slice(2));
-
-  if (!args.url) {
-    outputError(new Error('--url is required'));
-    return;
-  }
-
-  try {
-    const browser = await getBrowser({
-      headless: args.headless !== 'false'
-    });
-
-    const page = await getPage(browser);
+await runCommand(async (page, args) => {
 
     const requests = [];
     const filterTypes = args.types ? args.types.split(',').map(t => t.toLowerCase()) : null;
@@ -63,9 +51,8 @@ async function monitorNetwork() {
     });
 
     // Navigate
-    await page.goto(args.url, {
-      waitUntil: args['wait-until'] || 'networkidle2'
-    });
+    await navigate(page, args);
+    await waitForReady(page, args);
 
     // Merge requests with responses
     const combined = requests.map(req => ({
@@ -81,22 +68,13 @@ async function monitorNetwork() {
     };
 
     if (args.output) {
+      await fs.mkdir(path.dirname(path.resolve(args.output)), { recursive: true });
       await fs.writeFile(args.output, JSON.stringify(result, null, 2));
-      outputJSON({
+      return {
         success: true,
         output: args.output,
         requestCount: combined.length
-      });
-    } else {
-      outputJSON(result);
+      };
     }
-
-    if (args.close !== 'false') {
-      await closeBrowser();
-    }
-  } catch (error) {
-    outputError(error);
-  }
-}
-
-monitorNetwork();
+    return result;
+}, { required: ['url'] });

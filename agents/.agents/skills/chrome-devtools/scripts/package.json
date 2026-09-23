@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "Browser automation scripts for Chrome DevTools Agent Skill",
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
   "dependencies": {
-    "puppeteer": "^24.15.0",
-    "debug": "^4.4.0",
-    "yargs": "^17.7.2"
+    "puppeteer": "^24.15.0"
   },
   "engines": {
     "bun": ">=1.0.0"

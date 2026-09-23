@@ -3,25 +3,13 @@
  * Get DOM snapshot with selectors
  * Usage: node snapshot.js [--url https://example.com] [--output snapshot.json]
  */
-import { getBrowser, getPage, closeBrowser, parseArgs, outputJSON, outputError } from './lib/browser.js';
-import fs from 'fs/promises';
+import { runCommand, navigate, waitForReady } from './lib/session.js';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 
-async function snapshot() {
-  const args = parseArgs(process.argv.slice(2));
-
-  try {
-    const browser = await getBrowser({
-      headless: args.headless !== 'false'
-    });
-
-    const page = await getPage(browser);
-
-    // Navigate if URL provided
-    if (args.url) {
-      await page.goto(args.url, {
-        waitUntil: args['wait-until'] || 'networkidle2'
-      });
-    }
+await runCommand(async (page, args) => {
+    await navigate(page, args);
+    await waitForReady(page, args);
 
     // Get interactive elements with metadata
     const elements = await page.evaluate(() => {
@@ -110,22 +98,13 @@ async function snapshot() {
     };
 
     if (args.output) {
+      await fs.mkdir(path.dirname(path.resolve(args.output)), { recursive: true });
       await fs.writeFile(args.output, JSON.stringify(result, null, 2));
-      outputJSON({
+      return {
         success: true,
         output: args.output,
         elementCount: elements.length
-      });
-    } else {
-      outputJSON(result);
+      };
     }
-
-    if (args.close !== 'false') {
-      await closeBrowser();
-    }
-  } catch (error) {
-    outputError(error);
-  }
-}
-
-snapshot();
+    return result;
+});

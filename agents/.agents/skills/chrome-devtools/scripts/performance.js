@@ -3,26 +3,15 @@
  * Measure performance metrics and record trace
  * Usage: node performance.js --url https://example.com [--trace trace.json] [--metrics]
  */
-import { getBrowser, getPage, closeBrowser, parseArgs, outputJSON, outputError } from './lib/browser.js';
-import fs from 'fs/promises';
+import { runCommand, navigate, waitForReady } from './lib/session.js';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 
-async function measurePerformance() {
-  const args = parseArgs(process.argv.slice(2));
-
-  if (!args.url) {
-    outputError(new Error('--url is required'));
-    return;
-  }
-
-  try {
-    const browser = await getBrowser({
-      headless: args.headless !== 'false'
-    });
-
-    const page = await getPage(browser);
+await runCommand(async (page, args) => {
 
     // Start tracing if requested
     if (args.trace) {
+      await fs.mkdir(path.dirname(path.resolve(args.trace)), { recursive: true });
       await page.tracing.start({
         path: args.trace,
         categories: [
@@ -34,13 +23,11 @@ async function measurePerformance() {
     }
 
     // Navigate
-    await page.goto(args.url, {
-      waitUntil: 'networkidle2'
-    });
-
-    // Stop tracing
-    if (args.trace) {
-      await page.tracing.stop();
+    try {
+      await navigate(page, args);
+      await waitForReady(page, args);
+    } finally {
+      if (args.trace) await page.tracing.stop();
     }
 
     // Get performance metrics
@@ -132,14 +119,5 @@ async function measurePerformance() {
       result.trace = args.trace;
     }
 
-    outputJSON(result);
-
-    if (args.close !== 'false') {
-      await closeBrowser();
-    }
-  } catch (error) {
-    outputError(error);
-  }
-}
-
-measurePerformance();
+    return result;
+}, { required: ['url'] });

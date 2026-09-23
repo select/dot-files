@@ -163,51 +163,6 @@ export async function waitForElement(page, parsed, options = {}) {
 }
 
 /**
- * Click element based on selector type
- * @param {Object} page - Puppeteer page instance
- * @param {{type: string, selector: string}} parsed - Parsed selector
- * @returns {Promise<void>}
- */
-export async function clickElement(page, parsed) {
-  if (parsed.type === 'xpath') {
-    // Use locator API for XPath (Puppeteer v24+)
-    const locator = page.locator(`::-p-xpath(${parsed.selector})`);
-    await locator.click();
-  } else {
-    await page.click(parsed.selector);
-  }
-}
-
-/**
- * Type into element based on selector type
- * @param {Object} page - Puppeteer page instance
- * @param {{type: string, selector: string}} parsed - Parsed selector
- * @param {string} value - Text to type
- * @param {Object} options - Type options (delay, clear)
- * @returns {Promise<void>}
- */
-export async function typeIntoElement(page, parsed, value, options = {}) {
-  if (parsed.type === 'xpath') {
-    // Use locator API for XPath (Puppeteer v24+)
-    const locator = page.locator(`::-p-xpath(${parsed.selector})`);
-
-    // Clear if requested
-    if (options.clear) {
-      await locator.fill('');
-    }
-
-    await locator.fill(value);
-  } else {
-    // CSS selector
-    if (options.clear) {
-      await page.$eval(parsed.selector, el => el.value = '');
-    }
-
-    await page.type(parsed.selector, value, { delay: options.delay || 0 });
-  }
-}
-
-/**
  * Get element handle based on selector type
  * @param {Object} page - Puppeteer page instance
  * @param {{type: string, selector: string}} parsed - Parsed selector
@@ -234,24 +189,4 @@ export async function getElement(page, parsed) {
   } else {
     return await page.$(parsed.selector);
   }
-}
-
-/**
- * Get enhanced error message for selector failures
- * @param {Error} error - Original error
- * @param {string} selector - Selector that failed
- * @returns {Error} Enhanced error with troubleshooting tips
- */
-export function enhanceError(error, selector) {
-  if (error.message.includes('waiting for selector') ||
-      error.message.includes('waiting for XPath') ||
-      error.message.includes('No node found')) {
-    error.message += '\n\nTroubleshooting:\n' +
-      '1. Use snapshot.js to find correct selector: node snapshot.js --url <url>\n' +
-      '2. Try XPath selector: //button[text()="Click"] or //button[contains(text(),"Click")]\n' +
-      '3. Check element is visible on page (not display:none or hidden)\n' +
-      '4. Increase --timeout value: --timeout 10000\n' +
-      '5. Change wait strategy: --wait-until load or --wait-until domcontentloaded';
-  }
-  return error;
 }
