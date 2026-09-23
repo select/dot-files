@@ -39,9 +39,7 @@ _settle() { sleep 0.2; }
 
 case "$selected" in
     *"Stop"*)
-        pkill -SIGINT -f "gpu-screen-recorder"
-        notify-send -i media-record "Recording stopped" "Saved to ~/Videos/Screencasts"
-        pkill -SIGRTMIN+8 waybar
+        "$HOME/.config/hypr/scripts/capture.sh" stop
         ;;
     *"Screenshot"*"Region"*)
         _settle

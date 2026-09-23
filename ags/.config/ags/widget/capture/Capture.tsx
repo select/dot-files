@@ -19,6 +19,8 @@ const modes: { id: Mode; icon: string; label: string }[] = [
 const [mode, setMode] = createState<Mode>("region");
 const [kind, setKind] = createState<Kind>("screenshot");
 const [recording, setRecording] = createState(false);
+const [mic, setMic] = createState(false);
+const [keys, setKeys] = createState(false);
 
 function close() {
 	app.get_window("capture")?.set_visible(false);
@@ -38,7 +40,13 @@ function capture() {
 	const k = kind.get();
 	const m = mode.get();
 	close();
-	execAsync([SCRIPT, k, m]).catch((err) => console.error(err));
+	execAsync([
+		SCRIPT,
+		k,
+		m,
+		mic.get() ? "mic" : "no-mic",
+		keys.get() ? "keys" : "no-keys",
+	]).catch((err) => console.error(err));
 }
 
 function stop() {
@@ -126,7 +134,7 @@ export default function Capture(gdkmonitor: Gdk.Monitor) {
 						))}
 					</box>
 
-					{/* bottom bar: kind toggle | shutter | spacer — homogeneous keeps the shutter dead-centered */}
+					{/* bottom bar: kind toggle | shutter | recording options */}
 					<box class="capture-bottom" homogeneous>
 						<box halign={Gtk.Align.START} valign={Gtk.Align.CENTER}>
 							<box class="capture-kind" valign={Gtk.Align.CENTER}>
@@ -175,8 +183,37 @@ export default function Capture(gdkmonitor: Gdk.Monitor) {
 							</button>
 						</box>
 
-						{/* empty third cell balances the kind toggle */}
-						<box />
+						<box
+							class="capture-options"
+							halign={Gtk.Align.END}
+							valign={Gtk.Align.CENTER}
+							spacing={6}
+						>
+							<button
+								class={mic((enabled) =>
+									enabled ? "capture-option active" : "capture-option",
+								)}
+								tooltipText={mic((enabled) =>
+									enabled ? "Disable microphone" : "Enable microphone",
+								)}
+								sensitive={kind((value) => value === "video")}
+								onClicked={() => setMic(!mic.get())}
+							>
+								<label label={mic((enabled) => (enabled ? "󰍬" : "󰍭"))} />
+							</button>
+							<button
+								class={keys((enabled) =>
+									enabled ? "capture-option active" : "capture-option",
+								)}
+								tooltipText={keys((enabled) =>
+									enabled ? "Hide key presses" : "Show key presses",
+								)}
+								sensitive={kind((value) => value === "video")}
+								onClicked={() => setKeys(!keys.get())}
+							>
+								<label label="󰌌" />
+							</button>
+						</box>
 					</box>
 				</box>
 			</box>

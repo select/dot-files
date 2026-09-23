@@ -62,6 +62,23 @@ export function captureCss(p: Palette): string {
 		opacity: 1;
 	}
 
+	.capture-option {
+		background-color: ${segment};
+		color: ${text};
+		border-radius: 9999px;
+		min-width: 30px;
+		min-height: 30px;
+		padding: 0;
+		font-size: 14px;
+		opacity: 0.65;
+	}
+	.capture-option:hover { opacity: 1; }
+	.capture-option.active {
+		background-color: ${segmentSoft};
+		color: ${accent};
+		opacity: 1;
+	}
+
 	/* shutter button — white ring with inner disc, like GNOME's */
 	.capture-shutter {
 		background: transparent;
