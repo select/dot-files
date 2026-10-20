@@ -1,0 +1,10 @@
+[Unit]
+Description=Keep the local Pi history search indices up to date
+
+[Timer]
+OnBootSec=5m
+OnUnitInactiveSec=15m
+Unit=pi-session-search-sync.service
+
+[Install]
+WantedBy=timers.target

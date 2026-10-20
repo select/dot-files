@@ -1,0 +1,24 @@
+[Unit]
+Description=Local XERJ search for Pi session history
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/share/pi-session-search/bin/xerj --config %h/.config/pi-session-search/xerj.toml --bind 127.0.0.1 --port 19210 --data-dir %h/.local/share/pi-session-search/data --embed-mode neural
+WorkingDirectory=%h/.local/share/pi-session-search
+Environment=XERJ_DISABLE_FEEDBACK=true
+Environment=RAYON_NUM_THREADS=2
+Environment=OMP_NUM_THREADS=2
+Environment=TOKENIZERS_PARALLELISM=false
+UMask=0077
+Restart=on-failure
+RestartSec=5
+MemoryMax=4G
+MemorySwapMax=256M
+TimeoutStopSec=20
+CPUQuota=200%
+Nice=10
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target

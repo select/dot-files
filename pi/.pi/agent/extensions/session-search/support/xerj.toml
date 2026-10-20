@@ -1,0 +1,25 @@
+# Dedicated local Pi history instance. 98% was explicitly approved for this host.
+# Keep 95 (the upstream default) on hosts where that is appropriate.
+[limits]
+max_process_memory_mb = 3072
+max_total_memtable_mb = 64
+max_segment_hydration_cache_mb = 32
+max_query_memory_mb = 64
+max_concurrent_searches = 2
+disk_flood_stage_percent = 98
+
+[storage]
+flush_size_mb = 8
+flush_interval_secs = 5
+flush_idle_secs = 10
+
+[merge]
+max_merge_count = 4
+max_segment_mb = 32
+
+[embedding]
+mode = "neural"
+neural_window_concurrency = 1
+
+[rerank]
+enabled = false

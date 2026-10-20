@@ -1,0 +1,18 @@
+[Unit]
+Description=Incremental Pi history keyword sync and local neural backfill
+Requires=pi-session-search.service
+After=pi-session-search.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/.local/share/pi-session-search/extension
+ExecStart=%h/.bun/bin/bun cli.ts sync
+ExecStart=%h/.bun/bin/bun cli.ts sync-neural
+TimeoutStartSec=0
+TimeoutStopSec=30
+Restart=on-failure
+RestartSec=60
+UMask=0077
+MemoryMax=512M
+Nice=10
+NoNewPrivileges=true

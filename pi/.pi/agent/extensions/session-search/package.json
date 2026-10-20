@@ -1,0 +1,21 @@
+{
+  "name": "pi-session-search",
+  "private": true,
+  "type": "module",
+  "keywords": ["pi-package"],
+  "pi": { "extensions": ["./index.ts"] },
+  "scripts": {
+    "test": "bun test",
+    "check": "tsc --noEmit",
+    "test:live": "node tests/live-smoke.mjs",
+    "sync": "bun cli.ts sync"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-ai": "*",
+    "@earendil-works/pi-coding-agent": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0"
+  }
+}
