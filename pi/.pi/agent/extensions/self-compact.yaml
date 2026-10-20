@@ -1,0 +1,29 @@
+# Shared limits for every model. Values: percentages, token counts, k/m suffixes.
+# Hard cutoff = at + buffer, capped at 90% of the model's context window.
+# Keep softAt above Pi's retained recent history (20k tokens by default).
+# Conservative trial budgets, not vendor-prescribed optimal thresholds.
+# This is a tool cutoff, not a guaranteed per-request billing ceiling.
+# Larger working budget for models without a verified long-context price cliff.
+defaults:
+  softAt: "200k"
+  at: "300k"
+  buffer: "50k"       # Forced cutoff: 350k.
+
+# Overrides inherit omitted fields. Exact keys only (no wildcards).
+# Precedence per field: provider/model ID > model ID > defaults > built-in.
+# These GPT models have a long-context pricing tier above 272k input tokens.
+# Force at the 272k pricing boundary; oversized results can still overshoot.
+# Pricing source: github.com/github/docs/blob/main/data/tables/copilot/models-and-pricing.yml
+models:
+  "github-copilot/gpt-6-astra":
+    softAt: "180k"
+    at: "250k"
+    buffer: "22k"     # Forced cutoff: 272k (subject to the 90% context cap).
+  "github-copilot/gpt-6.1-sol":
+    softAt: "180k"
+    at: "250k"
+    buffer: "22k"     # Forced cutoff: 272k (subject to the 90% context cap).
+  "github-copilot/gpt-6-luna":
+    softAt: "180k"
+    at: "250k"
+    buffer: "22k"     # Forced cutoff: 272k (subject to the 90% context cap).

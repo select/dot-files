@@ -1,0 +1,12 @@
+{
+  "name": "dotfiles-self-compact",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "bun test tests/unit",
+    "test:runtime": "node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "yaml": "^2.8.3"
+  }
+}
