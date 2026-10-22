@@ -8,18 +8,8 @@ import { writeFile, mkdir } from 'fs/promises';
 import { join, basename } from 'path';
 import { parseArgs } from 'util';
 
-interface JiraContentItem {
-	type: string;
-	text?: string;
-	attrs?: Record<string, unknown>;
-	marks?: Array<{ type: string }>;
-	content?: JiraContentItem[];
-}
-
-interface JiraContent {
-	type: string;
-	content?: JiraContentItem[];
-}
+import { loadJiraConfig, getAuthHeader } from './jira-config';
+import { renderAdf, type AdfNode as JiraContent } from './adf';
 
 // Module-level media ID to filename map, set before conversion
 let mediaIdMap: Record<string, string> = {};
@@ -111,211 +101,11 @@ function convertDescriptionToMarkdown(
 	return convertContentToMarkdown(description.content);
 }
 
-function convertContentToMarkdown(content: Array<JiraContent>): string {
-	if (!content) return '';
-
-	let markdown = '';
-
-	function processInlineContent(items: unknown[]): string {
-		return items
-			.map((item) => {
-				const i = item as {
-					type: string;
-					text?: string;
-					marks?: Array<{ type: string; attrs?: { href?: string } }>;
-					attrs?: { text?: string; url?: string };
-				};
-				if (i.type === 'text') {
-					let text = i.text || '';
-					// Apply marks (bold, italic, etc.)
-					if (i.marks) {
-						for (const mark of i.marks) {
-							if (mark.type === 'strong') text = `**${text}**`;
-							if (mark.type === 'em') text = `*${text}*`;
-							if (mark.type === 'code') text = `\`${text}\``;
-							if (mark.type === 'link') {
-								const href = mark.attrs?.href || '';
-								text = `[${text}](${href})`;
-							}
-							// textColor mark is ignored (no markdown equivalent)
-						}
-					}
-					return text;
-				} else if (i.type === 'mention') {
-					return `@${i.attrs?.text || 'user'}`;
-				} else if (i.type === 'inlineCard') {
-					// Handle inline cards (links without text)
-					const url = i.attrs?.url || '';
-					return url;
-				} else if (i.type === 'hardBreak') {
-					return '\n';
-				}
-				return '';
-			})
-			.join('');
-	}
-
-	function processListItem(
-		item: unknown,
-		indent: string,
-		isOrdered: boolean,
-		index: number,
-	): string {
-		let result = '';
-		const prefix = isOrdered ? `${index + 1}.` : '-';
-		const listItem = item as {
-			content?: Array<{
-				type: string;
-				content?: unknown[];
-				attrs?: { language?: string };
-			}>;
-		};
-
-		// Process the list item content
-		if (listItem.content) {
-			for (let i = 0; i < listItem.content.length; i++) {
-				const child = listItem.content[i];
-
-				if (child.type === 'paragraph') {
-					const paragraphText = child.content
-						? processInlineContent(child.content)
-						: '';
-
-					if (i === 0) {
-						// First paragraph goes on the same line as the bullet
-						result += `${indent}${prefix} ${paragraphText}\n`;
-					} else {
-						// Subsequent paragraphs are indented
-						result += `${indent}  ${paragraphText}\n`;
-					}
-				} else if (
-					child.type === 'bulletList' ||
-					child.type === 'orderedList'
-				) {
-					// Handle nested lists
-					const nestedItems = (child as { content?: unknown[] }).content || [];
-					nestedItems.forEach((nestedItem: unknown, nestedIndex: number) => {
-						result += processListItem(
-							nestedItem,
-							indent + '  ',
-							child.type === 'orderedList',
-							nestedIndex,
-						);
-					});
-				} else if (child.type === 'codeBlock') {
-					const language = child.attrs?.language || '';
-					const codeText =
-						(child.content as Array<{ text?: string }> | undefined)
-							?.map((item) => item.text || '')
-							.join('') || '';
-					// Indent code blocks within list items
-					const indentedCode = codeText
-						.split('\n')
-						.map((line: string) => `${indent}  ${line}`)
-						.join('\n');
-					result += `${indent}  \`\`\`${language}\n${indentedCode}\n${indent}  \`\`\`\n`;
-				}
-			}
-		}
-
-		return result;
-	}
-
-	for (const block of content) {
-		if (block.type === 'paragraph') {
-			const paragraphText = block.content
-				? processInlineContent(block.content)
-				: '';
-			markdown += paragraphText + '\n\n';
-		} else if (block.type === 'heading') {
-			const level = (block as { attrs?: { level?: number } }).attrs?.level || 1;
-			const headingText = block.content
-				? processInlineContent(block.content)
-				: '';
-			markdown += `${'#'.repeat(level)} ${headingText}\n\n`;
-		} else if (block.type === 'bulletList' || block.type === 'orderedList') {
-			const listItems = block.content || [];
-			listItems.forEach((item, index) => {
-				markdown += processListItem(
-					item,
-					'',
-					block.type === 'orderedList',
-					index,
-				);
-			});
-			markdown += '\n';
-		} else if (block.type === 'codeBlock') {
-			const language =
-				(block as { attrs?: { language?: string } }).attrs?.language || '';
-			const codeText = block.content?.map((item) => item.text || '').join('');
-			markdown += `\`\`\`${language}\n${codeText}\n\`\`\`\n\n`;
-		} else if (block.type === 'blockquote') {
-			// Handle blockquotes
-			const quoteText = block.content
-				?.map((p) =>
-					(p as { content?: unknown[] }).content
-						? processInlineContent((p as { content?: unknown[] }).content!)
-						: '',
-				)
-				.join('\n');
-			markdown += `> ${quoteText}\n\n`;
-		} else if (block.type === 'rule') {
-			// Handle horizontal rules
-			markdown += '---\n\n';
-		} else if (block.type === 'expand') {
-			// Handle expand/collapse sections
-			const expandBlock = block as { attrs?: { title?: string }; content?: Array<JiraContent> };
-			const title = expandBlock.attrs?.title || 'Details';
-			markdown += `<details>\n<summary>${title}</summary>\n\n`;
-			if (expandBlock.content) {
-				markdown += convertContentToMarkdown(expandBlock.content) + '\n\n';
-			}
-			markdown += `</details>\n\n`;
-		} else if (block.type === 'blockCard') {
-			// Handle block-level link cards
-			const cardBlock = block as { attrs?: { url?: string } };
-			const url = cardBlock.attrs?.url || '';
-			if (url) {
-				markdown += `${url}\n\n`;
-			}
-		} else if (block.type === 'mediaGroup' || block.type === 'mediaSingle') {
-			// Handle media groups and single media (inline file attachments / images)
-			const mediaItems = block.content || [];
-			for (const media of mediaItems) {
-				const mediaNode = media as { attrs?: { id?: string; type?: string } };
-				const mediaId = mediaNode.attrs?.id;
-				if (mediaId && mediaIdMap[mediaId]) {
-					markdown += `@${mediaIdMap[mediaId]}\n`;
-				} else {
-					markdown += `📎 *(unresolved attached file)*\n`;
-				}
-			}
-			markdown += '\n';
-		} else if (block.type === 'table') {
-			// Handle tables
-			const rows = block.content || [];
-			for (let rowIdx = 0; rowIdx < rows.length; rowIdx++) {
-				const row = rows[rowIdx] as { content?: Array<{ type: string; content?: Array<JiraContent> }> };
-				const cells = row.content || [];
-				const cellTexts = cells.map(cell => {
-					if (cell.content) {
-						return cell.content.map(p => (p as { content?: unknown[] }).content ? processInlineContent((p as { content?: unknown[] }).content!) : '').join(' ');
-					}
-					return '';
-				});
-				markdown += `| ${cellTexts.join(' | ')} |\n`;
-				if (rowIdx === 0) {
-					markdown += `| ${cellTexts.map(() => '---').join(' | ')} |\n`;
-				}
-			}
-			markdown += '\n';
-		}
-	}
-
-	return markdown.trim();
+function convertContentToMarkdown(content: JiraContent[]): string {
+	return renderAdf(content, mediaIdMap);
 }
 
-function generateIssueMarkdown(
+export function generateIssueMarkdown(
 	issue: JiraIssue,
 	comments: JiraComment[],
 	devInfo?: DevInfoDetail,
@@ -409,9 +199,10 @@ Arguments:
   --help, -h       Show this help message
 
 Environment Variables:
-  JIRA_URL         Jira instance URL (required)
-  JIRA_USERNAME    Jira username/email (required)
-  JIRA_API_TOKEN   Jira API token (required)
+  JIRA_URL         Jira instance URL (use all three env vars together)
+  JIRA_USERNAME    Jira username/email
+  JIRA_API_TOKEN   Jira API token
+  Otherwise load ~/.config/atlassian-jira/credentials.json
   JIRA_DEBUG       Set to "true" to save raw JSON responses
 
 Examples:
@@ -421,26 +212,11 @@ Examples:
 		process.exit(values.help ? 0 : 1);
 	}
 
-	const JIRA_URL = process.env.JIRA_URL;
-	const JIRA_USERNAME = process.env.JIRA_USERNAME;
-	const JIRA_API_TOKEN = process.env.JIRA_API_TOKEN;
-
-	if (!JIRA_URL || !JIRA_USERNAME || !JIRA_API_TOKEN) {
-		const missing: string[] = [];
-		if (!JIRA_URL) missing.push('JIRA_URL');
-		if (!JIRA_USERNAME) missing.push('JIRA_USERNAME');
-		if (!JIRA_API_TOKEN) missing.push('JIRA_API_TOKEN');
-		console.error(
-			`Missing required environment variables: ${missing.join(', ')}`,
-		);
-		process.exit(1);
-	}
-
 	try {
 		const issueKey = extractIssueKey(values.issue);
-		const auth = Buffer.from(`${JIRA_USERNAME}:${JIRA_API_TOKEN}`).toString(
-			'base64',
-		);
+		const config = await loadJiraConfig();
+		const JIRA_URL = config.jiraUrl.replace(/\/$/, '');
+		const auth = getAuthHeader(config.username, config.apiToken);
 
 		// Fetch the issue from Jira API
 		const url = `${JIRA_URL}/rest/api/3/issue/${issueKey}`;
@@ -448,7 +224,7 @@ Examples:
 		try {
 			response = await fetch(url, {
 				headers: {
-					Authorization: `Basic ${auth}`,
+					Authorization: auth,
 					Accept: 'application/json',
 				},
 			});
@@ -471,7 +247,7 @@ Examples:
 			const renderedUrl = `${JIRA_URL}/rest/api/3/issue/${issueKey}?expand=renderedFields&fields=description,comment`;
 			const renderedResponse = await fetch(renderedUrl, {
 				headers: {
-					Authorization: `Basic ${auth}`,
+					Authorization: auth,
 					Accept: 'application/json',
 				},
 			});
@@ -509,7 +285,7 @@ Examples:
 		try {
 			commentsResponse = await fetch(commentsUrl, {
 				headers: {
-					Authorization: `Basic ${auth}`,
+					Authorization: auth,
 					Accept: 'application/json',
 				},
 			});
@@ -536,7 +312,7 @@ Examples:
 			const devInfoUrl = `${JIRA_URL}/rest/dev-status/latest/issue/detail?issueId=${issue.id}&applicationType=GitHub&dataType=pullrequest`;
 			const devInfoResponse = await fetch(devInfoUrl, {
 				headers: {
-					Authorization: `Basic ${auth}`,
+					Authorization: auth,
 					Accept: 'application/json',
 				},
 			});
@@ -594,7 +370,7 @@ Examples:
 				try {
 					attResponse = await fetch(attachment.content, {
 						headers: {
-							Authorization: `Basic ${auth}`,
+							Authorization: auth,
 						},
 					});
 				} catch (error) {
@@ -664,4 +440,4 @@ Examples:
 	}
 }
 
-main();
+if (import.meta.main) main();

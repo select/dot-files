@@ -1,6 +1,6 @@
 ---
 name: fetch-jira-issue
-description: "Fetch Jira issue with attachments and save to markdown. Use this skill when: fetch jira, jira issue, get ticket, jira ticket, download jira, EN-1234, AW-1234, FR-1234"
+description: "Fetch Jira issue with attachments and save to markdown. Use this skill when: fetch jira, jira issue, get ticket, jira ticket, download jira, EN-1234, AW-1234, FR-1234, https://apheris.atlassian.net/browse/EN-4526"
 ---
 
 # Purpose
@@ -9,9 +9,7 @@ This skill fetches a Jira issue including its description, comments, attachments
 
 ## Variables
 
-- **JIRA_URL**: Jira instance URL (from environment)
-- **JIRA_USERNAME**: Jira username/email (from environment)
-- **JIRA_API_TOKEN**: Jira API token (from environment)
+- **Credentials**: Prefer `JIRA_URL`, `JIRA_USERNAME`, and `JIRA_API_TOKEN` together; otherwise load `~/.config/atlassian-jira/credentials.json` with `jiraUrl`, `username`, and `apiToken` fields
 - **Output directory**: `issues/[issueKey]/`
 
 ## Instructions
@@ -29,18 +27,18 @@ When fetching a Jira issue, you need:
 > Execute the following steps in order, top to bottom:
 
 1. **Determine Issue Identifier**
-   
+
    **IF** user provides explicit issue identifier (key or URL):
    - Extract issue key from URL or use directly if already in key format
    - Validate format matches `[A-Z]+-\d+` pattern
    - Proceed to step 2
-   
+
    **ELSE IF** user says "current issue", "this branch", "this ticket", or similar:
    - Get current branch name using `git branch --show-current`
    - Extract issue key from branch name (pattern: `[A-Z]+-\d+`)
    - If no match found, ask user to provide issue identifier explicitly
    - Proceed to step 2
-   
+
    **ELSE**:
    - Ask user to provide issue identifier
 
@@ -68,6 +66,19 @@ bun fetch-issue.ts --issue "EN-4526"
 
 # Using full URL:
 bun fetch-issue.ts --issue "https://apheris.atlassian.net/browse/EN-4526"
+```
+
+## Rendering and tests
+
+The converter preserves nested Jira checklists as Markdown `- [ ]` / `- [x]`,
+including formatting and links in descriptions and comments. It also renders
+expand sections, tables, cards and attachment references. Unknown containers
+are traversed rather than silently discarding their text.
+
+Run the offline regression suite (no Jira credentials required):
+
+```bash
+bun test {baseDir}/scripts
 ```
 
 ## Output Format
