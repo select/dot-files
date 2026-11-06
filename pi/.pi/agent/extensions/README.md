@@ -10,6 +10,9 @@ Custom extensions and configuration for the pi coding agent.
 | `protected-files.json` | List of files protected from accidental modification |
 | `protected-files.ts` | Extension enforcing protected-files policy |
 | `web-fetch.ts` | Extension adding web fetch capability |
+| `wait-for-event/` | Idle until a command exits or an event file arrives; [skill integration and usage](wait-for-event/README.md) |
+| `self-compact/` | Autonomous context compaction; see [configuration](self-compact/README.md) |
+| `self-compact.yaml` | Shared context limits and per-model overrides |
 
 ---
 
