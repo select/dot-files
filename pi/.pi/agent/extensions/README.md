@@ -13,6 +13,7 @@ Custom extensions and configuration for the pi coding agent.
 | `wait-for-event/` | Idle until a command exits or an event file arrives; [skill integration and usage](wait-for-event/README.md) |
 | `self-compact/` | Autonomous context compaction; see [configuration](self-compact/README.md) |
 | `self-compact.yaml` | Shared context limits and per-model overrides |
+| `prompt-stash/` | Vendored Ctrl+S draft stash/restore stack; see [setup and usage](prompt-stash/README.md) |
 
 ---
 
