@@ -3,6 +3,7 @@ import { basename } from "node:path";
 import type { RenderedSegment, SegmentContext, SemanticColor, StatusLineSegment, StatusLineSegmentId } from "./types.js";
 import { fg, rainbow, applyColor } from "./theme.js";
 import { getIcons, SEP_DOT, getThinkingText } from "./icons.js";
+import { renderCompaction } from "./compaction.js";
 
 // Helper to apply semantic color from context
 function color(ctx: SegmentContext, semantic: SemanticColor, text: string): string {
@@ -258,6 +259,7 @@ const costSegment: StatusLineSegment = {
 const contextPctSegment: StatusLineSegment = {
   id: "context_pct",
   render(ctx) {
+    if (ctx.compaction) return renderCompaction(ctx);
     const icons = getIcons();
     const pct = ctx.contextPercent;
     const window = ctx.contextWindow;
@@ -390,7 +392,8 @@ const extensionStatusesSegment: StatusLineSegment = {
     // Join compact statuses with a separator
     // Notification-style statuses (starting with "[") are shown above the editor instead
     const parts: string[] = [];
-    for (const value of statuses.values()) {
+    for (const [key, value] of statuses) {
+      if (key === "self-compact" && ctx.compaction) continue;
       if (value && !value.trimStart().startsWith('[')) {
         parts.push(value);
       }

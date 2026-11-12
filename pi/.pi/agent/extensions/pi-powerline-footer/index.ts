@@ -1,6 +1,6 @@
-import type { ExtensionAPI, ReadonlyFooterDataProvider, Theme } from "@mariozechner/pi-coding-agent";
-import type { AssistantMessage } from "@mariozechner/pi-ai";
-import { visibleWidth, truncateToWidth } from "@mariozechner/pi-tui";
+import type { ExtensionAPI, ReadonlyFooterDataProvider, Theme } from "@earendil-works/pi-coding-agent";
+import type { AssistantMessage } from "@earendil-works/pi-ai";
+import { visibleWidth, truncateToWidth } from "@earendil-works/pi-tui";
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
@@ -8,6 +8,7 @@ import type { ColorScheme, SegmentContext, StatusLinePreset, StatusLineSegmentId
 import { getPreset, PRESETS } from "./presets.js";
 import { getSeparator } from "./separators.js";
 import { renderSegment } from "./segments.js";
+import { readCompactionState, type SelfCompactFooterState } from "./compaction.js";
 import { getGitStatus, invalidateGitStatus, invalidateGitBranch } from "./git-status.js";
 import { ansi, getFgAnsiCode } from "./colors.js";
 import { WelcomeComponent, WelcomeHeader, discoverLoadedCounts, getRecentSessions } from "./welcome.js";
@@ -85,7 +86,7 @@ function buildContentFromParts(
  * When terminal is wide enough, secondary segments move up to top bar.
  * When narrow, top bar segments overflow down to secondary row.
  */
-function computeResponsiveLayout(
+export function computeResponsiveLayout(
   ctx: SegmentContext,
   presetDef: ReturnType<typeof getPreset>,
   availableWidth: number
@@ -99,11 +100,11 @@ function computeResponsiveLayout(
   const allSegmentIds = [...primaryIds, ...secondaryIds];
   
   // Render all segments and get their widths
-  const renderedSegments: { content: string; width: number }[] = [];
+  const renderedSegments: { id: StatusLineSegmentId; content: string; width: number }[] = [];
   for (const segId of allSegmentIds) {
-    const { content, width, visible } = renderSegmentWithWidth(segId, ctx);
+    const { content, width, visible } = renderSegmentWithWidth(segId, { ...ctx, availableWidth });
     if (visible) {
-      renderedSegments.push({ content, width });
+      renderedSegments.push({ id: segId, content, width });
     }
   }
   
@@ -149,6 +150,14 @@ function computeResponsiveLayout(
     }
   }
   
+  // Preserve the configured top-row order. If tiny terminals would drop the
+  // budget entirely, use the secondary row rather than moving it ahead of the model.
+  const budget = ctx.compaction ? renderedSegments.find(seg => seg.id === "context_pct") : undefined;
+  if (budget && !topSegments.includes(budget.content) && !secondarySegments.includes(budget.content) &&
+      budget.width + baseOverhead <= availableWidth) {
+    secondarySegments = [budget.content];
+  }
+
   return {
     topContent: buildContentFromParts(topSegments, presetDef),
     secondaryContent: buildContentFromParts(secondarySegments, presetDef),
@@ -174,6 +183,8 @@ export default function powerlineFooter(pi: ExtensionAPI) {
   let showLastPrompt = true; // Cached setting for last prompt visibility
   let stashedEditorText: string | null = null;
   let currentEditor: any = null;
+  let compactionState: SelfCompactFooterState | undefined;
+  let unsubscribeCompaction: (() => void) | undefined;
   
   // Cache for responsive layout (shared between editor and widget for consistency)
   let lastLayoutWidth = 0;
@@ -186,6 +197,16 @@ export default function powerlineFooter(pi: ExtensionAPI) {
     currentCtx = ctx;
     lastUserPrompt = "";
     isStreaming = false;
+    compactionState = undefined;
+    lastLayoutResult = null;
+    unsubscribeCompaction?.();
+    unsubscribeCompaction = pi.events.on("self-compact:footer", (value) => {
+      compactionState = readCompactionState(value);
+      lastLayoutResult = null;
+      tuiRef?.requestRender();
+    });
+    // Handles either extension load order, including /reload and resumed sessions.
+    pi.events.emit("self-compact:footer-request", null);
 
     const settings = readSettings();
     showLastPrompt = settings.showLastPrompt !== false;
@@ -206,6 +227,13 @@ export default function powerlineFooter(pi: ExtensionAPI) {
         setupWelcomeOverlay(ctx);
       }
     }
+  });
+
+  pi.on("session_shutdown", () => {
+    unsubscribeCompaction?.();
+    unsubscribeCompaction = undefined;
+    compactionState = undefined;
+    lastLayoutResult = null;
   });
 
   // Check if a bash command might change git branch
@@ -535,6 +563,11 @@ export default function powerlineFooter(pi: ExtensionAPI) {
     },
   });
 
+  function compactionFor(ctx: any): SelfCompactFooterState | undefined {
+    return compactionState?.model === `${ctx.model?.provider ?? ""}/${ctx.model?.id ?? ""}` &&
+      compactionState.session === ctx.sessionManager?.getSessionId?.() ? compactionState : undefined;
+  }
+
   function buildSegmentContext(ctx: any, theme: Theme): SegmentContext {
     const presetDef = getPreset(config.preset);
     const colors: ColorScheme = presetDef.colors ?? getDefaultColors();
@@ -583,6 +616,7 @@ export default function powerlineFooter(pi: ExtensionAPI) {
       usageStats: { input, output, cacheRead, cacheWrite, cost },
       contextPercent,
       contextWindow,
+      compaction: compactionFor(ctx),
       autoCompactEnabled: ctx.settingsManager?.getCompactionSettings?.()?.enabled ?? true,
       sessionStartTime,
       git: gitStatus,
@@ -616,7 +650,7 @@ export default function powerlineFooter(pi: ExtensionAPI) {
 
   function setupCustomEditor(ctx: any) {
     // Import CustomEditor dynamically and create wrapper
-    import("@mariozechner/pi-coding-agent").then(({ CustomEditor }) => {
+    import("@earendil-works/pi-coding-agent").then(({ CustomEditor }) => {
       let autocompleteFixed = false;
 
       const editorFactory = (tui: any, editorTheme: any, keybindings: any) => {
@@ -727,7 +761,7 @@ export default function powerlineFooter(pi: ExtensionAPI) {
 
         return {
           dispose: unsub,
-          invalidate() {},
+          invalidate() { lastLayoutResult = null; },
           render(): string[] {
             return [];
           },
@@ -739,7 +773,7 @@ export default function powerlineFooter(pi: ExtensionAPI) {
       ctx.ui.setWidget("powerline-secondary", (_tui: any, theme: Theme) => {
         return {
           dispose() {},
-          invalidate() {},
+          invalidate() { lastLayoutResult = null; },
           render(width: number): string[] {
             if (!currentCtx) return [];
             
@@ -770,7 +804,8 @@ export default function powerlineFooter(pi: ExtensionAPI) {
             
             // Collect notification-style statuses (those starting with "[extensionName]")
             const notifications: string[] = [];
-            for (const value of statuses.values()) {
+            for (const [key, value] of statuses) {
+              if (key === "self-compact" && compactionFor(currentCtx)) continue;
               if (value && value.trimStart().startsWith('[')) {
                 // Account for leading space when checking width
                 const lineContent = ` ${value}`;

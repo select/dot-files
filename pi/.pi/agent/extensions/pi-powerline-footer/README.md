@@ -24,7 +24,24 @@ Customizes the default [pi](https://github.com/badlogic/pi-mono) editor with a p
 
 **Git integration** — Async status fetching with 1s cache TTL. Automatically invalidates on file writes/edits. Shows branch, staged (+), unstaged (*), and untracked (?) counts.
 
-**Context awareness** — Color-coded warnings at 70% (yellow) and 90% (red) context usage. Auto-compact indicator when enabled.
+**Context awareness** — Integrates with the local self-compact extension: an eight-cell meter
+shows current tokens against the configured forced cutoff, plus the warning threshold:
+
+```text
+╭─ … │ ◫ ▰▰▰▱▱▱▱▱ 123k/250k · warn 220k ──
+╰ …
+```
+
+Cached cells are green, newly used cells use the accent color, and empty cells are muted.
+The segment turns yellow at the warning threshold (`SOON`), red at the forced cutoff
+(`COMPACT`), and shows `COMPACTING`, `RESUMING`, or `FAILED` during the handoff.
+The meter scales to your compaction budget, not the model's entire context window.
+The default order is model → thinking → cache/cost → path → git → context.
+Narrow terminals preserve that order, move the budget to the secondary row if needed,
+and omit the meter/extra threshold details;
+`POWERLINE_NERD_FONTS=0` uses ASCII meter cells.
+Self-compact no longer displays a separate status gauge, avoiding duplicate meters during startup.
+Without self-compact, the original context percentage and 70%/90% warning colors remain.
 
 **Token intelligence** — Smart formatting (1.2k, 45M) and API-equivalent dollar cost, including subscription-backed providers.
 
@@ -42,7 +59,7 @@ Activates automatically. Toggle with `/powerline`, switch presets with `/powerli
 
 | Preset | Description |
 |--------|-------------|
-| `default` | Model, thinking, path (basename), git, context, tokens, cost |
+| `default` | Model, thinking, cache/cost, path (basename), git, context |
 | `minimal` | Just path (basename), git, context |
 | `compact` | Model, git, cost, context |
 | `full` | Everything including hostname, time, abbreviated path |

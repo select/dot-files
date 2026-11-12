@@ -7,7 +7,7 @@
  * 3. Default colors
  */
 
-import type { Theme, ThemeColor } from "@mariozechner/pi-coding-agent";
+import type { Theme, ThemeColor } from "@earendil-works/pi-coding-agent";
 import { existsSync, readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -67,7 +67,7 @@ function loadUserTheme(): ColorScheme {
       const parsed = JSON.parse(content);
       userThemeCache = parsed.colors ?? {};
       userThemeCacheTime = now;
-      return userThemeCache;
+      return userThemeCache ?? {};
     }
   } catch {
     // Ignore errors, use defaults

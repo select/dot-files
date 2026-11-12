@@ -1,7 +1,7 @@
 import { readdirSync, existsSync, statSync } from "node:fs";
 import { join, basename } from "node:path";
-import type { Component } from "@mariozechner/pi-tui";
-import { visibleWidth } from "@mariozechner/pi-tui";
+import type { Component } from "@earendil-works/pi-tui";
+import { visibleWidth } from "@earendil-works/pi-tui";
 import { ansi, fgOnly, getFgAnsiCode } from "./colors.js";
 
 export interface RecentSession {
