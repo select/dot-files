@@ -111,7 +111,7 @@ npx skills add justfinethanku/cc_chrome_devtools_mcp_skill@cc_chrome_devtools_mc
 
 ## My Setup (dot-files context)
 
-The `chrome-devtools` MCP server is already configured in `opencode/.config/opencode/opencode.jsonc`. Given that, the recommended stack is:
+The `chrome-devtools` skill is available to the agents configured here. Given that, the recommended stack is:
 
 1. **Install `awesome-copilot`** for day-to-day agent prompting context
 2. **Keep `mrgoonie/claudekit-skills`** available as the power-tool fallback — its scripts can be invoked directly when the MCP server isn't responding or you need Puppeteer-level control

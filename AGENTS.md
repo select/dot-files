@@ -10,8 +10,8 @@ dot-files/
 ├── awesome/          # AwesomeWM window manager (Lua)
 ├── git/              # Git configuration
 ├── mpv/              # MPV media player config
-├── opencode/         # OpenCode AI tool configuration (TypeScript/Python)
-├── opencode-code/    # Git submodule - OpenCode source (Bun monorepo)
+├── pi/              # Pi coding agent config and extensions (TypeScript)
+├── agents/          # Shared agent skills
 ├── tmux/             # Tmux terminal multiplexer
 ├── zed/              # Zed editor configuration
 └── zsh/              # Zsh shell configuration
@@ -23,24 +23,7 @@ dot-files/
 
 No centralized build system - this is a dotfiles collection. Work within specific subdirectories.
 
-### OpenCode Plugins (`opencode/.config/opencode/`)
-
-```bash
-bun install                    # Install dependencies
-bun run <plugin>.ts            # Run a TypeScript plugin directly
-```
-
-### OpenCode Source (`opencode-code/` submodule)
-
-```bash
-bun install                    # Install dependencies
-bun dev                        # Start dev server for testing
-bun turbo typecheck            # Run type checking across packages
-./packages/opencode/script/build.ts --single  # Build standalone executable
-./script/generate.ts           # Regenerate SDK
-```
-
-### Python Plugins (`opencode/.config/opencode/plugin/voice-permissions/`)
+### Python
 
 ```bash
 uv sync                        # Install Python dependencies (NEVER use pip)
@@ -69,22 +52,22 @@ ags bundle ags/.config/ags/app.ts /tmp/bundle          # Bundle & validate TypeS
 
 ## Code Style Guidelines
 
-### TypeScript/JavaScript (OpenCode plugins)
+### TypeScript/JavaScript (Pi extensions, skills, AGS)
 
 **Imports**:
 
 ```typescript
-import type { Plugin } from "@opencode-ai/plugin"; // Type-only imports
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent"; // Type-only imports
 import { something } from "package"; // Named imports preferred
 ```
 
 **Exports**:
 
 ```typescript
-export const PluginName: Plugin = async ({ $ }) => { ... }  // Named exports
+export function helper() { ... }  // Named exports for helpers
 ```
 
-**General Rules** (from opencode-code STYLE_GUIDE.md):
+**General Rules**:
 
 - Prefer `const` over `let` - use ternary for conditional assignment
 - Avoid `else` statements - use early returns instead
@@ -143,26 +126,14 @@ The following operations require explicit confirmation:
 
 | File                                       | Purpose                     |
 | ------------------------------------------ | --------------------------- |
-| `opencode/.config/opencode/opencode.jsonc` | Main OpenCode configuration |
-| `opencode/.config/opencode/plugin/*.ts`    | TypeScript plugins          |
+| `pi/.pi/agent/settings.json`               | Pi coding agent settings    |
+| `pi/.pi/agent/extensions/`                 | Pi extensions               |
 | `zsh/.zshrc`                               | Shell configuration         |
 | `zsh/.aliases`                             | Shell aliases               |
 | `awesome/rc.lua`                           | Window manager config       |
 | `ags/.config/ags/app.ts`                   | AGS main entry point and window registry |
 | `ags/.config/ags/widget/`                  | Custom GTK4 TSX widgets (bar, wifi, power, etc.) |
 | `ags/.config/ags/style.ts`                 | AGS global stylesheet compiler (with wal colors) |
-
-## Working with Submodules
-
-```bash
-git submodule update --init --recursive  # Initialize submodules
-git submodule update --remote            # Update to latest
-```
-
-Submodules:
-
-- `opencode-code/` - OpenCode source code
-- `awesome-claude-code-subagents/` - Claude subagent collection
 
 ## Tips for AI Agents
 

@@ -14,7 +14,6 @@ Each directory is a stow package that mirrors the home directory structure:
 | `mpv/`      | MPV media player                     | `~/.config/mpv/` |
 | `kitty/`    | Kitty terminal emulator              | `~/.config/kitty/` |
 | `zed/`      | Zed editor                           | `~/.config/zed/` |
-| `opencode/` | OpenCode AI tool                     | `~/.config/opencode/` |
 | `awesome/`  | AwesomeWM window manager             | `~/.config/awesome/` |
 | `hyprland/` | Hyprland WM + waybar/swaync/wofi/etc | `~/.config/hypr/`, etc. |
 | `ags/`      | [AGS desktop shell](ags/.config/ags/README.md) (bar, capture, wallpaper, …) | `~/.config/ags/` |
@@ -30,7 +29,7 @@ Each directory is a stow package that mirrors the home directory structure:
 
 ```bash
 cd ~/Dev/dot-files
-stow -v -t ~ zsh git tmux mpv kitty zed opencode awesome wal agents
+stow -v -t ~ zsh git tmux mpv kitty zed awesome wal agents
 stow --no-folding -v -t ~ pi  # pi needs --no-folding to avoid overwriting sessions/auth
 ```
 
