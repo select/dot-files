@@ -1,0 +1,21 @@
+id = "local.machine-menu"
+name = "Machine Menu"
+version = "0.1.0"
+min_herdr_version = "0.9.5"
+description = "Enable or disable saved SSH machines from a small popup."
+platforms = ["linux", "macos"]
+
+[[actions]]
+id = "open"
+title = "Machines: enable / disable"
+description = "Open the saved-machine menu without probing remote hosts."
+contexts = ["global", "workspace", "tab", "pane"]
+command = ["sh", "open.sh"]
+
+[[panes]]
+id = "menu"
+title = "Machines"
+placement = "popup"
+width = "65%"
+height = 16
+command = ["bun", "menu.ts"]

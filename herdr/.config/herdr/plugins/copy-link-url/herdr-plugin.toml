@@ -1,0 +1,20 @@
+id = "local.copy-link-url"
+name = "Copy Link URL"
+version = "0.1.0"
+min_herdr_version = "0.8.0"
+description = "Ctrl+click a terminal URL to copy it to the clipboard instead of opening it."
+platforms = ["linux"]
+
+[[actions]]
+id = "copy-url"
+title = "Copy Link URL"
+description = "Copy the clicked URL to the system clipboard."
+command = ["sh", "copy-link-url.sh"]
+
+# Ctrl+click (the only modified-click modifier Herdr exposes) on a matching URL
+# runs the action above with HERDR_PLUGIN_CLICKED_URL set, instead of opening it.
+[[link_handlers]]
+id = "copy-url"
+title = "Copy URL"
+pattern = "^(https?)://"
+action = "copy-url"
