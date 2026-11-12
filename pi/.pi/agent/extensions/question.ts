@@ -11,9 +11,9 @@
  * Mode is auto-detected from the parameters provided.
  */
 
-import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent"
-import { Editor, type EditorTheme, Key, matchesKey, Text, truncateToWidth } from "@mariozechner/pi-tui"
-import { Type } from "@sinclair/typebox"
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent"
+import { Editor, type EditorTheme, Key, matchesKey, Text, truncateToWidth } from "@earendil-works/pi-tui"
+import { Type } from "typebox"
 
 // ─── Domain Types ─────────────────────────────────────────────────────────────
 

@@ -1,20 +1,35 @@
 /**
  * Desktop Notification Extension
  *
- * Sends a desktop notification via notify-send when the agent finishes and is waiting for input.
+ * Best-effort Linux desktop notifications outside Herdr; silent on headless hosts.
  */
 
 import { execFile } from "child_process";
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
-import { Markdown, type MarkdownTheme } from "@mariozechner/pi-tui";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { Markdown, type MarkdownTheme } from "@earendil-works/pi-tui";
 
 /**
- * Send a desktop notification via notify-send.
+ * Herdr owns notifications for managed panes, including remote-to-local delivery.
+ * Outside Herdr, notify-send is only useful on a Linux desktop with a session bus.
+ */
+const canNotify = (): boolean =>
+	process.platform === "linux" &&
+	process.env.HERDR_ENV !== "1" &&
+	Boolean(process.env.DISPLAY || process.env.WAYLAND_DISPLAY) &&
+	Boolean(process.env.DBUS_SESSION_BUS_ADDRESS);
+
+/**
+ * Best-effort desktop notification. Never write asynchronous errors over Pi's editor.
  */
 const notify = (title: string, body: string): void => {
-	execFile("notify-send", [title, body, "--icon=terminal", "--app-name=pi"], (err) => {
-		if (err) console.error("[notify] notify-send failed:", err.message);
-	});
+	execFile(
+		"notify-send",
+		[title, body, "--icon=terminal", "--app-name=pi"],
+		{ timeout: 3000 },
+		() => {
+			// Missing executable, notification service, or timed-out D-Bus: stay silent.
+		},
+	);
 };
 
 const isTextPart = (part: unknown): part is { type: "text"; text: string } =>
@@ -107,7 +122,9 @@ const formatNotification = (
 };
 
 export default function (pi: ExtensionAPI) {
-	pi.on("agent_end", async (event) => {
+	pi.on("agent_end", async (event, ctx) => {
+		if (ctx.mode !== "tui" || !canNotify()) return;
+
 		const lastMessage = getLastAssistantMessage(event.messages ?? []);
 		if (lastMessage?.errorMessage) {
 			const errStr = lastMessage.errorMessage;

@@ -22,16 +22,16 @@ import type {
 	SessionStartEvent,
 	Theme,
 	ToolRenderResultOptions,
-} from "@mariozechner/pi-coding-agent"
+} from "@earendil-works/pi-coding-agent"
 import {
 	truncateHead,
 	DEFAULT_MAX_BYTES,
 	DEFAULT_MAX_LINES,
 	formatSize,
 	getMarkdownTheme,
-} from "@mariozechner/pi-coding-agent"
-import { type Component, Text, Markdown } from "@mariozechner/pi-tui"
-import { type Static, Type } from "@sinclair/typebox"
+} from "@earendil-works/pi-coding-agent"
+import { type Component, Text, Markdown } from "@earendil-works/pi-tui"
+import { type Static, Type } from "typebox"
 
 // ---------------------------------------------------------------------------
 // Config
