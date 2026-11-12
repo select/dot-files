@@ -10,7 +10,8 @@
  *    - Pre-flights the token before agent turns (`before_agent_start`) and model selection.
  *    - Prompts the user to run `gcloud auth application-default login` only when the
  *      refresh token is truly revoked or expired.
- *    - Provides the `/vertex-login` command for manual interactive login.
+ *    - Provides `/vertex-login` for manual login and `/vertex-check` for explicit
+ *      project/IAM diagnostics without model calls or automatic project changes.
  *
  * Debug log: ~/.pi/agent/vertex-auth.log
  */
@@ -19,6 +20,13 @@ import { execSync } from "node:child_process";
 import { appendFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
+import type {
+	Api,
+	AssistantMessageEventStream,
+	Model,
+	SimpleStreamOptions,
+	TranscriptContext,
+} from "@earendil-works/pi-ai/compat";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 
 const VERTEX_PREFIX = "vertex";
@@ -153,11 +161,107 @@ export async function getOrRefreshToken(force = false): Promise<string | null> {
 	return null;
 }
 
+export async function checkVertexProject(baseUrl: string): Promise<{ message: string; level: "info" | "warning" | "error" }> {
+	const url = new URL(baseUrl);
+	const project = url.pathname.match(/^\/v1(?:beta1)?\/projects\/([^/]+)\/locations\//)?.[1];
+	if (url.protocol !== "https:" || !/^(?:[a-z0-9-]+-)?aiplatform\.googleapis\.com$/.test(url.hostname) || !project) {
+		return { level: "error", message: "Not a Google Vertex project endpoint; no credentials sent." };
+	}
+	const token = await getOrRefreshToken();
+	if (!token) return { level: "error", message: "ADC token unavailable. Run /vertex-login." };
+	const endpoint = `https://cloudresourcemanager.googleapis.com/v1/projects/${encodeURIComponent(decodeURIComponent(project))}`;
+	const headers = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
+	const stateResponse = await fetch(endpoint, { headers, signal: AbortSignal.timeout(10000) });
+	if (stateResponse.ok) {
+		const state = await stateResponse.json() as { lifecycleState?: string };
+		if (state.lifecycleState && state.lifecycleState !== "ACTIVE") {
+			return { level: "error", message: `Vertex project ${project} is ${state.lifecycleState}. Update the provider baseUrl to an approved active project; logging in again will not restore this project.` };
+		}
+	} else if (stateResponse.status === 401) {
+		return { level: "error", message: "Google rejected the ADC token (401). Run /vertex-login." };
+	}
+	const response = await fetch(`${endpoint}:testIamPermissions`, {
+		method: "POST", headers, signal: AbortSignal.timeout(10000),
+		body: JSON.stringify({ permissions: ["aiplatform.endpoints.predict", "serviceusage.services.use"] }),
+	});
+	if (!response.ok) {
+		return { level: "warning", message: `Could not inspect IAM for ${project} (HTTP ${response.status}). This does not prove model access is denied. Check the project and API access with its administrator; do not assume ADC expired.` };
+	}
+	const result = await response.json() as { permissions?: string[] };
+	if (!result.permissions?.includes("aiplatform.endpoints.predict")) {
+		return { level: "error", message: `ADC lacks aiplatform.endpoints.predict on ${project}. Ask an administrator for approved Vertex AI access (roles/aiplatform.user); re-login alone will not grant it.` };
+	}
+	const quota = result.permissions.includes("serviceusage.services.use")
+		? "Quota-project permission is also present."
+		: "No serviceusage.services.use permission: do not set this as the ADC quota project. Resource-project Vertex requests may still work.";
+	return {
+		level: "info",
+		message: `${project}: prediction permission confirmed. ${quota}${stateResponse.ok ? "" : " Project lifecycle could not be inspected."} This check does not verify billing, API enablement, or model availability; no model request was made.`,
+	};
+}
+
+const VERTEX_ANTHROPIC_VERSION = "vertex-2023-10-16";
+let anthropicApi: ReturnType<typeof import("@earendil-works/pi-ai/compat").anthropicMessagesApi>;
+
+export function createVertexAnthropicFetch(model: { id: string; baseUrl: string }, baseFetch: typeof fetch = globalThis.fetch): typeof fetch {
+	const publisherBase = model.baseUrl.replace(/\/+$/, "").replace(/\/publishers\/google$/, "/publishers/anthropic");
+	const endpoint = new URL(publisherBase);
+	if (endpoint.protocol !== "https:" || endpoint.username || endpoint.password || endpoint.port ||
+		! /^(?:[a-z0-9-]+-)?aiplatform\.googleapis\.com$/.test(endpoint.hostname) ||
+		!/^\/v1(?:beta1)?\/projects\/[^/]+\/locations\/[^/]+\/publishers\/anthropic$/.test(endpoint.pathname) ||
+		endpoint.search || endpoint.hash) {
+		throw new Error("Expected a Google Vertex Anthropic publisher endpoint");
+	}
+	const targetUrl = `${publisherBase}/models/${encodeURIComponent(model.id)}:streamRawPredict`;
+
+	return (async (input: RequestInfo | URL, init?: RequestInit) => {
+		const request = new Request(input, init);
+		if (request.method !== "POST") throw new Error("Expected an Anthropic Messages POST request");
+		const headers = new Headers(request.headers);
+		headers.delete("x-api-key");
+		headers.delete("anthropic-version");
+
+		const parsed = JSON.parse(await request.text()) as Record<string, unknown>;
+		delete parsed.model;
+		delete parsed.betas;
+		parsed.anthropic_version = VERTEX_ANTHROPIC_VERSION;
+
+		return baseFetch(targetUrl, {
+			method: "POST",
+			headers,
+			body: JSON.stringify(parsed),
+			signal: request.signal,
+			redirect: "error",
+		});
+	}) as typeof fetch;
+}
+
+export function streamVertexAnthropic(
+	model: Model<Api>,
+	context: TranscriptContext,
+	options?: SimpleStreamOptions,
+): AssistantMessageEventStream {
+	return anthropicApi.streamSimple(model as Model<"anthropic-messages">, context, {
+		...options,
+		apiKey: undefined,
+		fetch: createVertexAnthropicFetch(model, options?.fetch),
+	});
+}
+
 // ---------------------------------------------------------------------------
 // Pi Extension Factory
 // ---------------------------------------------------------------------------
-export default function (pi: ExtensionAPI) {
+export default async function (pi: ExtensionAPI) {
+	// Keep the standalone ADC resolver dependency-free; Pi supplies this import.
+	const { anthropicMessagesApi } = await import("@earendil-works/pi-ai/compat");
+	anthropicApi = anthropicMessagesApi();
 	log("extension factory loaded");
+	for (const providerId of ["vertex", "vertex-global"]) {
+		pi.registerProvider(providerId, {
+			api: "anthropic-messages",
+			streamSimple: streamVertexAnthropic,
+		});
+	}
 	let inFlight = false;
 
 	const tokenValid = async (): Promise<boolean> => {
@@ -179,9 +283,9 @@ export default function (pi: ExtensionAPI) {
 		log("relogin done", { code: r.code, stderr: r.stderr.trim().slice(0, 300) });
 
 		if (r.code === 0) {
-			await getOrRefreshToken(true);
-			ctx.ui.notify("Vertex ADC refreshed ✓", "info");
-			return true;
+			const token = await getOrRefreshToken(true);
+			ctx.ui.notify(token ? "Vertex ADC refreshed ✓ (project access is separate; use /vertex-check)" : "Login completed but ADC token refresh failed", token ? "info" : "error");
+			return Boolean(token);
 		}
 		const detail = (r.stderr || r.stdout).trim().slice(0, 240);
 		ctx.ui.notify(`gcloud login failed: ${detail || "unknown error"}`, "error");
@@ -226,6 +330,22 @@ export default function (pi: ExtensionAPI) {
 	pi.on("model_select", async (event, ctx) => {
 		log("event: model_select", { eventModel: event.model });
 		await ensureAuth(ctx, event.model?.provider, "model_select");
+	});
+
+	pi.registerCommand("vertex-check", {
+		description: "Check the selected Vertex project's lifecycle and ADC permissions (no model call)",
+		handler: async (_args, ctx) => {
+			if (!ctx.model?.provider.startsWith(VERTEX_PREFIX)) {
+				ctx.ui.notify("Select a Vertex model first, then run /vertex-check.", "warning");
+				return;
+			}
+			try {
+				const result = await checkVertexProject(ctx.model.baseUrl);
+				ctx.ui.notify(result.message, result.level);
+			} catch {
+				ctx.ui.notify("Vertex project check failed (network, timeout, or invalid configuration). No project or IAM settings were changed.", "warning");
+			}
+		},
 	});
 
 	pi.registerCommand("vertex-login", {

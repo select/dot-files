@@ -1,12 +1,69 @@
 {
   "providers": {
+    "lyceum": {
+      "baseUrl": "https://api.lyceum.technology/openai/v1",
+      "apiKey": "$LYCEAUM_KEY",
+      "api": "openai-completions",
+      "models": [
+        {
+          "id": "moonshotai/kimi-k3",
+          "name": "Kimi K3 (Lyceum)",
+          "reasoning": true,
+          "input": ["text", "image"],
+          "contextWindow": 1048576,
+          "maxTokens": 65536,
+          "cost": { "input": 3.00, "output": 15.00, "cacheRead": 0.75, "cacheWrite": 0 },
+          "thinkingLevelMap": { "off": "low", "minimal": "low", "medium": "high", "xhigh": "max" },
+          "compat": { "maxTokensField": "max_tokens" }
+        },
+        {
+          "id": "deepseek/deepseek-v4.1-flash",
+          "name": "DeepSeek V4.1 Flash (Lyceum)",
+          "reasoning": true,
+          "input": ["text"],
+          "contextWindow": 1048576,
+          "maxTokens": 65536,
+          "cost": { "input": 0.50, "output": 1.50, "cacheRead": 0.13, "cacheWrite": 0 },
+          "thinkingLevelMap": { "off": "none" },
+          "compat": { "maxTokensField": "max_tokens" }
+        },
+        {
+          "id": "z-ai/glm-5.3-flash",
+          "name": "GLM-5.3 Flash (Lyceum)",
+          "reasoning": true,
+          "input": ["text", "image"],
+          "contextWindow": 1048576,
+          "maxTokens": 131072,
+          "cost": { "input": 0.20, "output": 0.50, "cacheRead": 0.05, "cacheWrite": 0 },
+          "thinkingLevelMap": { "off": "low", "minimal": "low", "medium": "high", "xhigh": "max" },
+          "compat": { "maxTokensField": "max_tokens" }
+        }
+      ]
+    },
     "openrouter": {
       "baseUrl": "https://openrouter.ai/api/v1",
       "apiKey": "$OPENROUTER_API_KEY",
-      "api": "openai-completions"
+      "api": "openai-completions",
+      "models": [
+        {
+          "id": "deepseek/deepseek-v4.1-flash:nitro",
+          "name": "DeepSeek V4.1 Flash (Nitro)",
+          "reasoning": true,
+          "input": ["text", "image"],
+          "contextWindow": 1048576,
+          "maxTokens": 384000,
+          "cost": { "input": 0.30, "output": 1.20, "cacheRead": 0.006, "cacheWrite": 0 },
+          "compat": {
+            "openRouterRouting": {
+              "only": ["deepseek", "fireworks"],
+              "sort": "throughput"
+            }
+          }
+        }
+      ]
     },
     "vertex-global": {
-      "baseUrl": "https://aiplatform.googleapis.com/v1/projects/driven-country-453015-a0/locations/global/publishers/google",
+      "baseUrl": "https://aiplatform.googleapis.com/v1/projects/apheris/locations/global/publishers/google",
       "api": "google-generative-ai",
       "apiKey": "!bun run ~/.pi/agent/extensions/vertex-auth.ts",
       "authHeader": true,
@@ -21,13 +78,37 @@
           "cost": { "input": 0.30, "output": 2.50, "cacheRead": 0.03, "cacheWrite": 0.083333 }
         },
         {
-          "id": "gemini-3.8-flash",
-          "name": "Gemini 3.8 Flash (Vertex global)",
+          "id": "gemini-4-argon",
+          "name": "Gemini 4 Argon (Vertex global)",
           "reasoning": true,
           "input": ["text", "image"],
           "contextWindow": 1048576,
           "maxTokens": 65536,
-          "cost": { "input": 0.75, "output": 3.75, "cacheRead": 0.075, "cacheWrite": 0 }
+          "cost": { "input": 2.00, "output": 10.00, "cacheRead": 0.10, "cacheWrite": 0 },
+          "thinkingLevelMap": { "off": "low", "minimal": "low", "xhigh": "high", "max": "high" }
+        },
+        {
+          "id": "gemini-4-carbon",
+          "name": "Gemini 4 Carbon (Vertex global)",
+          "reasoning": true,
+          "input": ["text", "image"],
+          "contextWindow": 1048576,
+          "maxTokens": 65536,
+          "cost": { "input": 2.00, "output": 10.00, "cacheRead": 0.10, "cacheWrite": 0 },
+          "thinkingLevelMap": { "off": "low", "minimal": "low", "xhigh": "high", "max": "high" }
+        },
+        {
+          "id": "claude-opus-5-5",
+          "name": "Claude Opus 5.5 (Vertex global)",
+          "api": "anthropic-messages",
+          "baseUrl": "https://aiplatform.googleapis.com/v1/projects/apheris/locations/global/publishers/anthropic",
+          "reasoning": true,
+          "input": ["text", "image"],
+          "contextWindow": 1000000,
+          "maxTokens": 128000,
+          "cost": { "input": 4.00, "output": 20.00, "cacheRead": 0.20, "cacheWrite": 5.00 },
+          "thinkingLevelMap": { "off": null, "minimal": null, "low": "low", "medium": "medium", "high": "high", "xhigh": "xhigh", "max": "max" },
+          "compat": { "forceAdaptiveThinking": true, "supportsTemperature": false, "supportsStrictTools": false }
         }
       ]
     }

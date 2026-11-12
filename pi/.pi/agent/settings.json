@@ -1,26 +1,41 @@
 {
-  "lastChangelogVersion": "0.87.1",
+  "lastChangelogVersion": "1.5.0",
   "quietStartup": true,
   "theme": "pywal",
+  "terminal": {
+    "images": "kitty"
+  },
   "defaultProvider": "amazon-bedrock",
   "defaultModel": "github-copilot/gpt-6-astra",
   "enabledModels": [
+    "github-copilot/gpt-6.1-sol",
+    "vertex-global/gemini-4-carbon",
+    "vertex-global/claude-opus-5-5",
+    "github-copilot/gpt-6-luna",
     "github-copilot/gpt-6-astra",
-    "vertex-global/gemini-3.8-flash",
-    "github-copilot/gpt-5.6-sol",
-    "github-copilot/gpt-5.6-terra",
-    "vertex-global/gemini-3.5-flash-lite",
-    "eu.anthropic.claude-opus-5",
-    "global.anthropic.claude-fable-5-1",
-    "eu.anthropic.claude-sonnet-5"
+    "eu.anthropic.claude-opus-5-5",
+    "eu.anthropic.claude-sonnet-5",
+    "lyceum/moonshotai/kimi-k3",
+    "lyceum/deepseek/deepseek-v4.1-flash",
+    "lyceum/z-ai/glm-5.3-flash"
+  ],
+  "_disabledModels": [
+    "openrouter/deepseek/deepseek-v4.1-flash:nitro"
   ],
   "packages": [
     "npm:pi-skill-palette",
     "npm:@aliou/pi-guardrails",
     "npm:lsp-pi",
-    "npm:token-rate-pi",
-    "npm:pi-mcp-adapter",
-    "npm:pi-rtk-optimizer"
+    "npm:token-rate-pi"
   ],
-  "defaultThinkingLevel": "medium"
+  "defaultThinkingLevel": "medium",
+  "codemode": {
+    "inlineBudget": 8000
+  },
+  "defaultTools": [
+    "+codemode"
+  ],
+  "extensionChangelogVersions": {
+    "{\"source\":\"npm:pi-skill-palette\",\"scope\":\"user\"}": "2.2.0"
+  }
 }
