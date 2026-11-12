@@ -306,6 +306,12 @@ hl.window_rule({ match = { class = "kitty" }, opacity = "0.94" })
 -- KeePassXC
 hl.window_rule({ match = { class = "(.*)(keepassxc)(.*)$" }, float = true })
 
+-- Screenshot annotation editor: centered floating window (80% of the monitor)
+local annotateMatch = { class = "^(dev.dotfiles.ScreenshotAnnotate)$" }
+hl.window_rule({ match = annotateMatch, float = true })
+hl.window_rule({ match = annotateMatch, size = { "monitor_w*0.8", "monitor_h*0.8" } })
+hl.window_rule({ match = annotateMatch, move = { "monitor_w*0.1", "monitor_h*0.1" } })
+
 -- mpv
 hl.window_rule({ match = { class = "mpv" }, keep_aspect_ratio = true })
 hl.window_rule({ match = { title = "(mpv)" }, opaque = true })

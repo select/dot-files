@@ -21,6 +21,7 @@ const [kind, setKind] = createState<Kind>("screenshot");
 const [recording, setRecording] = createState(false);
 const [mic, setMic] = createState(false);
 const [keys, setKeys] = createState(false);
+const [annotate, setAnnotate] = createState(true);
 
 function close() {
 	app.get_window("capture")?.set_visible(false);
@@ -46,6 +47,7 @@ function capture() {
 		m,
 		mic.get() ? "mic" : "no-mic",
 		keys.get() ? "keys" : "no-keys",
+		annotate.get() ? "annotate" : "no-annotate",
 	]).catch((err) => console.error(err));
 }
 
@@ -190,6 +192,21 @@ export default function Capture(gdkmonitor: Gdk.Monitor) {
 							spacing={6}
 						>
 							<button
+								class={annotate((enabled) =>
+									enabled ? "capture-option active" : "capture-option",
+								)}
+								tooltipText={annotate((enabled) =>
+									enabled
+										? "Annotate after capture (on)"
+										: "Annotate after capture (off)",
+								)}
+								visible={kind((value) => value === "screenshot")}
+								onClicked={() => setAnnotate(!annotate.get())}
+							>
+								<label label="󰏫" />
+							</button>
+							<button
+								visible={kind((value) => value === "video")}
 								class={mic((enabled) =>
 									enabled ? "capture-option active" : "capture-option",
 								)}
@@ -202,6 +219,7 @@ export default function Capture(gdkmonitor: Gdk.Monitor) {
 								<label label={mic((enabled) => (enabled ? "󰍬" : "󰍭"))} />
 							</button>
 							<button
+								visible={kind((value) => value === "video")}
 								class={keys((enabled) =>
 									enabled ? "capture-option active" : "capture-option",
 								)}

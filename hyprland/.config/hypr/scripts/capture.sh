@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Capture backend for the AGS screenshot/record widget.
-# Usage: capture.sh <screenshot|video|stop> [region|screen|window] [mic|no-mic] [keys|no-keys]
+# Usage: capture.sh <screenshot|video|stop> [region|screen|window] [mic|no-mic] [keys|no-keys] [annotate|no-annotate]
 # Commands mirror the old wofi capture-menu.sh.
 
 RECORDINGS="$HOME/Videos/Screencasts"
@@ -10,6 +10,7 @@ mkdir -p "$RECORDINGS" "$SCREENSHOTS"
 GSR="$HOME/.local/bin/gsr"
 HYPRSHOT="$HOME/.local/bin/hyprshot"
 ADDRECENT="$HOME/.local/bin/add-to-recent"
+EDIT="$HOME/.config/hypr/scripts/screenshot-edit.sh"
 WSHOWKEYS=$(command -v wshowkeys 2>/dev/null)
 KEYS_PID="${XDG_RUNTIME_DIR:-/tmp}/capture-wshowkeys.pid"
 
@@ -17,6 +18,11 @@ KIND="$1"
 MODE="$2"
 MIC="$3"
 KEYS="$4"
+ANNOTATE="$5"
+
+# After a screenshot: open the annotation editor, or just register it in recents.
+AFTER_SHOT="$ADDRECENT"
+[ "$ANNOTATE" = "annotate" ] && AFTER_SHOT="$EDIT"
 
 AUDIO_ARGS=(-a default_output)
 if [ "$MIC" = "mic" ]; then
@@ -125,15 +131,15 @@ fi
 case "$KIND-$MODE" in
 	screenshot-region)
 		_settle
-		"$HYPRSHOT" -m region -o "$SCREENSHOTS" -- "$ADDRECENT"
+		"$HYPRSHOT" -m region -o "$SCREENSHOTS" -- "$AFTER_SHOT"
 		;;
 	screenshot-screen)
 		_settle
-		"$HYPRSHOT" -m output -o "$SCREENSHOTS" -- "$ADDRECENT"
+		"$HYPRSHOT" -m output -o "$SCREENSHOTS" -- "$AFTER_SHOT"
 		;;
 	screenshot-window)
 		_settle
-		"$HYPRSHOT" -m window -o "$SCREENSHOTS" -- "$ADDRECENT"
+		"$HYPRSHOT" -m window -o "$SCREENSHOTS" -- "$AFTER_SHOT"
 		;;
 	video-region)
 		_settle
