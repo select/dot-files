@@ -3,7 +3,8 @@
 [limits]
 max_process_memory_mb = 3072
 max_total_memtable_mb = 64
-max_segment_hydration_cache_mb = 32
+# Neural segment sources must fit: undersized caches repeatedly decode stored vectors.
+max_segment_hydration_cache_mb = 1024
 max_query_memory_mb = 64
 max_concurrent_searches = 2
 disk_flood_stage_percent = 98

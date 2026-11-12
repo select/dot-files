@@ -23,6 +23,12 @@ The model gets two read-only tools:
 
 Historical messages are evidence, **not instructions**. Summaries and abandoned branches may be inaccurate or superseded. Search results are not proof that the matching text answers the query.
 
+Search has an **8-second backend budget**, with shorter budgets for optional neural retrieval (3 seconds, including its graph-readiness check) and coverage metadata (1 second). Slow components are aborted, and any completed retrieval results are returned with explicit warnings instead of failing the entire tool with a timeout. This also applies to keyword-only and semantic-only searches: a timed-out retrieval can return no excerpts, but the warnings mark it as incomplete, not evidence that no matching history exists. User cancellation still aborts the operation. Non-timeout keyword/explicit-semantic backend errors are still reported.
+
+Retrieval requests also carry a server-side deadline; aborting the HTTP client alone does not reliably stop backend work. Backend `timed_out` responses retain any hits and produce an incomplete-results warning.
+
+Coverage is informational and cannot block successful results. If its request fails or times out, both passage counts are `-1` in structured output and **unknown** in text, not zero. `tookMs` measures elapsed search time, including slow components, rather than only adding successful backend timings. The interactive command shows warnings even when there are no excerpts. If keyword retrieval is slow, retry `!`/keyword mode with fewer distinctive terms.
+
 ## Retrieval and neural backfill
 
 Two indices make the slow initial neural backfill independent of the complete keyword index:
@@ -32,9 +38,9 @@ Two indices make the slow initial neural backfill independent of the complete ke
 
 Hybrid runs keyword and semantic retrieval concurrently and combines their candidate lists with weighted reciprocal rank fusion (keyword weight 2, neural weight 1, rank constant 60). It deduplicates chunks of the same message. Hybrid totals describe the retrieved candidate pool, not the total number of all possible matches.
 
-Semantic retrieval uses a bounded, unfiltered HNSW pool of 200 global candidates, then enforces project/date/current-session scope locally. No wrong-scope candidates are returned, but narrow scopes may miss matches outside that pool; scoped results include a warning. Keyword scope filtering stays server-side. Coverage/status reads index metadata rather than running expensive full-corpus `_count` scans. Semantic searches also check graph readiness: while it is stale, rebuilding, incomplete or passage-scored, retrieval is deferred rather than deliberately triggering a full scan. Hybrid remains usable through its keyword results.
+Semantic retrieval uses a bounded, unfiltered HNSW pool of 200 global candidates, then enforces project/date/current-session scope locally. No wrong-scope candidates are returned, but narrow scopes may miss matches outside that pool; scoped results include a warning. Keyword scope filtering stays server-side. Coverage/status reads targeted `/{keyword-index},{neural-index}/_stats` counters. Both `_count` and `_cat/indices` can trigger full-corpus scans in XERJ, so neither is used. Semantic searches also check graph readiness: while it is stale, rebuilding, incomplete or passage-scored, retrieval is deferred rather than deliberately triggering a full scan. Hybrid remains usable through its keyword results.
 
-**Neural coverage can be partial**, especially during the first import. Every result and `/session-search-status` report keyword and neural passage counts. Missing/unavailable neural retrieval produces a warning and hybrid still returns keyword hits; explicit semantic searches report backend errors. Nearest-neighbor results from a small partial index can be irrelevant: use `!`/keyword mode for exact ticket IDs and error strings.
+**Neural coverage can be partial**, especially during the first import. Every result and `/session-search-status` report keyword and neural passage counts. Missing/unavailable neural retrieval produces a warning and hybrid still returns keyword hits; explicit semantic searches report non-timeout backend errors (deadline expiry returns an incomplete-result warning as described above). Nearest-neighbor results from a small partial index can be irrelevant: use `!`/keyword mode for exact ticket IDs and error strings.
 
 The local model is `sentence-transformers/all-MiniLM-L6-v2`. The ~90 MB model downloads once, then inference runs locally. On this CPU the first backfill is a **multi-hour background task**, not a completed instant upgrade. No cloud embedding or reranking fallback is configured. Keyword chunks are 1,000 Unicode code points; new neural chunks are at most 512, both with 160-code-point overlap. This prevents XERJ from creating extra passage vectors, which disable HNSW and force full scans. Pathological text can still exceed the model's token window.
 
@@ -64,7 +70,7 @@ A changing source is a best-effort snapshot, not a transaction with Pi. Searches
 ~/Dev/dot-files/pi/.pi/agent/extensions/session-search/  # this source
 ~/.pi/agent/extensions/session-search                  # symlink to source
 ~/.local/share/pi-session-search/
-  bin/xerj                  # verified v1.0.0-rc.97 binary
+  bin/xerj                  # SHA-256-verified v1.0.0-rc.100 binary
   data/                     # durable XERJ storage, not /tmp
   data/admin.key            # owner-only API key; never put in git
   models/                   # downloaded local model cache
@@ -82,9 +88,13 @@ This source contains no transcript copies, API keys, index state, or downloaded 
 
 The backend binds only to `127.0.0.1`: Elasticsearch-compatible API **19210**, native REST **19211**, gRPC **19212**. Authentication remains enabled. Reranking is explicitly forbidden in the server config. Extension clients reject non-loopback URLs and redirects.
 
-The root filesystem was 97% used with ~27 GB available. **The user explicitly approved a 98% flood-stage write-block threshold for this dedicated instance**; protection was not disabled and no system-wide disk policy changed. The backend has a 3 GiB internal memory budget, a 4 GiB systemd memory ceiling, a 256 MiB swap ceiling, a two-core CPU ceiling, and reduced CPU priority. Explicit budgets are 64 MiB aggregate memtables, 32 MiB segment hydration cache and 64 MiB per query; merges use at most four inputs and exclude segments at or above 32 MiB. OS scheduling/resource ceilings are bounds, not a guarantee that the machine cannot experience pressure.
+The root filesystem was 97% used with ~27 GB available. **The user explicitly approved a 98% flood-stage write-block threshold for this dedicated instance**; protection was not disabled and no system-wide disk policy changed. The backend has a 3 GiB internal memory budget, a 4 GiB systemd memory ceiling, a 256 MiB swap ceiling, a two-core CPU ceiling, and reduced CPU priority. Explicit budgets are 64 MiB aggregate memtables, 1 GiB segment hydration cache and 64 MiB per query; merges use at most four inputs and exclude segments at or above 32 MiB. OS scheduling/resource ceilings are bounds, not a guarantee that the machine cannot experience pressure.
 
 ## Operations
+
+The neural cache must hold the decoded segment sources, not just their compressed files. A 32 MiB cache caused repeated full-segment decoding; the installed 1 GiB cache fits this corpus within the unchanged 3 GiB process budget / 4 GiB service ceiling. XERJ rc.100 also includes cold-search performance fixes. A cold neural cache after restart still took about 22 seconds to populate in testing; initial searches can report an explicit deadline warning until warm. Warm semantic/hybrid requests completed in tens to hundreds of milliseconds. These are measurements, not latency guarantees. The strict live integration test fails on deadline deferral rather than counting it as successful semantic retrieval.
+
+The rc.97 binary and stopped-service data snapshot are retained privately under `~/.local/share/pi-session-search/backup-rc97-QhmhLzgf/` for rollback. This contains private indexed history and must not be published.
 
 ```bash
 systemctl --user status pi-session-search

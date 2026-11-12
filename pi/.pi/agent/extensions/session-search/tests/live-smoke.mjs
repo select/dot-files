@@ -34,15 +34,27 @@ try {
 	const reference = await read.execute("smoke-reference", { sessionFile: hit.sessionFile, entryId: hit.entryId })
 	assert.ok(reference.content[0].text.includes("EN-6382"))
 	assert.ok(reference.content[0].text.length <= 12000)
-	console.error("Live check: scoped semantic search")
+	console.error("Live check: hybrid search preserves keyword hits within its budget")
+	const hybridStarted = performance.now()
+	const hybrid = await find.execute("smoke-hybrid", { query: "EN-6382", mode: "hybrid", limit: 3 },
+		AbortSignal.timeout(15000), undefined, context)
+	assert.ok(hybrid.structuredContent.hits.length > 0)
+	assert.ok(!hybrid.structuredContent.warnings.some(warning => /timed out|unavailable|partial results/.test(warning)),
+		"hybrid verification requires both retrieval legs to complete")
+	assert.ok(performance.now() - hybridStarted < 10000)
+	console.error("Live check: scoped semantic search (deadline deferral is not a pass)")
 	const semantic = await find.execute("smoke-semantic", {
 		query: "a German public domain tale about a man waiting outside a guarded doorway", mode: "semantic",
 		project: join(process.env.HOME, "Dev/kafka"), before: "2026-10-19", limit: 3,
 	}, AbortSignal.timeout(30000), undefined, context)
-	assert.ok(semantic.structuredContent.hits.length > 0)
+	assert.ok(!semantic.structuredContent.warnings.some(warning => /timed out|unavailable|partial results/.test(warning)),
+		"semantic retrieval must complete; warm the cold backend cache before this integration test")
+	assert.ok(semantic.structuredContent.hits.length > 0, "semantic retrieval must return scoped hits")
 	assert.ok(semantic.structuredContent.hits.every(match => match.project === join(process.env.HOME, "Dev/kafka")))
 	console.log(JSON.stringify({ loader: "passed", tools: [...extension.tools.keys()], commands: [...extension.commands.keys()],
 		keywordExcerpts: keyword.structuredContent.hits.length, currentSessionExcluded: true, sourceRead: "passed",
+		hybridExcerpts: hybrid.structuredContent.hits.length, hybridWarnings: hybrid.structuredContent.warnings,
+		semanticStatus: "scoped retrieval passed",
 		semanticExcerpts: semantic.structuredContent.hits.length, coverage: keyword.structuredContent.coverage }, null, 2))
 } finally {
 	await rm(temporary, { recursive: true, force: true })
