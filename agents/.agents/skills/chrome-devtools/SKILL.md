@@ -107,6 +107,16 @@ node ~/.pi/agent/skills/chrome-devtools/scripts/screenshot.js \
 - **Always open the saved image with the read tool.** Successful capture alone
   does not prove rendering or interaction correctness.
 
+## Attach screenshots to GitHub
+
+When requested, use native gh 2.99+ with CLI OAuth/classic PAT authentication and repository write access—no browser cookies:
+
+```bash
+gh pr edit <number> --repo owner/repo --attach '/absolute/path/screenshot.png#Description of the screenshot'
+```
+
+This preserves the PR description and appends the image. For placement, pass the preserved body with a local Markdown image reference via `--body-file`; gh rewrites it to the uploaded URL. Use `gh issue edit` for issues. Verify the body before retrying failures to avoid duplicate attachments.
+
 ## Failure diagnosis and safety
 
 Before increasing a timeout, inspect the reported requested/final URL, title, body

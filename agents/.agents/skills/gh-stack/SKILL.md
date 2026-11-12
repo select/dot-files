@@ -71,6 +71,16 @@ git config remote.pushDefault origin     # if multiple remotes exist (skips remo
 - ❌ `gh stack checkout` without an argument — always provide a PR number or branch name
 - ❌ `gh stack checkout <pr-number>` when a different local stack already exists on those branches — this triggers an unbypassable conflict resolution prompt; use `gh stack unstack --local` first to remove the local tracking state (this keeps the stack on GitHub intact), then retry the checkout
 
+## Attach proof to a stacked PR
+
+After submitting the stack, attach screenshots/videos to the intended layer with native gh 2.99+ (CLI OAuth/classic PAT authentication and repository write access; no browser cookies):
+
+```bash
+gh pr edit <pr-number> --repo owner/repo --attach /absolute/path/proof.png
+```
+
+This appends to that PR's existing description without replacing it or the stack links. For placement, pass the preserved body with a local Markdown image reference via `--body-file`; gh rewrites it to the uploaded URL. Read back the body before retrying failures to avoid duplicates. Do not pass `--attach` to `gh stack submit`.
+
 ## Thinking about stack structure
 
 Each branch in a stack should represent a **discrete, logical unit of work** that can be reviewed independently. The changes within a branch should be cohesive—they belong together and make sense as a single PR.

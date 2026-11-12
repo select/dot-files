@@ -150,6 +150,16 @@ Apply these rules to every agent-generated PR comment, including inline review c
 - Keep feedback constructive and specific; use `question` rather than asserting an uncertain issue.
 - Use `note` for replies reporting completed work, and only claim changes or verification actually performed.
 
+## GitHub media attachments
+
+Use native gh 2.99+ with CLI OAuth/classic PAT authentication and repository write access; no browser cookies or separate uploader:
+
+```bash
+gh pr comment <number> --repo owner/repo --body '[agent] note: Screenshot of the fix.' --attach /absolute/path/screenshot.png
+```
+
+For a description rather than a comment, use `gh pr edit <number> --repo owner/repo --attach /absolute/path/screenshot.png`; this appends without replacing existing text. `--attach` also supports videos and can be repeated. Check the resulting body before retrying failures—partial uploads may already be posted.
+
 ## PR Comment Examples
 
 ```text
