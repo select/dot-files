@@ -6,9 +6,6 @@ if [[ ${XDG_SESSION_TYPE:-wayland} != wayland ]]; then
 	exec /usr/bin/zoom "$@"
 fi
 
-# Diagnostic failures must not prevent joining a meeting.
-systemctl --user start zoom-diagnostics.service || printf 'Zoom diagnostics could not start\n' >&2
-
 environment=(
 	--setenv=XDG_SESSION_TYPE=wayland
 	--setenv=XDG_CURRENT_DESKTOP=Hyprland

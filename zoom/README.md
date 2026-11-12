@@ -16,9 +16,9 @@ mitigation for CPU starvation, not a fix for application or capture bugs.
 - `meetings.slice`: CPU weight 300, compared with the normal `app.slice` weight 100.
 - `session.slice` drop-in: CPU weight 200 to protect desktop/audio/capture services.
 - Hyprland portal service drop-in: CPU weight 300 within `session.slice`.
-- `zoom-diagnostics.service`: starts with the wrapper and exits after 60 seconds
-  without a detected Zoom process. It is not enabled at login. Runs at nice 10 in
-  `background.slice`, with CPU weight 10.
+- `zoom-diagnostics.service`: manual opt-in only; automatic startup from the wrapper
+  was removed on 2026-10-20. Exits after 60 seconds without a detected Zoom process.
+  It is not enabled at login. Runs at nice 10 in `background.slice`, with CPU weight 10.
 
 Weights are relative among sibling cgroups, not percentages or reserved cores.
 They do not impose a CPU quota. Work launched outside the user service manager
@@ -63,7 +63,10 @@ the already-running cgroups during initial installation.
   publishing logs. Standard logs may not expose the selected SHM/DMA-BUF type;
   additional targeted tracing may be needed to prove buffer negotiation.
 
+The collector is stopped by default. To explicitly collect another session:
+
 ```sh
+systemctl --user start zoom-diagnostics.service
 systemctl --user status zoom-diagnostics
 systemctl --user list-units 'zoom-workplace-*'
 tail -f ~/.local/state/zoom-meeting/diagnostics.log
@@ -111,6 +114,28 @@ does not change capture FPS, display resolution, camera quality, or video effect
   control works. SHM sharing still negotiated 4K/max15fps. A CPU sample was about
   128%, but the active camera had changed to 720×1280 MJPEG30 (portrait), so this
   cannot be attributed to the update alone. DMA-BUF has not been retested on 7.1.5.
+
+## Findings and monitoring shutdown on 2026-10-20
+
+- Retained rotating logs cover parts of October 19–20 (5,769 process/pressure
+  samples); older history has rotated out.
+- Screen sharing still negotiated 3840×2160 BGRA at a maximum of 15 FPS.
+- At 16:02:55 on October 20, the capture client explicitly called portal
+  `Session.Close`; another capture session started at 16:03:06. This does not
+  establish whether the first stop was deliberate or caused by an application bug.
+- XDPH logged `Out of buffers` twice at 16:03:04 during the restart sequence.
+  The replacement capture was running by 16:03:08 and remained present until
+  approximately 16:15:51. These messages alone do not prove a permanent failure.
+- CPU pressure was substantial: CPU PSI `some avg10` had a median of 44.41%
+  across retained samples and was roughly 61–71% around that restart. This means
+  runnable work waited for CPU, not that those percentages represent utilization.
+  Zoom plus its webview processes reached about 286% CPU near the first capture
+  (100% = one logical CPU). Other development/browser processes also competed.
+- No definitive root cause for spontaneous share termination was established.
+- Stopped `zoom-diagnostics.service` and removed its automatic start from
+  `zoom-meeting`; the older `zoom-monitor.service` is also disabled and stopped.
+  Existing logs are retained. Scheduling weights, capture settings and the running
+  Zoom instance were left unchanged.
 
 ## Rollback
 
