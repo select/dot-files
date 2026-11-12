@@ -1,0 +1,12 @@
+id = "local.pi-images"
+name = "Pi Image Viewer"
+version = "0.1.0"
+min_herdr_version = "0.9.5"
+description = "Open Pi conversation images in a temporary fullscreen terminal overlay."
+platforms = ["linux", "macos"]
+
+[[panes]]
+id = "viewer"
+title = "Pi image — Esc to return"
+placement = "zoomed"
+command = ["bun", "viewer.ts"]
