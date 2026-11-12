@@ -10,6 +10,24 @@
       "installedAt": "2026-04-24T15:44:42.805Z",
       "updatedAt": "2026-04-24T15:44:42.805Z"
     },
+    "create-jira-issue": {
+      "source": "apheris/agents",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/apheris/agents.git",
+      "skillPath": "skills/create-jira-issue/SKILL.md",
+      "skillFolderHash": "b507ae6c63855e5c557d322684ab27fa9c209ef4",
+      "installedAt": "2026-10-22T08:54:06Z",
+      "updatedAt": "2026-10-22T08:54:06Z"
+    },
+    "devbox": {
+      "source": "apheris/agents",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/apheris/agents.git",
+      "skillPath": "skills/devbox/SKILL.md",
+      "skillFolderHash": "1ec7debaf4cc9f605253e1bc4b245baf0c40033e",
+      "installedAt": "2026-10-26T09:21:14Z",
+      "updatedAt": "2026-10-26T09:21:14Z"
+    },
     "find-skills": {
       "source": "vercel-labs/skills",
       "sourceType": "github",

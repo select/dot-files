@@ -36,10 +36,12 @@ bun ~/.agents/skills/aikido/scripts/aikido.ts repos
 bun ~/.agents/skills/aikido/scripts/aikido.ts pr apheris/hub#2603
 ```
 
-`pr` also works **without** Aikido credentials (GitHub check-run data only) — it reports the scan URL and
-new/solved issue counts per severity.
+`pr` also works **without** Aikido credentials (or with `--no-api`) for GitHub check-run data only.
+With credentials, `pr` and `pr-findings` fetch exact added/resolved findings via
+`/report/ciScans/{scan_id}/detail` (requires `reports:read`). `scan <id|URL>` calls that endpoint directly
+without GitHub access. A browser login is not required. Never print secrets to diagnose configuration.
 
 ## Requirements
 
 - `bun`
-- `gh` authenticated (only for the `pr` command)
+- `gh` authenticated (for `pr`, `pr-findings`, and numeric PR references)

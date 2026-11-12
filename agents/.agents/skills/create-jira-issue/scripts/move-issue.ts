@@ -8,7 +8,7 @@
  * to finish, and only then assigns the moved issue to the requested sprint.
  */
 
-import { getAuthHeader, loadJiraConfig } from "./jira-config";
+import { getAuthHeader, loadJiraConfig, type JiraConfig } from "./jira-config";
 
 type Board = "EN";
 type JiraIssueType = { id: string; name: string; subtask: boolean };
@@ -46,9 +46,9 @@ Usage:
 
 Required fields:
   --issue             Existing issue key to move
-  --board             Destination board: EN
 
 Optional fields:
+  --board             Destination board: EN (default; only supported destination)
   --issueType         Destination issue type. Defaults to a matching type in the destination project.
   --sprint            Destination sprint name, numeric ID, or "current" for the board's active sprint.
 
@@ -57,8 +57,8 @@ Notes:
 `;
 }
 
-function parseArgs(args: string[]): MoveInput {
-  const values: Partial<MoveInput> = {};
+export function parseArgs(args: string[]): MoveInput {
+  const values: Partial<MoveInput> = { board: "EN" };
   for (let index = 0; index < args.length; index += 1) {
     const value = args[index + 1];
     switch (args[index]) {
@@ -160,7 +160,12 @@ async function waitForMove(
       `${jiraUrl}/rest/api/3/task/${taskId}`,
       auth,
     );
-    if (task.status === "COMPLETE") return;
+    if (task.status === "COMPLETE") {
+      if (Object.keys(task.result?.failedIssues ?? {}).length > 0) {
+        throw new Error(`Jira move task reported failed issues: ${JSON.stringify(task.result?.failedIssues)}`);
+      }
+      return;
+    }
     if (task.status === "FAILED" || task.status === "CANCELLED") {
       throw new Error(
         `Jira move task ${task.status.toLowerCase()}: ${JSON.stringify(task)}`,
@@ -170,7 +175,7 @@ async function waitForMove(
   throw new Error(`Timed out waiting for Jira move task ${taskId}`);
 }
 
-async function moveIssue(input: MoveInput): Promise<{
+export async function moveIssue(input: MoveInput, suppliedConfig?: JiraConfig): Promise<{
   success: true;
   oldKey: string;
   key: string;
@@ -179,7 +184,7 @@ async function moveIssue(input: MoveInput): Promise<{
   sprintId?: number;
   url: string;
 }> {
-  const config = await loadJiraConfig();
+  const config = suppliedConfig ?? await loadJiraConfig();
   const auth = getAuthHeader(config.username, config.apiToken);
   const source = await requestJson<JiraIssue>(
     `${config.jiraUrl}/rest/api/3/issue/${encodeURIComponent(input.issueKey)}?fields=issuetype,project`,
@@ -238,21 +243,27 @@ async function moveIssue(input: MoveInput): Promise<{
 
   let sprintId: number | undefined;
   if (input.sprint !== undefined) {
-    sprintId = await resolveSprintId(
-      input.sprint,
-      input.board,
-      config.jiraUrl,
-      auth,
-    );
-    await requestJson<unknown>(
-      `${config.jiraUrl}/rest/agile/1.0/sprint/${sprintId}/issue`,
-      auth,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ issues: [moved.key] }),
-      },
-    );
+    try {
+      sprintId = await resolveSprintId(
+        input.sprint,
+        input.board,
+        config.jiraUrl,
+        auth,
+      );
+      await requestJson<unknown>(
+        `${config.jiraUrl}/rest/agile/1.0/sprint/${sprintId}/issue`,
+        auth,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ issues: [moved.key] }),
+        },
+      );
+    } catch (error) {
+      throw new Error(
+        `Issue moved from ${source.key} to ${moved.key} (${config.jiraUrl}/browse/${moved.key}), but sprint assignment failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
 
   return {
@@ -289,4 +300,7 @@ async function main(): Promise<void> {
   }
 }
 
-void main();
+// Importing helpers for offline tests must never run the Jira CLI.
+if (import.meta.main) {
+  void main();
+}

@@ -1,9 +1,9 @@
 #!/usr/bin/env bun
 
 /**
- * Create Jira Issue Script (EN board)
+ * Create Jira Issue Script (EN/AW boards)
  *
- * Creates an issue on the EN (Engineering) board with proper Atlassian Document Format (ADF).
+ * Creates an issue on the EN (Engineering) or AW (Apheris Web) board with proper Atlassian Document Format (ADF).
  *
  * Usage:
  *   # Via stdin (recommended for complex content):
@@ -12,12 +12,17 @@
  *   # Via command line arguments:
  *   npx ts-node create-issue.ts --board "EN" --title "..." --context "..." --definitionOfDone "..." --issueType "Task"
  *
+ *   # Print the ADF description without calling Jira:
+ *   echo '{...}' | bun create-issue.ts --stdin --dry-run
+ *
+ * Definition of Done items are rendered as Jira action items (checkboxes).
+ *
  * Reads credentials from ~/.config/atlassian-jira/credentials.json
  */
 
 import { loadJiraConfig, getAuthHeader } from './jira-config';
 
-type Board = 'EN';
+type Board = 'EN' | 'AW';
 type IssueType = 'Task' | 'Bug' | 'Story';
 
 interface IssueInput {
@@ -26,6 +31,8 @@ interface IssueInput {
 	context: string;
 	definitionOfDone: string[];
 	issueType?: IssueType;
+	/** Markdown appended after the Definition of Done (e.g. an attribution line) */
+	footer?: string;
 	/** File paths to attach to the issue (images/files) */
 	attachments?: string[];
 	/** Assignee: display name or email (resolved to accountId via search) */
@@ -54,12 +61,13 @@ interface AdfDocument {
 	content: AdfNode[];
 }
 
-const VALID_BOARDS: Board[] = ['EN'];
+const VALID_BOARDS: Board[] = ['EN', 'AW'];
 const VALID_ISSUE_TYPES: IssueType[] = ['Task', 'Bug', 'Story'];
 
 // Board IDs for sprint lookup
 const BOARD_IDS: Record<Board, number> = {
 	EN: 22,
+	AW: 9,
 };
 
 function createTextNode(
@@ -92,6 +100,37 @@ function createBulletList(items: string[]): AdfNode {
 			type: 'listItem',
 			content: [createParagraph(...parseInlineMarkdown(item))],
 		})),
+	};
+}
+
+/**
+ * Split a Definition of Done item into its text and checked state, dropping any
+ * leading markdown checkbox marker ("- [ ] ", "[x] ", ...) the caller included.
+ */
+function parseDodItem(item: string): { text: string; done: boolean } {
+	const match = item.match(/^\s*(?:[-*]\s+)?\[([ xX]?)\]\s*/);
+	if (!match) {
+		return { text: item.trim(), done: false };
+	}
+	return {
+		text: item.slice(match[0].length).trim(),
+		done: match[1].toLowerCase() === 'x',
+	};
+}
+
+/** Build a Jira action-item list (rendered as checkboxes) */
+function createTaskList(items: string[]): AdfNode {
+	return {
+		type: 'taskList',
+		attrs: { localId: crypto.randomUUID() },
+		content: items.map((item) => {
+			const { text, done } = parseDodItem(item);
+			return {
+				type: 'taskItem',
+				attrs: { localId: crypto.randomUUID(), state: done ? 'DONE' : 'TODO' },
+				content: parseInlineMarkdown(text),
+			};
+		}),
 	};
 }
 
@@ -248,6 +287,18 @@ function parseMarkdownToAdf(markdown: string): AdfNode[] {
 			continue;
 		}
 
+		// ATX heading (# through ######), with optional closing hashes.
+		const heading = line.match(/^(#{1,6})[ \t]+(.+?)(?:[ \t]+#+)?[ \t]*$/);
+		if (heading) {
+			nodes.push({
+				type: 'heading',
+				attrs: { level: heading[1]!.length },
+				content: parseInlineMarkdown(heading[2]!),
+			});
+			i++;
+			continue;
+		}
+
 		// Numbered list (1. item, 2. item, etc.)
 		if (/^\d+\.\s/.test(line)) {
 			const listItems: string[] = [];
@@ -291,6 +342,7 @@ function parseMarkdownToAdf(markdown: string): AdfNode[] {
 			if (
 				currentLine.trim() === '' ||
 				currentLine.startsWith('```') ||
+				/^(#{1,6})[ \t]+\S/.test(currentLine) ||
 				/^\d+\.\s/.test(currentLine) ||
 				/^[-*]\s/.test(currentLine)
 			) {
@@ -309,7 +361,7 @@ function parseMarkdownToAdf(markdown: string): AdfNode[] {
 	return nodes;
 }
 
-function buildIssueDescription(input: IssueInput): AdfDocument {
+export function buildIssueDescription(input: IssueInput): AdfDocument {
 	const content: AdfNode[] = [];
 
 	// Context section
@@ -319,7 +371,11 @@ function buildIssueDescription(input: IssueInput): AdfDocument {
 	// Definition of Done section
 	content.push(createHeading('Definition of Done', 2));
 	if (input.definitionOfDone.length > 0) {
-		content.push(createBulletList(input.definitionOfDone));
+		content.push(createTaskList(input.definitionOfDone));
+	}
+
+	if (input.footer) {
+		content.push(...parseMarkdownToAdf(input.footer));
 	}
 
 	return {
@@ -332,7 +388,7 @@ function buildIssueDescription(input: IssueInput): AdfDocument {
 /**
  * Build wiki markup description for use with v2 API (supports inline images)
  */
-function buildWikiMarkupDescription(
+export function buildWikiMarkupDescription(
 	input: IssueInput,
 	attachmentFilenames: string[],
 ): string {
@@ -358,8 +414,15 @@ function buildWikiMarkupDescription(
 
 	lines.push('h2. Definition of Done');
 	lines.push('');
+	// Wiki markup has no checkboxes: these bullets are swapped for an ADF task
+	// list afterwards by replaceDodWithTaskList()
 	for (const item of input.definitionOfDone) {
-		lines.push(`* ${item}`);
+		lines.push(`* ${convertMarkdownToWiki(parseDodItem(item).text, [])}`);
+	}
+
+	if (input.footer) {
+		lines.push('');
+		lines.push(convertMarkdownToWiki(input.footer, []));
 	}
 
 	return lines.join('\n');
@@ -372,7 +435,31 @@ function convertMarkdownToWiki(
 	markdown: string,
 	attachmentFilenames: string[],
 ): string {
+	// Convert fenced code separately: headings, links and inline formatting inside
+	// code must stay literal. Never run the prose replacements over code bodies.
+	return markdown.split(/(^```[^\n]*\n[\s\S]*?^```[ \t]*(?=\n|$))/gm)
+		.map((part) => {
+			const fence = part.match(/^```([^\n]*)\n([\s\S]*?)^```[ \t]*$/m);
+			if (fence) {
+				const language = fence[1]!.trim();
+				return `{code${language ? ':language=' + language : ''}}\n${fence[2]!.replace(/\n$/, '')}\n{code}`;
+			}
+			return convertMarkdownProseToWiki(part, attachmentFilenames);
+		})
+		.join('');
+}
+
+function convertMarkdownProseToWiki(
+	markdown: string,
+	attachmentFilenames: string[],
+): string {
 	let result = markdown;
+
+	// Jira treats Markdown heading hashes as nested ordered-list markers.
+	result = result.replace(
+		/^(#{1,6})[ \t]+(.+?)(?:[ \t]+#+)?[ \t]*$/gm,
+		(_match, hashes, title) => `h${hashes.length}. ${title}`,
+	);
 
 	// Embed image references FIRST (before link conversion eats them)
 	// Match patterns like ![alt](path/to/filename) where path ends with the attachment filename
@@ -392,13 +479,6 @@ function convertMarkdownToWiki(
 
 	// Convert [text](url) to [text|url]
 	result = result.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '[$1|$2]');
-
-	// Convert markdown code blocks to {code}
-	result = result.replace(
-		/```(\w*)\n([\s\S]*?)```/g,
-		(_match, lang, code) =>
-			`{code${lang ? ':language=' + lang : ''}}\n${code.trimEnd()}\n{code}`,
-	);
 
 	// Convert numbered lists: "1. item" -> "# item"
 	result = result.replace(/^\d+\.\s(.+)$/gm, '# $1');
@@ -420,11 +500,12 @@ function validateInput(input: unknown): IssueInput {
 
 	const obj = input as Record<string, unknown>;
 
-	if (!obj.board || typeof obj.board !== 'string') {
-		throw new Error('board is required and must be a string (EN)');
+	const requestedBoard = obj.board ?? 'EN';
+	if (typeof requestedBoard !== 'string') {
+		throw new Error('board must be a string (EN or AW)');
 	}
 
-	const board = obj.board.toUpperCase() as Board;
+	const board = requestedBoard.toUpperCase() as Board;
 	if (!VALID_BOARDS.includes(board)) {
 		throw new Error(`board must be one of: ${VALID_BOARDS.join(', ')}`);
 	}
@@ -487,6 +568,11 @@ function validateInput(input: unknown): IssueInput {
 
 	const sprint = obj.sprint != null ? obj.sprint : undefined;
 
+	if (obj.footer != null && typeof obj.footer !== 'string') {
+		throw new Error('footer must be a string');
+	}
+	const footer = obj.footer?.trim() || undefined;
+
 	return {
 		board,
 		title: obj.title.trim(),
@@ -496,6 +582,7 @@ function validateInput(input: unknown): IssueInput {
 		attachments,
 		assignee: assignee as string | undefined,
 		sprint: sprint as string | number | undefined,
+		footer,
 	};
 }
 
@@ -544,6 +631,10 @@ function parseArgs(args: string[]): IssueInput | 'stdin' {
 				break;
 			case '--sprint':
 				result.sprint = nextArg;
+				i++;
+				break;
+			case '--footer':
+				result.footer = nextArg;
 				i++;
 				break;
 		}
@@ -632,8 +723,8 @@ async function resolveSprintId(
 		return sprintQuery;
 	}
 
-	// Always search by name — numeric strings like "123" refer to sprint names
-	// (e.g. "EN Sprint 123"), not internal Jira sprint IDs.
+	// Always search by name — numeric strings like "155" refer to sprint names
+	// (e.g. "EN Sprint 155"), not internal Jira sprint IDs.
 
 	// Search by name in active/future sprints for the board
 	const boardId = BOARD_IDS[board];
@@ -776,6 +867,72 @@ async function updateDescriptionWithWikiMarkup(
 		const errorText = await response.text();
 		throw new Error(
 			`Failed to update description with wiki markup: ${response.status} - ${errorText}`,
+		);
+	}
+
+	await replaceDodWithTaskList(issueKey, input, jiraUrl, auth);
+}
+
+/**
+ * Wiki markup cannot express checkboxes, so after a wiki-markup write, read the
+ * description back as ADF (now including the inline images) and swap the
+ * Definition of Done bullet list for a task list.
+ */
+async function replaceDodWithTaskList(
+	issueKey: string,
+	input: IssueInput,
+	jiraUrl: string,
+	auth: string,
+): Promise<void> {
+	const issueUrl = `${jiraUrl}/rest/api/3/issue/${issueKey}`;
+	const getResponse = await fetch(`${issueUrl}?fields=description`, {
+		headers: { Authorization: auth, Accept: 'application/json' },
+	});
+	if (!getResponse.ok) {
+		const errorText = await getResponse.text();
+		throw new Error(
+			`Failed to read description for checkbox conversion: ${getResponse.status} - ${errorText}`,
+		);
+	}
+
+	const { fields } = (await getResponse.json()) as {
+		fields: { description: AdfDocument | null };
+	};
+	const content = fields.description?.content ?? [];
+	const headingIndex = content.findIndex(
+		(node) =>
+			node.type === 'heading' &&
+			node.content?.map((child) => child.text ?? '').join('') ===
+				'Definition of Done',
+	);
+	const listIndex =
+		headingIndex === -1
+			? -1
+			: content.findIndex(
+					(node, index) => index > headingIndex && node.type === 'bulletList',
+				);
+	if (listIndex === -1) {
+		console.error(
+			'⚠️  Definition of Done list not found, leaving it as bullet points',
+		);
+		return;
+	}
+
+	content[listIndex] = createTaskList(input.definitionOfDone);
+
+	const putResponse = await fetch(issueUrl, {
+		method: 'PUT',
+		headers: {
+			Authorization: auth,
+			'Content-Type': 'application/json',
+			Accept: 'application/json',
+		},
+		body: JSON.stringify({ fields: { description: fields.description } }),
+	});
+	if (!putResponse.ok) {
+		const errorText = await putResponse.text();
+		throw new Error(
+			`Failed to convert Definition of Done to checkboxes: ${putResponse.status} - ${errorText}`,
 		);
 	}
 }
@@ -992,7 +1149,7 @@ async function main(): Promise<void> {
 
 		if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
 			console.log(`
-Create/Update Jira Issue (EN board)
+Create/Update Jira Issue (EN/AW boards)
 
 Usage:
   # Create via stdin (recommended):
@@ -1001,6 +1158,9 @@ Usage:
   # Update via stdin:
   echo '{"board": "EN", "title": "...", "context": "...", "definitionOfDone": ["..."], "issueKey": "EN-1234"}' | bun create-issue.ts --stdin --update
 
+  # Print the ADF description without calling Jira:
+  echo '{...}' | bun create-issue.ts --stdin --dry-run
+
   # Create via arguments:
   bun create-issue.ts --board "EN" --title "..." --context "..." --definitionOfDone "..." [--issueType "Task"]
 
@@ -1008,18 +1168,22 @@ Usage:
   bun create-issue.ts --update --issueKey "EN-1234" --board "EN" --title "..." --context "..." --definitionOfDone "..."
 
 Required fields:
-  --board             Board to create issue on (EN)
   --title             Short, descriptive title
   --context           Background information explaining the issue
-  --definitionOfDone  Criteria for completion (can be specified multiple times)
+  --definitionOfDone  Criteria for completion (can be specified multiple times),
+                      rendered as Jira checkboxes; a leading "[ ]"/"[x]" is stripped
+                      ("[x]" marks the item done)
 
 Optional fields:
+  --board             Board to create issue on: EN (default) or AW
   --issueType         Type of issue: Task (default), Bug, or Story
+  --footer            Markdown appended after the Definition of Done
   --assignee          Assignee display name or email (resolved via search)
   --sprint            Sprint name (partial match) or numeric sprint ID
   --attachment        File path to attach (can be specified multiple times)
   --update            Update an existing issue instead of creating
   --issueKey          Issue key to update (required with --update)
+  --dry-run           Print the ADF description as JSON instead of calling Jira
 
 Credentials:
   Reads from env vars (JIRA_URL, JIRA_USERNAME, JIRA_API_TOKEN)
@@ -1051,6 +1215,11 @@ Credentials:
 			input = parsed;
 		}
 
+		if (args.includes('--dry-run')) {
+			console.log(JSON.stringify(buildIssueDescription(input), null, 2));
+			return;
+		}
+
 		if (isUpdate) {
 			if (!issueKey) {
 				throw new Error('--issueKey is required when using --update');
@@ -1077,4 +1246,7 @@ Credentials:
 	}
 }
 
-main();
+// Importing the rendering helpers in tests must never run the Jira CLI.
+if (import.meta.main) {
+	main();
+}
