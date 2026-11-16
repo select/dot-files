@@ -33,6 +33,9 @@ agent-browser --session my-task close
 | `eval <js>` | Evaluate JavaScript and return JSON |
 | `mouse move <x> <y>` / `down` / `up` | Pointer control for canvas/SVG drag selections |
 | `screenshot [path]` | Save PNG screenshot (`--full` for full page, `--annotate` for numbered labels) |
+| `console [--clear]` / `errors [--clear]` | View console logs or uncaught page errors |
+| `network requests` / `network har <start\|stop> [path]` | Inspect requests (`--filter <pat>`) or record HAR |
+| `trace start\|stop [path]` / `profiler start\|stop [path]` | Record Chrome DevTools performance trace or CPU profile |
 | `close` | Close the browser session |
 
 ## Tips
