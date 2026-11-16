@@ -9,7 +9,7 @@
   "defaultModel": "github-copilot/gpt-6-astra",
   "enabledModels": [
     "github-copilot/gpt-6.1-sol",
-    "vertex-global/gemini-4-carbon",
+    "vertex-global/gemini-4-hydrogen",
     "vertex-global/claude-opus-5-5",
     "github-copilot/gpt-6-luna",
     "github-copilot/gpt-6-astra",

@@ -1,0 +1,76 @@
+{
+  "overrides": [
+    {
+      "url": "http://localhost:8081/config.json",
+      "body": "{\"API_URL\":\"http://localhost:8081\",\"AUTH0_ENABLED\":false,\"FOUNDRY_ENABLED\":true}"
+    }
+  ],
+  "steps": [
+    {
+      "action": "navigate",
+      "url": "http://localhost:8081/foundry?demo&agree-tou",
+      "wait-for": "[data-test='foundry-run-foundry_demo_succeeded']"
+    },
+    {
+      "action": "click",
+      "selector": "[data-test='foundry-run-foundry_demo_succeeded']",
+      "wait-for": "[data-test='foundry-matrix-panel']"
+    },
+    {
+      "action": "assert",
+      "name": "CIF-derived chain counts and PDE dimensions",
+      "expression": "document.querySelectorAll('[data-test=foundry-chain-residue]').length === 158 && document.querySelector('#matrix-canvas')?.width === 170 && document.querySelectorAll('[data-test=foundry-chain]')[1]?.textContent.includes('12 items')"
+    },
+    {
+      "action": "assert",
+      "name": "Served metadata has no chain count maps",
+      "expression": "fetch('/demo/output/job_0JwhEC9Qa/meta/mcl1_lig2_sample_1.json').then(response => response.json()).then(data => !('atoms_in_chain' in data) && !('residues_in_chain' in data))"
+    },
+    {
+      "action": "screenshot",
+      "output": "foundry-initial.png",
+      "wait-for": "[data-test='molstar-canvas']",
+      "delay": 1500,
+      "full-page": true,
+      "scroll-top": true
+    },
+    {
+      "action": "drag",
+      "selector": "#matrix-canvas",
+      "from": [0.235, 0.118],
+      "to": [0.353, 0.588],
+      "wait-for": "[data-test='matrix-selection']"
+    },
+    {
+      "action": "assert",
+      "name": "Matrix selection highlights the chain in all three colors",
+      "expression": "['green','yellow','purple'].every(color => document.querySelectorAll('[data-test=foundry-chain-residue].bg-' + color + '-500').length > 0)"
+    },
+    {
+      "action": "screenshot",
+      "output": "foundry-pde-selection.png",
+      "delay": 1000,
+      "full-page": true,
+      "scroll-top": true
+    },
+    {
+      "action": "drag",
+      "selector": "(//*[@data-test='foundry-chain-residue'])[10]",
+      "toSelector": "(//*[@data-test='foundry-chain-residue'])[20]",
+      "from": [0.5, 0.5],
+      "to": [0.5, 0.5]
+    },
+    {
+      "action": "assert",
+      "name": "Sequence range propagates to the matrix",
+      "expression": "document.querySelectorAll('[data-test=foundry-chain-residue].bg-green-500').length === 11 && !!document.querySelector('[data-test=matrix-selection]')"
+    },
+    {
+      "action": "screenshot",
+      "output": "foundry-chain-selection.png",
+      "delay": 1000,
+      "full-page": true,
+      "scroll-top": true
+    }
+  ]
+}

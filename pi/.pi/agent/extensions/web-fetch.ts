@@ -184,6 +184,7 @@ export default function (pi: ExtensionAPI) {
 			"",
 			"URL must include the scheme (https://). Plain http:// is auto-upgraded.",
 			"Use the gh CLI (via bash) for GitHub URLs — it is faster and more reliable.",
+			"For interactive workflows (clicking, forms, auth, screenshots, canvas/WebGL), use the agent-browser skill instead.",
 		].join("\n"),
 		parameters: WebFetchParams,
 
