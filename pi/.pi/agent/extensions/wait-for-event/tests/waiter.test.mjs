@@ -15,12 +15,18 @@ async function temporary(t) {
 
 function waiting(t, options, cwd = process.cwd()) {
 	let resolve;
-	const result = new Promise((done) => { resolve = done; });
+	const result = new Promise((done) => {
+		resolve = done;
+	});
 	const results = [];
-	const waiter = new EventWaiter(normalizeOptions(options, cwd), (value) => {
-		results.push(value);
-		resolve(value);
-	}, 10);
+	const waiter = new EventWaiter(
+		normalizeOptions(options, cwd),
+		(value) => {
+			results.push(value);
+			resolve(value);
+		},
+		10,
+	);
 	t.after(() => waiter.cancel());
 	waiter.start();
 	return { waiter, result, results };
@@ -35,10 +41,18 @@ async function eventually(predicate) {
 }
 
 test("validates source selection, timeout, argument types and paths", () => {
-	for (const options of [null, {}, { label: "x" }, { label: "x", command: "true", file: "x" },
-		{ label: "x", file: "x", args: [] }, { label: "x", command: "true", args: [3] },
-		{ label: " ", command: "true" }, { label: "x", file: "x", timeoutSeconds: 0 },
-		{ label: "x", file: "x", timeoutSeconds: 86401 }, { label: "x", file: "x", unexpected: true }]) {
+	for (const options of [
+		null,
+		{},
+		{ label: "x" },
+		{ label: "x", command: "true", file: "x" },
+		{ label: "x", file: "x", args: [] },
+		{ label: "x", command: "true", args: [3] },
+		{ label: " ", command: "true" },
+		{ label: "x", file: "x", timeoutSeconds: 0 },
+		{ label: "x", file: "x", timeoutSeconds: 86401 },
+		{ label: "x", file: "x", unexpected: true },
+	]) {
 		assert.throws(() => normalizeOptions(options, "/tmp"));
 	}
 	const spec = normalizeOptions({ label: "x", command: "./watch", cwd: "sub" }, "/tmp");
@@ -49,52 +63,108 @@ test("validates source selection, timeout, argument types and paths", () => {
 });
 
 test("conflicting modes offer both corrections without guessing the intended source", () => {
-	const options = { label: "AWS login for Bedrock review", command: "bash",
+	const options = {
+		label: "AWS login for Bedrock review",
+		command: "bash",
 		args: ["-c", "while [ ! -s /tmp/unique-login.exit ]; do sleep 1; done"],
-		file: "/tmp/unique-login.exit", cwd: "/tmp", timeoutSeconds: 300,
-		resumePrompt: "Read login exit status and verify the exact Bedrock model." };
-	assert.throws(() => normalizeOptions(options, "/tmp"), (error) => {
-		assert.match(error.message, /No wait was armed/);
-		assert.match(error.message, /do not invent a placeholder file/);
-		assert.match(error.message, /Do not repeat the rejected arguments/);
-		const command = JSON.parse(error.message.split("COMMAND mode (launch a foreground watcher): ")[1].split(" FILE mode")[0]);
-		const file = JSON.parse(error.message.split("FILE mode (only if a process already writes this file): ")[1].split(" Unused fields")[0]);
-		assert.deepEqual(command, { ...options, file: null });
-		assert.deepEqual(file, { ...options, command: null, args: null });
-		assert.equal(normalizeOptions(command, "/tmp").command, options.command);
-		assert.equal(normalizeOptions(file, "/tmp").file, options.file);
-		return true;
-	});
+		file: "/tmp/unique-login.exit",
+		cwd: "/tmp",
+		timeoutSeconds: 300,
+		resumePrompt: "Read login exit status and verify the exact Bedrock model.",
+	};
+	assert.throws(
+		() => normalizeOptions(options, "/tmp"),
+		(error) => {
+			assert.match(error.message, /No wait was armed/);
+			assert.match(error.message, /do not invent a placeholder file/);
+			assert.match(error.message, /Do not repeat the rejected arguments/);
+			const command = JSON.parse(
+				error.message.split("COMMAND mode (launch a foreground watcher): ")[1].split(" FILE mode")[0],
+			);
+			const file = JSON.parse(
+				error.message.split("FILE mode (only if a process already writes this file): ")[1].split(" Unused fields")[0],
+			);
+			assert.deepEqual(command, { ...options, file: null });
+			assert.deepEqual(file, { ...options, command: null, args: null });
+			assert.equal(normalizeOptions(command, "/tmp").command, options.command);
+			assert.equal(normalizeOptions(file, "/tmp").file, options.file);
+			return true;
+		},
+	);
 	assert.equal(options.command, "bash", "validation must not mutate the tool arguments");
 });
 
 test("missing mode and file-mode args errors explain how to repair the call", () => {
 	assert.throws(() => normalizeOptions({ label: "x" }, "/tmp"), /FILE example:.*COMMAND example:/);
-	assert.throws(() => normalizeOptions({ label: "x", file: "event", args: [] }, "/tmp"), (error) => {
-		const correction = JSON.parse(error.message.split("Retry with: ")[1]);
-		assert.deepEqual(correction, { label: "x", file: "event", command: null, args: null });
-		assert.equal(normalizeOptions(correction, "/tmp").file, "/tmp/event");
-		return true;
-	});
+	assert.throws(
+		() => normalizeOptions({ label: "x", file: "event", args: [] }, "/tmp"),
+		(error) => {
+			const correction = JSON.parse(error.message.split("Retry with: ")[1]);
+			assert.deepEqual(correction, { label: "x", file: "event", command: null, args: null });
+			assert.equal(normalizeOptions(correction, "/tmp").file, "/tmp/event");
+			return true;
+		},
+	);
 });
 
 test("null optional fields behave like omission without mutating input", () => {
-	const options = { label: "CI", command: "gh", args: null, file: null,
-		cwd: null, timeoutSeconds: null, resumePrompt: null };
+	const options = {
+		label: "CI",
+		command: "gh",
+		args: null,
+		file: null,
+		cwd: null,
+		timeoutSeconds: null,
+		resumePrompt: null,
+	};
 	assert.deepEqual(normalizeOptions(options, "/tmp"), normalizeOptions({ label: "CI", command: "gh" }, "/tmp"));
 	assert.equal(options.file, null);
 	assert.equal(options.cwd, null);
-	assert.deepEqual(normalizeOptions({ ...options, command: null, file: "event" }, "/tmp"),
-		normalizeOptions({ label: "CI", file: "event" }, "/tmp"));
-	for (const invalid of [{ label: null, command: "gh" }, { label: "CI", command: null, file: null },
-		{ ...options, unexpected: null }, { ...options, file: "" }, { ...options, args: [] , command: null, file: "event" }]) {
+	assert.deepEqual(
+		normalizeOptions({ ...options, command: null, file: "event" }, "/tmp"),
+		normalizeOptions({ label: "CI", file: "event" }, "/tmp"),
+	);
+	for (const invalid of [
+		{ label: null, command: "gh" },
+		{ label: "CI", command: null, file: null },
+		{ ...options, unexpected: null },
+		{ ...options, file: "" },
+		{ ...options, args: [], command: null, file: "event" },
+	]) {
 		assert.throws(() => normalizeOptions(invalid, "/tmp"));
 	}
 });
 
+test("timer-only waits require an explicit valid timeout and no command args", () => {
+	assert.equal(normalizeOptions({ label: "timer", timeoutSeconds: 86400 }, "/tmp").timeoutSeconds, 86400);
+	for (const options of [
+		{},
+		{ timeoutSeconds: null },
+		{ timeoutSeconds: 0 },
+		{ timeoutSeconds: 86401 },
+		{ timeoutSeconds: 1.5 },
+		{ timeoutSeconds: "1" },
+		{ timeoutSeconds: 1, args: [] },
+	]) {
+		assert.throws(() => normalizeOptions({ label: "timer", ...options }, "/tmp"));
+	}
+	assert.equal(normalizeOptions({ label: "CI", command: "true", timeoutSeconds: 1 }, "/tmp").timeoutSeconds, 1);
+});
+
+test("timer-only completion wakes once and status describes the timer", async (t) => {
+	const { waiter, result, results } = waiting(t, { label: "timer", timeoutSeconds: 1 });
+	assert.match(waiter.status(), /Timer: 1s/);
+	assert.deepEqual(await result, { kind: "timer", output: "", truncated: false });
+	await sleep(50);
+	assert.equal(results.length, 1);
+});
+
 test("command captures stdout/stderr and passes arguments without a shell", async (t) => {
-	const { result, results } = waiting(t, { label: "command", command: process.execPath,
-		args: ["-e", "console.log(process.argv[1]); console.error('stderr')", "$(echo injected)"] });
+	const { result, results } = waiting(t, {
+		label: "command",
+		command: process.execPath,
+		args: ["-e", "console.log(process.argv[1]); console.error('stderr')", "$(echo injected)"],
+	});
 	const value = await result;
 	assert.equal(value.kind, "command");
 	assert.equal(value.exitCode, 0);
@@ -111,11 +181,19 @@ test("command exit wakes even when a descendant holds stdout/stderr open", { tim
 const {writeFileSync}=require('node:fs');
 const child=spawn(process.execPath,['-e',"setInterval(() => {}, 1000)"],{stdio:['ignore',1,2]});
 writeFileSync(process.argv[1],String(child.pid)); child.unref(); console.log('direct command finished');`;
-	const { result, results } = waiting(t, { label: "inherited pipes", command: process.execPath,
-		args: ["-e", source, file], timeoutSeconds: 3 });
+	const { result, results } = waiting(t, {
+		label: "inherited pipes",
+		command: process.execPath,
+		args: ["-e", source, file],
+		timeoutSeconds: 3,
+	});
 	let pid;
 	t.after(() => {
-		if (pid) { try { process.kill(pid, "SIGKILL"); } catch {} }
+		if (pid) {
+			try {
+				process.kill(pid, "SIGKILL");
+			} catch {}
+		}
 	});
 	const value = await result;
 	const { readFile } = await import("node:fs/promises");
@@ -142,8 +220,12 @@ test("status includes source, elapsed time, deadline and last file observation",
 
 test("command runs in the requested directory", async (t) => {
 	const directory = await temporary(t);
-	const { result } = waiting(t, { label: "cwd", command: process.execPath, cwd: directory,
-		args: ["-e", "console.log(process.cwd())"] });
+	const { result } = waiting(t, {
+		label: "cwd",
+		command: process.execPath,
+		cwd: directory,
+		args: ["-e", "console.log(process.cwd())"],
+	});
 	assert.equal((await result).output.trim(), directory);
 });
 
@@ -157,8 +239,11 @@ test("nonzero exit and missing executable wake with failure information", async 
 });
 
 test("output retention is bounded and keeps the command tail", async (t) => {
-	const { result } = waiting(t, { label: "large", command: process.execPath,
-		args: ["-e", "console.log('x'.repeat(100000) + 'TAIL')"] });
+	const { result } = waiting(t, {
+		label: "large",
+		command: process.execPath,
+		args: ["-e", "console.log('x'.repeat(100000) + 'TAIL')"],
+	});
 	const value = await result;
 	assert.equal(value.output.length, OUTPUT_LIMIT);
 	assert.equal(value.truncated, true);
@@ -193,8 +278,12 @@ test("file reads are bounded and non-regular files fail", async (t) => {
 });
 
 test("timeout wakes once, terminates the command, and is not presented as success", async (t) => {
-	const options = { label: "timeout", command: process.execPath,
-		args: ["-e", "console.log('started'); setInterval(() => {}, 100)"], timeoutSeconds: 1 };
+	const options = {
+		label: "timeout",
+		command: process.execPath,
+		args: ["-e", "console.log('started'); setInterval(() => {}, 100)"],
+		timeoutSeconds: 1,
+	};
 	const { result, results } = waiting(t, options);
 	const value = await result;
 	assert.equal(value.kind, "timeout");
@@ -220,8 +309,11 @@ test("cancellation never wakes, before startup or while watching a file", async 
 });
 
 test("cancellation kills a foreground process without delivering a result", async (t) => {
-	const { waiter, results } = waiting(t, { label: "cancel", command: process.execPath,
-		args: ["-e", "setInterval(() => {}, 100)"] });
+	const { waiter, results } = waiting(t, {
+		label: "cancel",
+		command: process.execPath,
+		args: ["-e", "setInterval(() => {}, 100)"],
+	});
 	await sleep(100);
 	waiter.cancel();
 	await sleep(50);
@@ -242,10 +334,20 @@ async function runtime(t) {
 	const messages = [];
 	const notices = [];
 	const statuses = [];
+	const widgets = [];
 	loaded.runtime.appendEntry = (type, data) => session.appendCustomEntry(type, data);
 	loaded.runtime.sendMessage = (message, delivery) => messages.push({ message, delivery });
-	const ctx = { mode: "tui", cwd: directory, isIdle: () => true, sessionManager: session,
-		ui: { setStatus: (key, value) => statuses.push({ key, value }), notify: (message) => notices.push(message) } };
+	const ctx = {
+		mode: "tui",
+		cwd: directory,
+		isIdle: () => true,
+		sessionManager: session,
+		ui: {
+			setStatus: (key, value) => statuses.push({ key, value }),
+			setWidget: (key, value) => widgets.push({ key, value }),
+			notify: (message) => notices.push(message),
+		},
+	};
 	const emit = async (type, event = {}) => {
 		let result;
 		for (const handler of extension.handlers.get(type) ?? []) result = await handler({ type, ...event }, ctx);
@@ -256,14 +358,22 @@ async function runtime(t) {
 	const command = (args) => extension.commands.get("wait-event").handler(args, ctx);
 	t.after(() => emit("session_shutdown", { reason: "quit" }));
 	await emit("session_start", { reason: "startup" });
-	return { directory, ctx, messages, notices, statuses, emit, tool, call, command, session };
+	const progress = (options, signal) =>
+		extension.tools
+			.get("set_wait_progress")
+			.definition.execute("progress", { progress: options }, signal, undefined, ctx);
+	return { directory, ctx, messages, notices, statuses, widgets, progress, emit, tool, call, command, session };
 }
 
 test("installed Pi loads the tool, ends the turn, and receives exactly one wake-up", runtimeOptions, async (t) => {
 	const run = await runtime(t);
 	assert.equal(run.tool.exposure, "model-only");
-	const result = await run.call({ label: "CI", command: process.execPath, args: ["-e", "console.log('done')"],
-		resumePrompt: "Inspect CI failures" });
+	const result = await run.call({
+		label: "CI",
+		command: process.execPath,
+		args: ["-e", "console.log('done')"],
+		resumePrompt: "Inspect CI failures",
+	});
 	assert.equal(result.terminate, true);
 	assert.equal(run.messages.length, 0);
 	assert.deepEqual(await run.emit("cache_warming_decision"), { action: "stop" });
@@ -278,8 +388,15 @@ test("installed Pi loads the tool, ends the turn, and receives exactly one wake-
 test("a rejected mixed-mode call does not arm a wait and can be retried in file mode", runtimeOptions, async (t) => {
 	const run = await runtime(t);
 	assert.match(run.tool.description, /Never combine non-null command and file/);
-	await assert.rejects(run.call({ label: "login", command: process.execPath,
-		args: ["-e", "console.log('must not run')"], file: "login.exit" }), /non-null command and file are mutually exclusive/);
+	await assert.rejects(
+		run.call({
+			label: "login",
+			command: process.execPath,
+			args: ["-e", "console.log('must not run')"],
+			file: "login.exit",
+		}),
+		/non-null command and file are mutually exclusive/,
+	);
 	assert.equal(await run.emit("cache_warming_decision"), undefined);
 	assert.equal(run.statuses.length, 0);
 	assert.equal(run.messages.length, 0);
@@ -294,12 +411,24 @@ test("a rejected mixed-mode call does not arm a wait and can be retried in file 
 test("all-fields-present calls validate against the schema and wake in either mode", runtimeOptions, async (t) => {
 	const run = await runtime(t);
 	const { validateToolArguments } = await import(pathToFileURL(join(host, "../pi-ai/dist/index.js")));
-	const command = { label: "CI", command: process.execPath, args: ["-e", "console.log('done')"],
-		file: null, cwd: null, timeoutSeconds: null, resumePrompt: null };
+	const command = {
+		label: "CI",
+		command: process.execPath,
+		args: ["-e", "console.log('done')"],
+		file: null,
+		cwd: null,
+		timeoutSeconds: null,
+		resumePrompt: null,
+		progress: null,
+	};
 	// Model providers may require all properties even though TypeBox marks them optional.
-	const strict = { ...run.tool, parameters: { ...run.tool.parameters,
-		required: Object.keys(run.tool.parameters.properties) } };
-	const result = await run.call(validateToolArguments(strict, { type: "toolCall", id: "command", name: run.tool.name, arguments: command }));
+	const strict = {
+		...run.tool,
+		parameters: { ...run.tool.parameters, required: Object.keys(run.tool.parameters.properties) },
+	};
+	const result = await run.call(
+		validateToolArguments(strict, { type: "toolCall", id: "command", name: run.tool.name, arguments: command }),
+	);
 	assert.equal(result.terminate, true);
 	await eventually(() => run.messages.length === 1);
 	assert.match(run.messages[0].message.content, /Command exited \(code 0\)/);
@@ -308,42 +437,87 @@ test("all-fields-present calls validate against the schema and wake in either mo
 	await writeFile(join(run.directory, "login.exit"), "0\n");
 	await eventually(() => run.messages.length === 2);
 	assert.match(run.messages[1].message.content, /Event file received/);
-	assert.throws(() => validateToolArguments(strict, { type: "toolCall", id: "invalid", name: run.tool.name,
-		arguments: { ...command, label: null } }));
+	assert.throws(() =>
+		validateToolArguments(strict, {
+			type: "toolCall",
+			id: "invalid",
+			name: run.tool.name,
+			arguments: { ...command, label: "" },
+		}),
+	);
+	await assert.rejects(run.call({ ...command, label: null }));
 });
 
-test("the real Pi agent loop stops after the arming tool instead of making a polling model call", runtimeOptions, async (t) => {
-	const run = await runtime(t);
-	const { runAgentLoop } = await import(pathToFileURL(join(host, "../pi-agent-core/dist/agent-loop.js")));
-	const { createAssistantMessageEventStream } = await import(pathToFileURL(join(host, "../pi-ai/dist/utils/event-stream.js")));
-	let calls = 0;
-	const model = { id: "test", name: "test", api: "anthropic-messages", provider: "test", contextWindow: 10000,
-		maxTokens: 1000, reasoning: false, input: ["text"], cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 } };
-	const stream = () => {
-		calls++;
-		const message = { role: "assistant", content: calls === 1
-			? [{ type: "toolCall", id: "wait", name: "wait_for_event", arguments: { label: "loop", file: "event" } }]
-			: [{ type: "text", text: "Unexpected extra model call" }],
-			api: model.api, provider: model.provider, model: model.id, timestamp: Date.now(),
-			stopReason: calls === 1 ? "toolUse" : "stop",
-			usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, totalTokens: 0,
-				cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 } } };
-		const events = createAssistantMessageEventStream();
-		events.push({ type: "done", reason: message.stopReason, message });
-		events.end(message);
-		return events;
-	};
-	const context = { messages: [], tools: [{ ...run.tool,
-		execute: (id, args, signal, update) => run.tool.execute(id, args, signal, update, run.ctx) }] };
-	await runAgentLoop([{ role: "user", content: "Wait for an event", timestamp: Date.now() }], context,
-		{ model, convertToLlm: (messages) => messages }, () => {}, undefined, stream);
-	assert.equal(calls, 1);
-	await sleep(50);
-	assert.equal(calls, 1);
-	assert.equal(run.messages.length, 0);
-	await writeFile(join(run.directory, "event"), "done");
-	await eventually(() => run.messages.length === 1);
-});
+test(
+	"the real Pi agent loop stops after the arming tool instead of making a polling model call",
+	runtimeOptions,
+	async (t) => {
+		const run = await runtime(t);
+		const { runAgentLoop } = await import(pathToFileURL(join(host, "../pi-agent-core/dist/agent-loop.js")));
+		const { createAssistantMessageEventStream } = await import(
+			pathToFileURL(join(host, "../pi-ai/dist/utils/event-stream.js"))
+		);
+		let calls = 0;
+		const model = {
+			id: "test",
+			name: "test",
+			api: "anthropic-messages",
+			provider: "test",
+			contextWindow: 10000,
+			maxTokens: 1000,
+			reasoning: false,
+			input: ["text"],
+			cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+		};
+		const stream = () => {
+			calls++;
+			const message = {
+				role: "assistant",
+				content:
+					calls === 1
+						? [{ type: "toolCall", id: "wait", name: "wait_for_event", arguments: { label: "loop", file: "event" } }]
+						: [{ type: "text", text: "Unexpected extra model call" }],
+				api: model.api,
+				provider: model.provider,
+				model: model.id,
+				timestamp: Date.now(),
+				stopReason: calls === 1 ? "toolUse" : "stop",
+				usage: {
+					input: 0,
+					output: 0,
+					cacheRead: 0,
+					cacheWrite: 0,
+					totalTokens: 0,
+					cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
+				},
+			};
+			const events = createAssistantMessageEventStream();
+			events.push({ type: "done", reason: message.stopReason, message });
+			events.end(message);
+			return events;
+		};
+		const context = {
+			messages: [],
+			tools: [
+				{ ...run.tool, execute: (id, args, signal, update) => run.tool.execute(id, args, signal, update, run.ctx) },
+			],
+		};
+		await runAgentLoop(
+			[{ role: "user", content: "Wait for an event", timestamp: Date.now() }],
+			context,
+			{ model, convertToLlm: (messages) => messages },
+			() => {},
+			undefined,
+			stream,
+		);
+		assert.equal(calls, 1);
+		await sleep(50);
+		assert.equal(calls, 1);
+		assert.equal(run.messages.length, 0);
+		await writeFile(join(run.directory, "event"), "done");
+		await eventually(() => run.messages.length === 1);
+	},
+);
 
 test("duplicate wait is rejected; status/cancel do not trigger the agent", runtimeOptions, async (t) => {
 	const run = await runtime(t);
@@ -361,35 +535,157 @@ test("duplicate wait is rejected; status/cancel do not trigger the agent", runti
 	assert.equal(run.session.getBranch().at(-1).data.status, "cancelled");
 });
 
-test("shutdown/tree navigation prevent stale wakes; interrupted commands are not replayed", runtimeOptions, async (t) => {
+test(
+	"shutdown/tree navigation prevent stale wakes; interrupted commands are not replayed",
+	runtimeOptions,
+	async (t) => {
+		const run = await runtime(t);
+		await run.call({ label: "old session", file: "event" });
+		await run.emit("session_shutdown", { reason: "reload" });
+		await run.emit("session_start", { reason: "reload" });
+		assert.match(run.notices.at(-1), /interrupted/);
+		await writeFile(join(run.directory, "event"), "done");
+		await sleep(50);
+		assert.equal(run.messages.length, 0);
+		await run.call({ label: "tree", file: "tree-event" });
+		await run.emit("session_tree");
+		await writeFile(join(run.directory, "tree-event"), "done");
+		await sleep(50);
+		assert.equal(run.messages.length, 0);
+	},
+);
+
+test(
+	"commands arm JSON waits, reject malformed input/busy arming, and deliver a queued follow-up",
+	runtimeOptions,
+	async (t) => {
+		const run = await runtime(t);
+		await run.command("not json");
+		assert.match(run.notices.at(-1), /SyntaxError/);
+		run.ctx.isIdle = () => false;
+		await run.command('{"label":"busy","file":"event"}');
+		assert.match(run.notices.at(-1), /Stop the current/);
+		run.ctx.isIdle = () => true;
+		await run.command(JSON.stringify({ label: "manual", command: process.execPath, args: ["-e", "process.exit(0)"] }));
+		run.ctx.isIdle = () => false;
+		await eventually(() => run.messages.length === 1);
+		assert.equal(run.messages[0].delivery.deliverAs, "followUp");
+	},
+);
+
+test("timer-only waits automatically show a countdown and wake once, without a checker", runtimeOptions, async (t) => {
 	const run = await runtime(t);
-	await run.call({ label: "old session", file: "event" });
-	await run.emit("session_shutdown", { reason: "reload" });
-	await run.emit("session_start", { reason: "reload" });
-	assert.match(run.notices.at(-1), /interrupted/);
-	await writeFile(join(run.directory, "event"), "done");
-	await sleep(50);
+	const result = await run.call({
+		label: "Pause",
+		timeoutSeconds: 2,
+		command: null,
+		args: null,
+		file: null,
+		progress: null,
+	});
+	assert.equal(result.terminate, true);
+	assert.match(run.widgets[0].value[0], /0%  0\/2/);
+	assert.equal(run.widgets[0].value.length, 1);
+	assert.match(run.widgets[0].value[0], /2s remaining/);
+	run.ctx.isIdle = () => false;
+	await eventually(() => run.widgets.some((widget) => widget.value?.[0].includes("50%")));
 	assert.equal(run.messages.length, 0);
-	await run.call({ label: "tree", file: "tree-event" });
-	await run.emit("session_tree");
-	await writeFile(join(run.directory, "tree-event"), "done");
-	await sleep(50);
+	await eventually(() => run.messages.length === 1);
+	assert.match(run.messages[0].message.content, /Timer elapsed after 2 seconds/);
+	assert.equal(run.widgets.at(-1).value, undefined);
+});
+
+test("timer-only wait can be cancelled and its automatic bar can be removed", runtimeOptions, async (t) => {
+	const run = await runtime(t);
+	await run.call({ label: "Pause", timeoutSeconds: 1 });
+	await run.command("progress null");
+	assert.equal(run.widgets.at(-1).value, undefined);
+	await run.command("cancel");
+	await sleep(1100);
 	assert.equal(run.messages.length, 0);
 });
 
-test("commands arm JSON waits, reject malformed input/busy arming, and deliver a queued follow-up", runtimeOptions, async (t) => {
-	const run = await runtime(t);
-	await run.command("not json");
-	assert.match(run.notices.at(-1), /SyntaxError/);
-	run.ctx.isIdle = () => false;
-	await run.command('{"label":"busy","file":"event"}');
-	assert.match(run.notices.at(-1), /Stop the current/);
-	run.ctx.isIdle = () => true;
-	await run.command(JSON.stringify({ label: "manual", command: process.execPath, args: ["-e", "process.exit(0)"] }));
-	run.ctx.isIdle = () => false;
-	await eventually(() => run.messages.length === 1);
-	assert.equal(run.messages[0].delivery.deliverAs, "followUp");
-});
+test(
+	"optional progress paints while idle or busy, never wakes at 100%, and clears on completion",
+	runtimeOptions,
+	async (t) => {
+		const run = await runtime(t);
+		const checker = {
+			command: process.execPath,
+			args: ["-e", "console.log(JSON.stringify({current:1,total:1,message:'CI'}))"],
+		};
+		const result = await run.call({ label: "CI", file: "event", progress: checker });
+		assert.equal(result.terminate, true);
+		run.ctx.isIdle = () => false;
+		await eventually(() => run.widgets.some((widget) => widget.value?.[0].includes("100%")));
+		assert.equal(run.messages.length, 0);
+		assert.deepEqual(await run.emit("cache_warming_decision"), { action: "stop" });
+		await writeFile(join(run.directory, "event"), "done");
+		await eventually(() => run.messages.length === 1);
+		assert.equal(run.widgets.at(-1).value, undefined);
+		assert.equal(run.messages[0].delivery.deliverAs, "followUp");
+	},
+);
+
+test(
+	"progress attaches after arming, replaces/removes without terminating, and rejects invalid changes safely",
+	runtimeOptions,
+	async (t) => {
+		const run = await runtime(t);
+		await assert.rejects(run.progress(null), /No active event wait/);
+		await run.call({ label: "late progress", file: "event" });
+		assert.equal(run.widgets.length, 0);
+		const result = await run.progress({
+			command: process.execPath,
+			args: ["-e", "console.log(JSON.stringify({current:1,total:2}))"],
+		});
+		assert.equal(result.terminate, undefined);
+		await eventually(() => run.widgets.some((widget) => widget.value?.[0].includes("50%")));
+		const length = run.widgets.length;
+		await assert.rejects(run.progress({ command: "" }), /progress.command/);
+		assert.equal(run.widgets.length, length);
+		run.ctx.isIdle = () => false;
+		await run.command(
+			'progress {"command":"' +
+				process.execPath +
+				'","args":["-e","console.log(JSON.stringify({current:3,total:4}))"]}',
+		);
+		await eventually(() => run.widgets.some((widget) => widget.value?.[0].includes("75%")));
+		await run.progress(null);
+		assert.equal(run.widgets.at(-1).value, undefined);
+		assert.equal(run.messages.length, 0);
+		await writeFile(join(run.directory, "event"), "done");
+		await eventually(() => run.messages.length === 1);
+	},
+);
+
+test(
+	"progress failures leave the main wait active; cancel/shutdown/tree/timeout clear the widget",
+	runtimeOptions,
+	async (t) => {
+		for (const action of ["cancel", "shutdown", "tree", "timeout"]) {
+			const run = await runtime(t);
+			await run.call({
+				label: action,
+				file: "event",
+				timeoutSeconds: action === "timeout" ? 1 : 30,
+				progress: { command: process.execPath, args: ["-e", "console.log('invalid')"] },
+			});
+			await eventually(() => run.widgets.some((widget) => widget.value?.[0].includes("unavailable")));
+			assert.equal(run.messages.length, 0);
+			if (action === "cancel") await run.command("cancel");
+			if (action === "shutdown") await run.emit("session_shutdown", { reason: "reload" });
+			if (action === "tree") await run.emit("session_tree");
+			if (action === "timeout") await eventually(() => run.messages.length === 1);
+			assert.equal(run.widgets.at(-1).value, undefined);
+			const count = run.widgets.length;
+			await writeFile(join(run.directory, "event"), "done");
+			await sleep(50);
+			assert.equal(run.widgets.length, count);
+			assert.equal(run.messages.length, action === "timeout" ? 1 : 0);
+		}
+	},
+);
 
 test("one-shot modes and an already-aborted tool call cannot arm waits", runtimeOptions, async (t) => {
 	const run = await runtime(t);

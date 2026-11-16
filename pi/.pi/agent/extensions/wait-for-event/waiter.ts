@@ -4,6 +4,7 @@ import { open } from "node:fs/promises";
 import { homedir } from "node:os";
 import { resolve } from "node:path";
 import { clearTimeout, setTimeout } from "node:timers";
+import { normalizeProgress, type ProgressOptions, type ProgressSpec } from "./progress.ts";
 
 export const OUTPUT_LIMIT = 24_000;
 export const DRAIN_MILLISECONDS = 250;
@@ -16,15 +17,17 @@ export interface WaitOptions {
 	cwd?: string;
 	timeoutSeconds?: number;
 	resumePrompt?: string;
+	progress?: ProgressOptions;
 }
 
 export interface WaitSpec extends WaitOptions {
 	cwd: string;
 	timeoutSeconds: number;
+	progress?: ProgressSpec;
 }
 
 export interface WaitResult {
-	kind: "command" | "file" | "timeout" | "error";
+	kind: "command" | "file" | "timer" | "timeout" | "error";
 	output: string;
 	truncated: boolean;
 	exitCode?: number | null;
@@ -39,7 +42,7 @@ export function normalizeOptions(value: unknown, cwd: string): WaitSpec {
 	if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Expected a JSON object");
 	const input = value as Record<string, unknown>;
 	const options: Record<string, unknown> = {};
-	const allowed = new Set(["label", "command", "args", "file", "cwd", "timeoutSeconds", "resumePrompt"]);
+	const allowed = new Set(["label", "command", "args", "file", "cwd", "timeoutSeconds", "resumePrompt", "progress"]);
 	for (const key of Object.keys(input)) {
 		if (!allowed.has(key)) throw new Error(`Unknown option: ${key}`);
 		// Nullable optional fields support providers that require every property.
@@ -53,30 +56,42 @@ export function normalizeOptions(value: unknown, cwd: string): WaitSpec {
 	}
 	if (!options.label) throw new Error("label is required");
 	if (options.command && options.file) {
-		throw new Error("No wait was armed: non-null command and file are mutually exclusive. " +
-			"Choose based on the actual event source; do not invent a placeholder file. " +
-			"COMMAND mode (launch a foreground watcher): " + JSON.stringify({ ...options, file: null }) +
-			" FILE mode (only if a process already writes this file): " +
-			JSON.stringify({ ...options, command: null, args: null }) +
-			" Unused fields may be omitted or null. Do not repeat the rejected arguments.");
+		throw new Error(
+			"No wait was armed: non-null command and file are mutually exclusive. " +
+				"Choose based on the actual event source; do not invent a placeholder file. " +
+				"COMMAND mode (launch a foreground watcher): " +
+				JSON.stringify({ ...options, file: null }) +
+				" FILE mode (only if a process already writes this file): " +
+				JSON.stringify({ ...options, command: null, args: null }) +
+				" Unused fields may be omitted or null. Do not repeat the rejected arguments.",
+		);
 	}
-	if (!options.command && !options.file) {
-		throw new Error('No wait was armed: specify exactly one of command or file. ' +
-			'FILE example: {"label":"Login finished","file":"/tmp/unique-login.exit"}. ' +
-			'COMMAND example: {"label":"CI finished","command":"gh","args":["run","watch","123","--exit-status"]}.');
+	if (!options.command && !options.file && options.timeoutSeconds === undefined) {
+		throw new Error(
+			"No wait was armed: specify command or file, or an explicit timeoutSeconds for a timer-only wait. " +
+				'FILE example: {"label":"Login finished","file":"/tmp/unique-login.exit"}. ' +
+				'COMMAND example: {"label":"CI finished","command":"gh","args":["run","watch","123","--exit-status"]}. ' +
+				'TIMER example: {"label":"Pause finished","timeoutSeconds":30}.',
+		);
 	}
-	if (options.args !== undefined && (!Array.isArray(options.args) || !options.args.every((arg) => typeof arg === "string"))) {
+	if (
+		options.args !== undefined &&
+		(!Array.isArray(options.args) || !options.args.every((arg) => typeof arg === "string"))
+	) {
 		throw new Error("args must be an array of strings");
 	}
-	if (options.file && options.args !== undefined) {
-		throw new Error("No wait was armed: args is only valid with command. " +
-			"For FILE mode omit args or set it to null. Retry with: " + JSON.stringify({ ...options, command: null, args: null }));
+	if (!options.command && options.args !== undefined) {
+		throw new Error(
+			"No wait was armed: args is only valid with command. " +
+				"For FILE/TIMER mode omit args or set it to null. Retry with: " +
+				JSON.stringify({ ...options, command: null, args: null }),
+		);
 	}
 	const timeout = options.timeoutSeconds ?? 3600;
 	if (typeof timeout !== "number" || !Number.isInteger(timeout) || timeout < 1 || timeout > 86400) {
 		throw new Error("timeoutSeconds must be an integer between 1 and 86400");
 	}
-	const spec = options as unknown as WaitOptions;
+	const spec = options as unknown as Omit<WaitOptions, "progress">;
 	const directory = resolve(cwd, expandHome(spec.cwd ?? cwd));
 	return {
 		...spec,
@@ -84,6 +99,7 @@ export function normalizeOptions(value: unknown, cwd: string): WaitSpec {
 		command: spec.command?.includes("/") ? resolve(directory, expandHome(spec.command)) : spec.command,
 		file: spec.file ? resolve(directory, expandHome(spec.file)) : undefined,
 		timeoutSeconds: timeout,
+		...(options.progress === undefined ? {} : { progress: normalizeProgress(options.progress, directory) }),
 	};
 }
 
@@ -113,7 +129,11 @@ export class EventWaiter {
 		return [
 			`Waiting for ${this.spec.label}`,
 			`Elapsed: ${Math.floor((now - this.startedAt) / 1000)}s; deadline: ${new Date(this.startedAt + this.spec.timeoutSeconds * 1000).toISOString()}`,
-			this.spec.file ? `File: ${this.spec.file}` : `Command: ${JSON.stringify([this.spec.command, ...(this.spec.args ?? [])])}`,
+			this.spec.file
+				? `File: ${this.spec.file}`
+				: this.spec.command
+					? `Command: ${JSON.stringify([this.spec.command, ...(this.spec.args ?? [])])}`
+					: `Timer: ${this.spec.timeoutSeconds}s`,
 			`Last observed: ${this.observation}`,
 		].join("\n");
 	}
@@ -123,11 +143,18 @@ export class EventWaiter {
 		// Defer startup until the arming tool has returned its terminating result.
 		this.timer = setTimeout(() => {
 			if (this.finished) return;
-			this.deadline = setTimeout(() => this.complete({
-				kind: "timeout", output: this.output, truncated: this.truncated,
-			}), this.spec.timeoutSeconds * 1000);
+			this.deadline = setTimeout(
+				() =>
+					this.complete({
+						kind: this.spec.command || this.spec.file ? "timeout" : "timer",
+						output: this.output,
+						truncated: this.truncated,
+					}),
+				this.spec.timeoutSeconds * 1000,
+			);
 			if (this.spec.command) this.startCommand();
-			else void this.pollFile();
+			else if (this.spec.file) void this.pollFile();
+			else this.observation = "Timer running";
 		}, 0);
 	}
 
@@ -188,9 +215,14 @@ export class EventWaiter {
 			child.stdout!.setEncoding("utf8").on("data", (text: string) => this.capture(text));
 			child.stderr!.setEncoding("utf8").on("data", (text: string) => this.capture(text));
 			child.once("error", (error) => this.complete({ kind: "error", output: error.message, truncated: false }));
-			const exited = (exitCode: number | null, signal: NodeJS.Signals | null) => this.complete({
-				kind: "command", exitCode, signal, output: this.output, truncated: this.truncated,
-			});
+			const exited = (exitCode: number | null, signal: NodeJS.Signals | null) =>
+				this.complete({
+					kind: "command",
+					exitCode,
+					signal,
+					output: this.output,
+					truncated: this.truncated,
+				});
 			child.once("exit", (exitCode, signal) => {
 				if (this.finished) return;
 				this.observation = "Command exited; draining remaining output";
@@ -234,11 +266,16 @@ export class EventWaiter {
 }
 
 export function formatResult(spec: WaitSpec, result: WaitResult): string {
-	const status = result.kind === "command"
-		? `Command exited (code ${result.exitCode ?? "none"}${result.signal ? `, signal ${result.signal}` : ""}).`
-		: result.kind === "file" ? "Event file received."
-		: result.kind === "timeout" ? `Timed out after ${spec.timeoutSeconds} seconds. This is not a successful event.`
-		: "Wait failed. This is not a successful event.";
+	const status =
+		result.kind === "command"
+			? `Command exited (code ${result.exitCode ?? "none"}${result.signal ? `, signal ${result.signal}` : ""}).`
+			: result.kind === "file"
+				? "Event file received."
+				: result.kind === "timer"
+					? `Timer elapsed after ${spec.timeoutSeconds} seconds.`
+					: result.kind === "timeout"
+						? `Timed out after ${spec.timeoutSeconds} seconds. This is not a successful event.`
+						: "Wait failed. This is not a successful event.";
 	return [
 		`Wait completed: ${spec.label}`,
 		status,
@@ -247,5 +284,7 @@ export function formatResult(spec: WaitSpec, result: WaitResult): string {
 		result.output || "(no output)",
 		"--- End event output ---",
 		`Continuation instruction: ${spec.resumePrompt ?? "Continue the user's task using this result. Inspect failures before proceeding."}`,
-	].filter(Boolean).join("\n");
+	]
+		.filter(Boolean)
+		.join("\n");
 }

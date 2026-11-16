@@ -34,6 +34,9 @@ Add instructions like these to the skill's `SKILL.md`:
 
 ### Choose exactly one mode
 
+- **TIMER:** wake after an explicit `timeoutSeconds` (integer 1–86,400). Omit `command`, `args`
+  and `file`, or set them to `null`. A countdown progress bar appears automatically;
+  no checker script or temporary files are needed.
 - **FILE:** a process already writes a completion/status file (for example an AWS
   login running in tmux). Send `label`, `file`, and any deadline/continuation.
   **Omit `command` and `args`, or set both to `null`**; do not send empty
@@ -62,12 +65,13 @@ command call is valid:
   "file": null,
   "cwd": null,
   "timeoutSeconds": 900,
-  "resumePrompt": "Inspect the CI outcome and report failures or completion."
+  "resumePrompt": "Inspect the CI outcome and report failures or completion.",
+  "progress": null
 }
 ```
 
 `label` remains required and non-null. Empty strings are not a substitute for
-`null`, and file mode still rejects an `args` array (even an empty one).
+`null`, and file/timer modes reject an `args` array (even an empty one).
 
 For a login already running in tmux and writing a unique exit-status file:
 
@@ -79,6 +83,111 @@ For a login already running in tmux and writing a unique exit-status file:
   "resumePrompt": "Inspect the login exit status. If successful, verify the exact requested Bedrock model; otherwise diagnose the login failure."
 }
 ```
+
+### Timer-only wait
+
+```json
+{
+  "label": "Deployment cooldown",
+  "timeoutSeconds": 30,
+  "resumePrompt": "The cooldown elapsed. Check the deployment health."
+}
+```
+
+The extension wakes once when the timer elapses and automatically shows an
+elapsed-time bar with seconds remaining. The bar updates in ordinary code while
+Pi is idle or handling another prompt. It is not a lock on the session.
+For timer-only waits, `timeoutSeconds` is the duration and must be supplied
+explicitly. With a command/file it remains a safety deadline (default one hour),
+and expiry reports a timeout failure. Without a command/file expiry is a normal
+timer completion. A timer completion means only that time elapsed, not that an
+external task succeeded. `/wait-event cancel` stops the timer without waking.
+
+### Optional progress for command/file waits
+
+Command and file waits have **no progress bar by default**. Add `progress` to
+show one without changing the main wake-up event:
+
+```json
+{
+  "label": "CI finished",
+  "command": "gh",
+  "args": ["run", "watch", "123", "--repo", "owner/repo", "--exit-status"],
+  "progress": {
+    "command": "bash",
+    "args": [
+      "-c",
+      "gh api repos/owner/repo/actions/runs/123/jobs --jq '{current: ([.jobs[] | select(.status == \"completed\")] | length), total: (.jobs | length), message: \"CI jobs\"}'"
+    ],
+    "intervalSeconds": 10,
+    "timeoutSeconds": 10
+  }
+}
+```
+
+The checker is a short-lived, non-interactive, **read-only query**. Interpreter
+arguments (`bash -c`, `node -e`, etc.) carry the script inline—no temporary script
+files are needed. Commands run without a shell unless you explicitly use an
+interpreter. Each check inherits the wait's cwd and Pi's environment/permissions.
+It must exit and emit one JSON object on stdout:
+
+```json
+{"current": 7, "total": 10, "message": "Running checks"}
+```
+
+Counters must be finite numbers with `0 <= current <= total` and `total > 0`.
+`message` is optional. Output is display-only and is never added to model context.
+Stderr is drained but not parsed. Combined stdout/stderr is capped at 24,000 bytes;
+messages are sanitized and limited to 200 characters for display.
+
+Checks start asynchronously and repeat **after** the previous check finishes,
+with `intervalSeconds` delay (default 2; integer 1–3,600). They never overlap.
+`progress.timeoutSeconds` is a per-check deadline (default 10; integer 1–300),
+not the main wait's deadline. Missing executables, nonzero exits, invalid JSON,
+output overflow and checker timeouts show “Progress unavailable” and retry,
+retaining the last known value. They never finish, cancel or wake the main wait.
+Even **100% progress does not wake the agent**; only the original completion
+source does. Queries must not launch detached/background workers. Checker process
+groups are terminated on completion/cancellation on Unix, with SIGKILL after two
+seconds if needed; on Windows only the direct checker is terminated.
+
+#### Attach progress after the wait has started
+
+The agent can first arm a wait, then discover how to measure progress during a
+later turn. Call `set_wait_progress` to attach or replace the checker:
+
+```json
+{
+  "progress": {
+    "command": "bash",
+    "args": ["-c", "printf '%s\\n' '{\"current\":7,\"total\":10,\"message\":\"Checks\"}'"]
+  }
+}
+```
+
+This tool returns immediately, does **not** terminate the current turn, and does
+not restart the main wait or alter its completion source/deadline. It requires an
+active wait. Invalid replacements leave the current checker intact. Send
+`{"progress": null}` to remove the bar while keeping the wait armed.
+
+The equivalent manual commands work even while the agent is busy:
+
+```text
+/wait-event progress {"command":"bash","args":["-c","printf '%s\\n' '{\"current\":7,\"total\":10}'"]}
+/wait-event progress null
+```
+
+A custom checker can also replace a timer's automatic countdown. Removing it
+hides the bar; the underlying timer still runs. Supplying `progress: null` or
+omitting it when **arming a timer** uses the automatic countdown. For command/file
+waits, null/omission means no bar. Optional nested checker fields accept `null`
+like omission; `progress.command` remains required and non-null.
+
+Widgets and checker resources are cleared on completion, cancellation, timeout,
+quit, reload, session replacement, or tree navigation. Progress updates use no
+model calls and do not interfere with new prompts or ongoing agent work. In RPC
+mode widget lines are emitted through `setWidget`; the client decides how to
+render them.
 
 ### Foreground watcher command
 
@@ -255,13 +364,16 @@ interrupting its current work.
 ## Lifecycle and limits
 
 - One wait per session. A second wait is rejected until the first finishes or is cancelled.
-- Default timeout: one hour. Allowed range: 1–86,400 seconds. Timeout wakes the
+- Command/file default timeout: one hour. Allowed range: 1–86,400 seconds.
+  Timer-only waits require an explicit `timeoutSeconds` and complete normally
+  when that duration elapses. For command/file waits, timeout wakes the
   agent with a timeout result, **not** a successful event result.
 - Cancellation never triggers a model turn.
 - Commands run with Pi's permissions and inherited environment, like ordinary
   local tools. No shell is used unless explicitly requested. This is a new
   execution surface: permission/guardrail rules must cover `wait_for_event`, not
-  just `bash`. Do not include secrets in arguments or output; results enter the session.
+  just `bash`, including the checker commands in `wait_for_event` and `set_wait_progress`.
+  Do not include secrets in arguments or output; main event results enter the session.
 - On cancellation/timeout/shutdown, Unix process groups receive SIGTERM followed
   by SIGKILL after two seconds. This covers ordinary descendants, not processes
   that deliberately daemonize. On Windows only the direct child is terminated.
@@ -287,7 +399,9 @@ an installed Pi host, set `PI_WAIT_EVENT_HOST` to the installed
 `dist/`), then run the same command. Host-dependent tests are skipped without it.
 
 The suites cover waiter delivery/lifecycle, command exit with inherited pipes,
-supervisor CLI/protocol framing, crashes, deadlines, cancellation, duplicate
+optional progress parsing/rendering, inline checkers, late attach/replace/remove,
+checker errors/timeouts/cancellation, timer-only countdowns, supervisor CLI/protocol
+framing, crashes, deadlines, cancellation, duplicate
 completion races and bounded shutdown. A host integration test runs the installed
 `pi` executable with a local mock provider and deliberately hung shutdown, then
 verifies that the parent file waiter wakes exactly once. No paid model requests
