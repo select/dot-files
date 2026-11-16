@@ -119,10 +119,13 @@ export async function generateSummary(event: SessionBeforeCompactEvent, ctx: Ext
 	].sort((a, b) => b.length - a.length);
 	const userInstructions = summaryInstructions(event, instructions);
 	let truncatedInput = false;
+	const thinkingLevel = ctx.thinkingLevel && ctx.thinkingLevel !== "off" ? "low" : ctx.thinkingLevel;
 	const result = await compact(
-		event.preparation, ctx.model, undefined, undefined, event.customInstructions, event.signal, ctx.thinkingLevel,
+		event.preparation, ctx.model, undefined, undefined, event.customInstructions, event.signal, thinkingLevel,
 		async (model, context, options) => {
-			const maxTokens = Math.min(options?.maxTokens ?? 8192, model.maxTokens || 8192, 8192);
+			const maxTokens = model.maxTokens
+				? Math.min(options?.maxTokens ?? model.maxTokens, model.maxTokens)
+				: (options?.maxTokens ?? 16384);
 			const budgetChars = Math.max(8000, (model.contextWindow - maxTokens - 2000) * 4 - system.text.length - userInstructions.length);
 			const { messages, truncated } = replaceInstructions(context, inputs, userInstructions, budgetChars);
 			truncatedInput ||= truncated;
